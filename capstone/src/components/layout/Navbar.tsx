@@ -227,9 +227,14 @@ export const Navbar: React.FC = () => {
               )}
             </div>
           ) : (
-            <Button size="sm" variant="primary" onClick={() => navigate('/login')}>
-              Sign In
-            </Button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/login')}>
+                Sign In
+              </Button>
+              <Button size="sm" variant="primary" onClick={() => navigate('/register')}>
+                Register
+              </Button>
+            </div>
           )}
 
           <button

@@ -1,6 +1,6 @@
 # UniLib API Server
 
-RESTful backend API for the UniLib University Library Management System, built with **Node.js**, **Express**, **TypeScript**, and **Prisma ORM** following **Clean Architecture** principles.
+RESTful backend API for the UniLib University Library Management System, built with **Node.js**, **Express**, **TypeScript**, and **Sequelize ORM** with **PostgreSQL**, following **Clean Architecture** principles.
 
 ---
 
@@ -29,7 +29,7 @@ The server follows a strict **Clean Architecture** layered approach with a unidi
 ├─────────────────────────────────────────┤
 │  Application (Use cases, DTOs, service abstractions)      │
 ├─────────────────────────────────────────┤
-│  Infrastructure (Prisma repos, JWT, Bcrypt, HTTP clients) │
+│  Infrastructure (Sequelize repos & models, JWT, Bcrypt, HTTP clients) │
 ├─────────────────────────────────────────┤
 │  Domain (Entities, Repository ports, Domain errors)       │
 └─────────────────────────────────────────┘
@@ -38,7 +38,7 @@ The server follows a strict **Clean Architecture** layered approach with a unidi
 **Key principles applied:**
 - **Domain layer** has zero framework dependencies — pure TypeScript interfaces and classes.
 - **Application layer** encodes all business rules. Use cases throw domain errors; they contain no try/catch blocks.
-- **Infrastructure layer** adapts external services (Prisma, bcrypt, JWT, Open Library API) to the domain ports.
+- **Infrastructure layer** adapts external services (Sequelize, bcrypt, JWT, Open Library API) to the domain ports.
 - **Presentation layer** handles HTTP. Controllers are thin — they only parse requests and call use cases. No business logic lives here.
 - **Global error middleware** catches all exceptions and maps domain errors to correct HTTP status codes. Controllers never handle errors directly.
 - All strings in the codebase are in English. No `throw` statements in controllers.
@@ -49,10 +49,6 @@ The server follows a strict **Clean Architecture** layered approach with a unidi
 
 ```
 server/
-├── prisma/
-│   ├── schema.prisma        # Database schema (SQLite dev / PostgreSQL prod)
-│   ├── seed.ts              # Seeds demo user accounts
-│   └── unilib.db            # SQLite database file (generated)
 ├── src/
 │   ├── domain/
 │   │   ├── entities/        # Pure domain entity interfaces
@@ -87,16 +83,19 @@ server/
 │   │       └── WishlistUseCases.ts
 │   ├── infrastructure/
 │   │   ├── database/
-│   │   │   └── prisma.ts            # Prisma client singleton
+│   │   │   ├── sequelize.ts         # Sequelize connection instance
+│   │   │   ├── seed.ts              # Demo seed script
+│   │   │   └── models/
+│   │   │       └── index.ts         # Sequelize model definitions & associations
 │   │   ├── external/
 │   │   │   └── OpenLibraryClient.ts # Open Library API HTTP client
-│   │   ├── repositories/            # Prisma repository implementations
-│   │   │   ├── PrismaUserRepository.ts
-│   │   │   ├── PrismaBookRepository.ts
-│   │   │   ├── PrismaLoanRepository.ts
-│   │   │   ├── PrismaReservationRepository.ts
-│   │   │   ├── PrismaReadingRecordRepository.ts
-│   │   │   └── PrismaWishlistRepository.ts
+│   │   ├── repositories/            # Sequelize repository implementations
+│   │   │   ├── SequelizeUserRepository.ts
+│   │   │   ├── SequelizeBookRepository.ts
+│   │   │   ├── SequelizeLoanRepository.ts
+│   │   │   ├── SequelizeReservationRepository.ts
+│   │   │   ├── SequelizeReadingRecordRepository.ts
+│   │   │   └── SequelizeWishlistRepository.ts
 │   │   └── security/
 │   │       ├── BcryptHasher.ts      # IHasher implementation
 │   │       └── JwtService.ts        # ITokenService implementation
@@ -139,9 +138,8 @@ server/
 | Node.js          | 22.x     | JavaScript runtime                   |
 | TypeScript       | 5.x      | Static typing (strict mode)          |
 | Express          | 4.x      | HTTP framework                       |
-| Prisma ORM       | 6.x      | Database access and migrations       |
-| SQLite           | —        | Development database (zero setup)    |
-| PostgreSQL       | 15+      | Production database option           |
+| Sequelize ORM    | 6.x      | Database access and model management |
+| PostgreSQL       | 15+      | Primary database                     |
 | bcryptjs         | 2.x      | Password hashing                     |
 | jsonwebtoken     | 9.x      | JWT creation and verification        |
 | helmet           | 8.x      | HTTP security headers                |
@@ -156,6 +154,7 @@ server/
 
 - Node.js 18+ (22.x recommended)
 - npm 9+
+- PostgreSQL 15+
 
 ### Installation
 
@@ -170,16 +169,10 @@ npm install
 cp .env.example .env
 # Edit .env with your configuration if needed
 
-# 4. Generate Prisma client
-npx prisma generate
-
-# 5. Push schema to database (creates SQLite file on first run)
-npx prisma db push
-
-# 6. Seed demo user accounts
+# 4. (Optional) Pre-seed demo users (auto-creates tables)
 npm run seed
 
-# 7. Start the development server (hot-reload)
+# 5. Start the development server (hot-reload, auto-syncs DB)
 npm run dev
 ```
 
@@ -187,12 +180,11 @@ The server starts on **http://localhost:3000** by default.
 
 ### Available Scripts
 
-| Script             | Description                                    |
-|:------------------ |:---------------------------------------------- |
-| `npm run dev`      | Start development server with hot-reload       |
+| `npm run dev`      | Start development server with hot-reload (auto-syncs DB) |
 | `npm run build`    | Compile TypeScript to `dist/`                  |
 | `npm start`        | Run compiled production build                  |
-| `npm run seed`     | Seed demo user accounts into the database      |
+| `npm run seed`     | Seed demo user accounts into PostgreSQL        |
+| `npm run db:sync`  | Synchronize Sequelize models with PostgreSQL   |
 | `npm run lint`     | Run TypeScript type-check (`tsc --noEmit`)     |
 
 ---
@@ -204,11 +196,8 @@ The server starts on **http://localhost:3000** by default.
 NODE_ENV=development
 PORT=3000
 
-# Database
-# SQLite for development:
-DATABASE_URL="file:./prisma/unilib.db"
-# PostgreSQL for production:
-# DATABASE_URL="postgresql://user:password@host:5432/unilib"
+# Database (PostgreSQL)
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/unilib?schema=public"
 
 # JWT
 JWT_SECRET=unilib-super-secret-jwt-key-change-in-production
@@ -296,7 +285,7 @@ All endpoints are prefixed with `/api`.
 
 ## 8. Database
 
-The application uses **SQLite** in development (zero configuration) and supports **PostgreSQL** in production by changing the `DATABASE_URL` environment variable and the Prisma schema provider.
+The application uses **PostgreSQL** exclusively, managed through Sequelize ORM. Tables are automatically verified and synchronized on application bootstrap via `sequelize.sync()`. Set `DATABASE_URL` in `.env` to your PostgreSQL connection string.
 
 ### Domain Models
 

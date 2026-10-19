@@ -1,15 +1,14 @@
 import { Router } from 'express';
-import { prisma } from '../../infrastructure/database/prisma';
 import { BcryptHasher } from '../../infrastructure/security/BcryptHasher';
 import { JwtService } from '../../infrastructure/security/JwtService';
 import { OpenLibraryClient } from '../../infrastructure/external/OpenLibraryClient';
 
-import { PrismaUserRepository } from '../../infrastructure/repositories/PrismaUserRepository';
-import { PrismaBookRepository } from '../../infrastructure/repositories/PrismaBookRepository';
-import { PrismaLoanRepository } from '../../infrastructure/repositories/PrismaLoanRepository';
-import { PrismaReservationRepository } from '../../infrastructure/repositories/PrismaReservationRepository';
-import { PrismaReadingRecordRepository } from '../../infrastructure/repositories/PrismaReadingRecordRepository';
-import { PrismaWishlistRepository } from '../../infrastructure/repositories/PrismaWishlistRepository';
+import { SequelizeUserRepository } from '../../infrastructure/repositories/SequelizeUserRepository';
+import { SequelizeBookRepository } from '../../infrastructure/repositories/SequelizeBookRepository';
+import { SequelizeLoanRepository } from '../../infrastructure/repositories/SequelizeLoanRepository';
+import { SequelizeReservationRepository } from '../../infrastructure/repositories/SequelizeReservationRepository';
+import { SequelizeReadingRecordRepository } from '../../infrastructure/repositories/SequelizeReadingRecordRepository';
+import { SequelizeWishlistRepository } from '../../infrastructure/repositories/SequelizeWishlistRepository';
 
 import {
   RegisterUserUseCase,
@@ -68,12 +67,12 @@ export function createApiRouter(): Router {
   const tokenService = new JwtService();
   const openLibraryClient = new OpenLibraryClient();
 
-  const userRepo = new PrismaUserRepository(prisma);
-  const bookRepo = new PrismaBookRepository(prisma);
-  const loanRepo = new PrismaLoanRepository(prisma);
-  const reservationRepo = new PrismaReservationRepository(prisma);
-  const readingRecordRepo = new PrismaReadingRecordRepository(prisma);
-  const wishlistRepo = new PrismaWishlistRepository(prisma);
+  const userRepo = new SequelizeUserRepository();
+  const bookRepo = new SequelizeBookRepository();
+  const loanRepo = new SequelizeLoanRepository();
+  const reservationRepo = new SequelizeReservationRepository();
+  const readingRecordRepo = new SequelizeReadingRecordRepository();
+  const wishlistRepo = new SequelizeWishlistRepository();
 
   const registerUseCase = new RegisterUserUseCase(userRepo, hasher, tokenService);
   const loginUseCase = new LoginUserUseCase(userRepo, hasher, tokenService);

@@ -18,6 +18,7 @@ export function createAuthRoutes(
       body('name').trim().notEmpty().withMessage('Name is required.'),
       body('studentOrEmployeeId').trim().notEmpty().withMessage('Student or employee ID is required.'),
       body('department').trim().notEmpty().withMessage('Department is required.'),
+      body('role').optional().isIn(['STUDENT', 'PROFESSOR', 'LIBRARIAN']).withMessage('Role must be STUDENT, PROFESSOR, or LIBRARIAN.'),
       validateRequest,
     ],
     asyncHandler(controller.register as any)

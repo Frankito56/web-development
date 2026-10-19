@@ -2,11 +2,21 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 import { apiClient } from '@/services/apiClient';
 
+interface RegisterData {
+  email: string;
+  password: string;
+  name: string;
+  role?: UserRole;
+  studentOrEmployeeId: string;
+  department: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   role: UserRole | null;
   login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: RegisterData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -69,6 +79,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const register = async (userData: RegisterData): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await apiClient.auth.register(userData);
+      setUser({
+        id: res.user.id,
+        name: res.user.name,
+        email: res.user.email,
+        role: res.user.role,
+        studentOrEmployeeId: res.user.studentOrEmployeeId,
+        department: res.user.department,
+        avatarUrl: res.user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        maxBorrowLimit: res.user.role === 'LIBRARIAN' ? 25 : res.user.role === 'PROFESSOR' ? 15 : 5,
+        joinedDate: '2024-01-01',
+      });
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Registration failed' };
+    }
+  };
+
   const logout = () => {
     apiClient.auth.logout();
     setUser(null);
@@ -81,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         role: user?.role || null,
         login,
+        register,
         logout,
         isLoading,
       }}

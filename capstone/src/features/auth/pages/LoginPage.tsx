@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { Button } from '@/components/ui/Button';
@@ -98,6 +98,13 @@ export const LoginPage: React.FC = () => {
           >
             {isSubmitting ? 'Authenticating...' : 'Sign In'}
           </Button>
+
+          <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+            Don't have an account?{' '}
+            <Link to="/register" style={{ color: 'var(--color-primary-600)', fontWeight: 600, textDecoration: 'none' }}>
+              Create an Account
+            </Link>
+          </div>
         </form>
       </div>
     </div>

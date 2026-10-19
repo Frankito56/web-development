@@ -13,9 +13,14 @@ export class RegisterUserUseCase {
   ) {}
 
   async execute(dto: RegisterUserDTO): Promise<AuthResponseDTO> {
-    const existing = await this.userRepo.findByEmail(dto.email);
-    if (existing) {
+    const existingEmail = await this.userRepo.findByEmail(dto.email);
+    if (existingEmail) {
       throw new ConflictError('An account with this email already exists.');
+    }
+
+    const existingId = await this.userRepo.findByStudentOrEmployeeId(dto.studentOrEmployeeId);
+    if (existingId) {
+      throw new ConflictError('An account with this student or employee ID already exists.');
     }
 
     const passwordHash = await this.hasher.hash(dto.password);

@@ -1,22 +1,14 @@
-import { PrismaClient } from '@prisma/client';
+import { Op } from 'sequelize';
 import {
   IReservationRepository,
   CreateReservationInput,
 } from '../../domain/repositories/IReservationRepository';
 import { ReservationEntity } from '../../domain/entities/ReservationEntity';
 import { ReservationStatus } from '../../domain/types';
+import { ReservationModel, BookModel } from '../database/models';
 
-export class PrismaReservationRepository implements IReservationRepository {
-  constructor(private readonly prisma: PrismaClient) {}
-
-  private toEntity(record: {
-    id: string;
-    bookId: string;
-    userId: string;
-    reservedAt: Date;
-    status: string;
-    priorityOrder: number;
-  }): ReservationEntity {
+export class SequelizeReservationRepository implements IReservationRepository {
+  private toEntity(record: ReservationModel): ReservationEntity {
     return {
       id: record.id,
       bookId: record.bookId,
@@ -28,75 +20,81 @@ export class PrismaReservationRepository implements IReservationRepository {
   }
 
   async findById(id: string): Promise<ReservationEntity | null> {
-    const record = await this.prisma.reservation.findUnique({ where: { id } });
+    const record = await ReservationModel.findByPk(id);
     return record ? this.toEntity(record) : null;
   }
 
   async findByUserId(userId: string): Promise<ReservationEntity[]> {
-    const records = await this.prisma.reservation.findMany({
+    const records = await ReservationModel.findAll({
       where: { userId },
-      orderBy: { reservedAt: 'desc' },
-      include: { book: true },
+      order: [['reservedAt', 'DESC']],
+      include: [{ model: BookModel, as: 'book' }],
     });
     return records.map((r) => this.toEntity(r));
   }
 
   async findActiveByBookId(bookId: string): Promise<ReservationEntity[]> {
-    const records = await this.prisma.reservation.findMany({
+    const records = await ReservationModel.findAll({
       where: {
         bookId,
-        status: { in: ['WAITING', 'READY_FOR_PICKUP'] },
+        status: { [Op.in]: ['WAITING', 'READY_FOR_PICKUP'] },
       },
-      orderBy: { priorityOrder: 'asc' },
+      order: [['priorityOrder', 'ASC']],
     });
     return records.map((r) => this.toEntity(r));
   }
 
   async findActiveByUserAndBook(userId: string, bookId: string): Promise<ReservationEntity | null> {
-    const record = await this.prisma.reservation.findFirst({
+    const record = await ReservationModel.findOne({
       where: {
         userId,
         bookId,
-        status: { in: ['WAITING', 'READY_FOR_PICKUP'] },
+        status: { [Op.in]: ['WAITING', 'READY_FOR_PICKUP'] },
       },
     });
     return record ? this.toEntity(record) : null;
   }
 
   async countActiveByBookId(bookId: string): Promise<number> {
-    return this.prisma.reservation.count({
+    return ReservationModel.count({
       where: {
         bookId,
-        status: { in: ['WAITING', 'READY_FOR_PICKUP'] },
+        status: { [Op.in]: ['WAITING', 'READY_FOR_PICKUP'] },
       },
     });
   }
 
   async create(input: CreateReservationInput): Promise<ReservationEntity> {
-    const created = await this.prisma.reservation.create({
-      data: {
-        bookId: input.bookId,
-        userId: input.userId,
-        priorityOrder: input.priorityOrder,
-        status: 'WAITING',
-      },
+    const created = await ReservationModel.create({
+      bookId: input.bookId,
+      userId: input.userId,
+      priorityOrder: input.priorityOrder,
+      status: 'WAITING',
     });
     return this.toEntity(created);
   }
 
   async updateStatus(id: string, status: ReservationStatus): Promise<ReservationEntity> {
-    const updated = await this.prisma.reservation.update({
-      where: { id },
-      data: { status },
-    });
-    return this.toEntity(updated);
+    const reservation = await ReservationModel.findByPk(id);
+    if (!reservation) {
+      throw new Error(`Reservation with id ${id} not found`);
+    }
+
+    reservation.status = status;
+    await reservation.save();
+
+    return this.toEntity(reservation);
   }
 
   async cancel(id: string): Promise<ReservationEntity> {
-    const updated = await this.prisma.reservation.update({
-      where: { id },
-      data: { status: 'CANCELLED' },
-    });
-    return this.toEntity(updated);
+    const reservation = await ReservationModel.findByPk(id);
+    if (!reservation) {
+      throw new Error(`Reservation with id ${id} not found`);
+    }
+
+    reservation.status = 'CANCELLED';
+    await reservation.save();
+
+    return this.toEntity(reservation);
   }
 }

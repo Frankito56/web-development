@@ -31,6 +31,9 @@ const WishlistPage = lazy(() =>
 const LoginPage = lazy(() =>
   import('@/features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage }))
 );
+const RegisterPage = lazy(() =>
+  import('@/features/auth/pages/RegisterPage').then((m) => ({ default: m.RegisterPage }))
+);
 const ProfilePage = lazy(() =>
   import('@/features/auth/pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
@@ -95,8 +98,9 @@ export const App: React.FC = () => {
                 }
               />
 
-              {/* Auth Route */}
+              {/* Auth Routes */}
               <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
 
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/books" replace />} />

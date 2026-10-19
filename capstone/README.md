@@ -223,7 +223,7 @@ VITE_BACKEND_URL="http://localhost:3000/api"
 
 ### Seeded Database Accounts
 
-The backend seed script (`npm run prisma:seed` in `/server`) populates the database with test accounts for each institutional role:
+The backend seed script (`npm run seed` in `/server`) populates the database with test accounts for each institutional role:
 
 | Role       | Email                           | Password      |
 |:---------- |:------------------------------- |:------------- |

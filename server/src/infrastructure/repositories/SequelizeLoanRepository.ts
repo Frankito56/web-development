@@ -1,25 +1,14 @@
-import { PrismaClient } from '@prisma/client';
+import { Op } from 'sequelize';
 import {
   ILoanRepository,
   CreateLoanInput,
 } from '../../domain/repositories/ILoanRepository';
 import { LoanEntity } from '../../domain/entities/LoanEntity';
 import { LoanStatus } from '../../domain/types';
+import { LoanModel, BookModel } from '../database/models';
 
-export class PrismaLoanRepository implements ILoanRepository {
-  constructor(private readonly prisma: PrismaClient) {}
-
-  private toEntity(record: {
-    id: string;
-    bookId: string;
-    userId: string;
-    borrowDate: Date;
-    dueDate: Date;
-    returnDate: Date | null;
-    renewCount: number;
-    status: string;
-    notes: string | null;
-  }): LoanEntity {
+export class SequelizeLoanRepository implements ILoanRepository {
+  private toEntity(record: LoanModel): LoanEntity {
     return {
       id: record.id,
       bookId: record.bookId,
@@ -34,35 +23,35 @@ export class PrismaLoanRepository implements ILoanRepository {
   }
 
   async findById(id: string): Promise<LoanEntity | null> {
-    const record = await this.prisma.loan.findUnique({ where: { id } });
+    const record = await LoanModel.findByPk(id);
     return record ? this.toEntity(record) : null;
   }
 
   async findByUserId(userId: string): Promise<LoanEntity[]> {
-    const records = await this.prisma.loan.findMany({
+    const records = await LoanModel.findAll({
       where: { userId },
-      orderBy: { borrowDate: 'desc' },
-      include: { book: true },
+      order: [['borrowDate', 'DESC']],
+      include: [{ model: BookModel, as: 'book' }],
     });
     return records.map((r) => this.toEntity(r));
   }
 
   async findActiveByBookId(bookId: string): Promise<LoanEntity[]> {
-    const records = await this.prisma.loan.findMany({
+    const records = await LoanModel.findAll({
       where: {
         bookId,
-        status: { in: ['ACTIVE', 'OVERDUE'] },
+        status: { [Op.in]: ['ACTIVE', 'OVERDUE'] },
       },
     });
     return records.map((r) => this.toEntity(r));
   }
 
   async findActiveByUserAndBook(userId: string, bookId: string): Promise<LoanEntity | null> {
-    const record = await this.prisma.loan.findFirst({
+    const record = await LoanModel.findOne({
       where: {
         userId,
         bookId,
-        status: { in: ['ACTIVE', 'OVERDUE'] },
+        status: { [Op.in]: ['ACTIVE', 'OVERDUE'] },
       },
     });
     return record ? this.toEntity(record) : null;
@@ -70,47 +59,49 @@ export class PrismaLoanRepository implements ILoanRepository {
 
   async findOverdue(): Promise<LoanEntity[]> {
     const now = new Date();
-    const records = await this.prisma.loan.findMany({
+    const records = await LoanModel.findAll({
       where: {
         status: 'ACTIVE',
-        dueDate: { lt: now },
+        dueDate: { [Op.lt]: now },
       },
     });
     return records.map((r) => this.toEntity(r));
   }
 
   async create(input: CreateLoanInput): Promise<LoanEntity> {
-    const created = await this.prisma.loan.create({
-      data: {
-        bookId: input.bookId,
-        userId: input.userId,
-        dueDate: input.dueDate,
-        notes: input.notes,
-        status: 'ACTIVE',
-      },
+    const created = await LoanModel.create({
+      bookId: input.bookId,
+      userId: input.userId,
+      dueDate: input.dueDate,
+      notes: input.notes,
+      status: 'ACTIVE',
     });
     return this.toEntity(created);
   }
 
   async returnBook(loanId: string, returnDate: Date): Promise<LoanEntity> {
-    const updated = await this.prisma.loan.update({
-      where: { id: loanId },
-      data: {
-        returnDate,
-        status: 'RETURNED',
-      },
-    });
-    return this.toEntity(updated);
+    const loan = await LoanModel.findByPk(loanId);
+    if (!loan) {
+      throw new Error(`Loan with id ${loanId} not found`);
+    }
+
+    loan.returnDate = returnDate;
+    loan.status = 'RETURNED';
+    await loan.save();
+
+    return this.toEntity(loan);
   }
 
   async renew(loanId: string, newDueDate: Date): Promise<LoanEntity> {
-    const updated = await this.prisma.loan.update({
-      where: { id: loanId },
-      data: {
-        dueDate: newDueDate,
-        renewCount: { increment: 1 },
-      },
-    });
-    return this.toEntity(updated);
+    const loan = await LoanModel.findByPk(loanId);
+    if (!loan) {
+      throw new Error(`Loan with id ${loanId} not found`);
+    }
+
+    loan.dueDate = newDueDate;
+    loan.renewCount += 1;
+    await loan.save();
+
+    return this.toEntity(loan);
   }
 }
