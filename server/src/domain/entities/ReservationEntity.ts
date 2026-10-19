@@ -1,4 +1,5 @@
 import { ReservationStatus } from '../types';
+import { BookEntity } from './BookEntity';
 
 export interface ReservationEntity {
   id: string;
@@ -7,4 +8,5 @@ export interface ReservationEntity {
   reservedAt: Date;
   status: ReservationStatus;
   priorityOrder: number;
+  book?: BookEntity;
 }

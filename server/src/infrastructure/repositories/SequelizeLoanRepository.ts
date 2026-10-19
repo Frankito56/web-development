@@ -4,10 +4,45 @@ import {
   CreateLoanInput,
 } from '../../domain/repositories/ILoanRepository';
 import { LoanEntity } from '../../domain/entities/LoanEntity';
-import { LoanStatus } from '../../domain/types';
+import { BookEntity } from '../../domain/entities/BookEntity';
+import { LoanStatus, AvailabilityStatus } from '../../domain/types';
 import { LoanModel, BookModel } from '../database/models';
 
 export class SequelizeLoanRepository implements ILoanRepository {
+  private bookToEntity(record: BookModel): BookEntity {
+    let parsedAuthors: string[] = [];
+    try {
+      parsedAuthors = JSON.parse(record.authors);
+    } catch {
+      parsedAuthors = [record.authors];
+    }
+
+    let parsedSubjects: string[] = [];
+    try {
+      parsedSubjects = JSON.parse(record.subjects);
+    } catch {
+      parsedSubjects = [];
+    }
+
+    return {
+      id: record.id,
+      openLibraryKey: record.openLibraryKey ?? undefined,
+      isbn: record.isbn ?? undefined,
+      title: record.title,
+      authors: parsedAuthors,
+      publishYear: record.publishYear ?? undefined,
+      coverUrl: record.coverUrl ?? undefined,
+      description: record.description ?? undefined,
+      subjects: parsedSubjects,
+      totalCopies: record.totalCopies,
+      availableCopies: record.availableCopies,
+      shelfLocation: record.shelfLocation,
+      availabilityStatus: record.availabilityStatus as AvailabilityStatus,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    };
+  }
+
   private toEntity(record: LoanModel): LoanEntity {
     return {
       id: record.id,
@@ -19,6 +54,7 @@ export class SequelizeLoanRepository implements ILoanRepository {
       renewCount: record.renewCount,
       status: record.status as LoanStatus,
       notes: record.notes ?? undefined,
+      book: record.book ? this.bookToEntity(record.book as BookModel) : undefined,
     };
   }
 

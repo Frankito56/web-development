@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { BcryptHasher } from '../../infrastructure/security/BcryptHasher';
 import { JwtService } from '../../infrastructure/security/JwtService';
 import { OpenLibraryClient } from '../../infrastructure/external/OpenLibraryClient';
@@ -135,7 +135,7 @@ export function createApiRouter(): Router {
   apiRouter.use('/reading-records', createReadingRecordRoutes(readingRecordController, authMiddleware));
   apiRouter.use('/wishlist', createWishlistRoutes(wishlistController, authMiddleware));
 
-  apiRouter.get('/health', (_req, res) => {
+  apiRouter.get('/health', (_req: Request, res: Response) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 

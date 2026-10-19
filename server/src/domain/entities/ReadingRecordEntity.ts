@@ -1,4 +1,5 @@
 import { ReadingStatus } from '../types';
+import { BookEntity } from './BookEntity';
 
 export interface ReadingRecordEntity {
   id: string;
@@ -8,4 +9,5 @@ export interface ReadingRecordEntity {
   progressPercentage: number;
   notes?: string;
   updatedAt: Date;
+  book?: BookEntity;
 }
