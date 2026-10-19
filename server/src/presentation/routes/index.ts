@@ -14,6 +14,7 @@ import {
   RegisterUserUseCase,
   LoginUserUseCase,
   GetUserProfileUseCase,
+  UpdateUserProfileUseCase,
 } from '../../application/use-cases/AuthUseCases';
 import {
   GetBooksUseCase,
@@ -77,6 +78,7 @@ export function createApiRouter(): Router {
   const registerUseCase = new RegisterUserUseCase(userRepo, hasher, tokenService);
   const loginUseCase = new LoginUserUseCase(userRepo, hasher, tokenService);
   const getProfileUseCase = new GetUserProfileUseCase(userRepo);
+  const updateProfileUseCase = new UpdateUserProfileUseCase(userRepo);
 
   const getBooksUseCase = new GetBooksUseCase(bookRepo);
   const getBookByIdUseCase = new GetBookByIdUseCase(bookRepo);
@@ -101,7 +103,7 @@ export function createApiRouter(): Router {
   const addWishlistUseCase = new AddToWishlistUseCase(wishlistRepo, bookRepo, openLibraryClient);
   const removeWishlistUseCase = new RemoveFromWishlistUseCase(wishlistRepo);
 
-  const authController = new AuthController(registerUseCase, loginUseCase, getProfileUseCase);
+  const authController = new AuthController(registerUseCase, loginUseCase, getProfileUseCase, updateProfileUseCase);
   const bookController = new BookController(
     getBooksUseCase,
     getBookByIdUseCase,

@@ -32,6 +32,7 @@ export class RegisterUserUseCase {
       role: dto.role ?? 'STUDENT',
       studentOrEmployeeId: dto.studentOrEmployeeId,
       department: dto.department,
+      avatarUrl: dto.avatarUrl,
     });
 
     const token = this.tokenService.sign({ userId: user.id, role: user.role });
@@ -98,3 +99,21 @@ export class GetUserProfileUseCase {
     return publicProfile;
   }
 }
+
+export class UpdateUserProfileUseCase {
+  constructor(private readonly userRepo: IUserRepository) {}
+
+  async execute(
+    userId: string,
+    input: { name?: string; department?: string; avatarUrl?: string }
+  ): Promise<UserPublic> {
+    const user = await this.userRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+    const updated = await this.userRepo.update(userId, input);
+    const { passwordHash: _, ...publicProfile } = updated;
+    return publicProfile;
+  }
+}
+

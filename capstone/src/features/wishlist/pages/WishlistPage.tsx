@@ -20,20 +20,31 @@ import './WishlistPage.css';
 export const WishlistPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useNotification();
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-  const [books, setBooks] = useState<Book[]>([]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>(() =>
+    user ? WishlistService.getUserWishlist(user.id) : []
+  );
+  const [books, setBooks] = useState<Book[]>(() =>
+    StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, [])
+  );
 
-  const loadData = useCallback(() => {
+  const syncFromStorage = useCallback(() => {
     if (!user) return;
     setWishlist(WishlistService.getUserWishlist(user.id));
     setBooks(StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []));
   }, [user]);
 
+  const loadData = useCallback(async () => {
+    if (!user) return;
+    const items = await WishlistService.fetchUserWishlist(user.id);
+    setWishlist(items);
+    setBooks(StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []));
+  }, [user]);
+
   useEffect(() => {
     loadData();
-    const unsubscribe = StorageService.subscribe(loadData);
+    const unsubscribe = StorageService.subscribe(syncFromStorage);
     return () => unsubscribe();
-  }, [loadData]);
+  }, [loadData, syncFromStorage]);
 
   const handleToggleNotification = (item: WishlistItem) => {
     if (!user) return;

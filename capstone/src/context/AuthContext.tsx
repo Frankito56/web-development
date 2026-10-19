@@ -9,6 +9,7 @@ interface RegisterData {
   role?: UserRole;
   studentOrEmployeeId: string;
   department: string;
+  avatarUrl?: string;
 }
 
 interface AuthContextType {
@@ -17,6 +18,7 @@ interface AuthContextType {
   role: UserRole | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: RegisterData) => Promise<{ success: boolean; error?: string }>;
+  updateProfile: (data: { name?: string; department?: string; avatarUrl?: string }) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -44,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: profile.role,
           studentOrEmployeeId: profile.studentOrEmployeeId,
           department: profile.department,
-          avatarUrl: profile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+          avatarUrl: profile.avatarUrl || '/placeholder-avatar.svg',
           maxBorrowLimit: profile.role === 'LIBRARIAN' ? 25 : profile.role === 'PROFESSOR' ? 15 : 5,
           joinedDate: '2024-01-01',
         });
@@ -69,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: res.user.role,
         studentOrEmployeeId: res.user.studentOrEmployeeId,
         department: res.user.department,
-        avatarUrl: res.user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        avatarUrl: res.user.avatarUrl || '/placeholder-avatar.svg',
         maxBorrowLimit: res.user.role === 'LIBRARIAN' ? 25 : res.user.role === 'PROFESSOR' ? 15 : 5,
         joinedDate: '2024-01-01',
       });
@@ -89,13 +91,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: res.user.role,
         studentOrEmployeeId: res.user.studentOrEmployeeId,
         department: res.user.department,
-        avatarUrl: res.user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        avatarUrl: res.user.avatarUrl || '/placeholder-avatar.svg',
         maxBorrowLimit: res.user.role === 'LIBRARIAN' ? 25 : res.user.role === 'PROFESSOR' ? 15 : 5,
         joinedDate: '2024-01-01',
       });
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || 'Registration failed' };
+    }
+  };
+
+  const updateProfile = async (data: { name?: string; department?: string; avatarUrl?: string }): Promise<boolean> => {
+    try {
+      const updated = await apiClient.auth.updateProfile(data);
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              name: updated.name,
+              department: updated.department,
+              avatarUrl: updated.avatarUrl || '/placeholder-avatar.svg',
+            }
+          : null
+      );
+      return true;
+    } catch {
+      return false;
     }
   };
 
@@ -112,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: user?.role || null,
         login,
         register,
+        updateProfile,
         logout,
         isLoading,
       }}

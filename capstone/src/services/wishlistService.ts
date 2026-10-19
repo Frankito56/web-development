@@ -3,6 +3,37 @@ import { StorageService } from './storageService';
 import { apiClient } from './apiClient';
 
 export const WishlistService = {
+  async fetchUserWishlist(userId: string): Promise<WishlistItem[]> {
+    try {
+      const serverItems = await apiClient.wishlist.getMyWishlist();
+      const mapped: WishlistItem[] = serverItems.map((sw: any) => ({
+        id: sw.id,
+        bookId: sw.bookId,
+        bookTitle: sw.book?.title || 'Saved Book',
+        bookCoverUrl: sw.book?.coverUrl || undefined,
+        bookAuthors: Array.isArray(sw.book?.authors)
+          ? sw.book.authors
+          : typeof sw.book?.authors === 'string'
+          ? (() => {
+              try {
+                return JSON.parse(sw.book.authors);
+              } catch {
+                return [sw.book.authors];
+              }
+            })()
+          : ['Author'],
+        userId: sw.userId,
+        addedAt: sw.addedAt ? new Date(sw.addedAt).toISOString() : new Date().toISOString(),
+        notifyWhenAvailable: sw.notifyWhenAvailable ?? true,
+      }));
+
+      StorageService.setItem(StorageService.KEYS.WISHLIST, mapped);
+      return mapped;
+    } catch {
+      return this.getUserWishlist(userId);
+    }
+  },
+
   getUserWishlist(userId: string): WishlistItem[] {
     const list = StorageService.getItem<WishlistItem[]>(StorageService.KEYS.WISHLIST, []);
     return list.filter((w) => w.userId === userId);

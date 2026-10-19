@@ -3,6 +3,7 @@ import {
   RegisterUserUseCase,
   LoginUserUseCase,
   GetUserProfileUseCase,
+  UpdateUserProfileUseCase,
 } from '../../application/use-cases/AuthUseCases';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
 
@@ -11,6 +12,7 @@ export class AuthController {
     private readonly registerUseCase: RegisterUserUseCase,
     private readonly loginUseCase: LoginUserUseCase,
     private readonly getProfileUseCase: GetUserProfileUseCase,
+    private readonly updateProfileUseCase: UpdateUserProfileUseCase,
   ) {}
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -27,4 +29,10 @@ export class AuthController {
     const profile = await this.getProfileUseCase.execute(req.user.userId);
     res.json({ success: true, data: profile });
   };
+
+  updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const profile = await this.updateProfileUseCase.execute(req.user.userId, req.body);
+    res.json({ success: true, data: profile });
+  };
 }
+

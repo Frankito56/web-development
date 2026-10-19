@@ -179,9 +179,12 @@ export const Navbar: React.FC = () => {
                 className="unilib-profile-btn"
               >
                 <img
-                  src={user.avatarUrl}
+                  src={user.avatarUrl || '/placeholder-avatar.svg'}
                   alt={user.name}
                   className="unilib-profile-avatar"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/placeholder-avatar.svg';
+                  }}
                 />
                 <div style={{ display: 'none' }} className="user-text-md">
                   <p style={{ fontSize: '0.8rem', fontWeight: 700, margin: 0 }}>{user.name}</p>

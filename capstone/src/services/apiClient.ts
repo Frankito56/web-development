@@ -134,6 +134,7 @@ class ApiClient {
       role?: UserRole;
       studentOrEmployeeId: string;
       department: string;
+      avatarUrl?: string;
     }): Promise<AuthResponse> => {
       const res = await this.request<AuthResponse>('/auth/register', {
         method: 'POST',
@@ -144,6 +145,12 @@ class ApiClient {
     },
     getProfile: async (): Promise<ApiUser> => {
       return this.request<ApiUser>('/auth/me');
+    },
+    updateProfile: async (data: { name?: string; department?: string; avatarUrl?: string }): Promise<ApiUser> => {
+      return this.request<ApiUser>('/auth/profile', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
     },
     logout: () => {
       this.setToken(null);

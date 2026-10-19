@@ -19,6 +19,7 @@ export const RegisterPage: React.FC = () => {
   const [studentOrEmployeeId, setStudentOrEmployeeId] = useState('');
   const [department, setDepartment] = useState('');
   const [role, setRole] = useState<UserRole>('STUDENT');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,6 +57,7 @@ export const RegisterPage: React.FC = () => {
       role,
       studentOrEmployeeId: studentOrEmployeeId.trim(),
       department: department.trim(),
+      avatarUrl: avatarUrl.trim() || undefined,
     });
 
     setIsSubmitting(false);
@@ -186,6 +188,15 @@ export const RegisterPage: React.FC = () => {
               ))}
             </div>
           </div>
+
+          <Input
+            label="Profile Image URL (Optional)"
+            type="url"
+            value={avatarUrl}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+            placeholder="https://... (leave empty for placeholder)"
+            helperText="If omitted, your default placeholder image will be used."
+          />
 
           <Button
             type="submit"

@@ -14,7 +14,7 @@
 }
 
 .dark .unilib-navbar-header {
-  background-color: rgba(15, 23, 42, 0.85);
+  background-color: rgba(13, 22, 44, 0.88);
 }
 
 .unilib-navbar-container {
@@ -46,12 +46,12 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-600), #4f46e5);
+  background: linear-gradient(135deg, var(--color-primary-600), #f97316);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(37, 68, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
   transition: transform var(--transition-fast);
 }
 

@@ -19,6 +19,7 @@ export function createAuthRoutes(
       body('studentOrEmployeeId').trim().notEmpty().withMessage('Student or employee ID is required.'),
       body('department').trim().notEmpty().withMessage('Department is required.'),
       body('role').optional().isIn(['STUDENT', 'PROFESSOR', 'LIBRARIAN']).withMessage('Role must be STUDENT, PROFESSOR, or LIBRARIAN.'),
+      body('avatarUrl').optional().trim(),
       validateRequest,
     ],
     asyncHandler(controller.register as any)
@@ -35,6 +36,18 @@ export function createAuthRoutes(
   );
 
   router.get('/me', authMiddleware, asyncHandler(controller.getProfile as any));
+
+  router.patch(
+    '/profile',
+    authMiddleware,
+    [
+      body('name').optional().trim().notEmpty().withMessage('Name cannot be empty.'),
+      body('department').optional().trim().notEmpty().withMessage('Department cannot be empty.'),
+      body('avatarUrl').optional().trim(),
+      validateRequest,
+    ],
+    asyncHandler(controller.updateProfile as any)
+  );
 
   return router;
 }

@@ -7,6 +7,7 @@ export interface RegisterUserDTO {
   role?: UserRole;
   studentOrEmployeeId: string;
   department: string;
+  avatarUrl?: string;
 }
 
 export interface LoginDTO {
