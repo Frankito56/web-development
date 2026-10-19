@@ -6,7 +6,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { LoanService } from '@/services/loanService';
-import { StorageService } from '@/services/storageService';
 import { Loan, Reservation } from '@/types';
 import { ActiveLoansList } from '../components/ActiveLoansList';
 import { LoanHistoryList } from '../components/LoanHistoryList';
@@ -27,24 +26,34 @@ type Tab = 'active' | 'reservations' | 'history';
 export const MyLoansPage: React.FC = () => {
   const { user } = useAuth();
   const [currentTab, setCurrentTab] = useState<Tab>('active');
-  const [activeLoans, setActiveLoans] = useState<Loan[]>([]);
-  const [loanHistory, setLoanHistory] = useState<Loan[]>([]);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [activeLoans, setActiveLoans] = useState<Loan[]>(() =>
+    user ? LoanService.getActiveLoans(user.id) : []
+  );
+  const [loanHistory, setLoanHistory] = useState<Loan[]>(() =>
+    user ? LoanService.getLoanHistory(user.id) : []
+  );
+  const [reservations, setReservations] = useState<Reservation[]>(() =>
+    user ? LoanService.getUserReservations(user.id) : []
+  );
 
+  // Fetch fresh data from backend API in parallel, batching state updates
   const loadData = useCallback(async () => {
     if (!user) return;
-    const { active, history } = await LoanService.fetchUserLoans(user.id);
-    setActiveLoans(active);
-    setLoanHistory(history);
-
-    const userRes = await LoanService.fetchUserReservations(user.id);
-    setReservations(userRes);
-  }, [user]);
+    try {
+      const [{ active, history }, userRes] = await Promise.all([
+        LoanService.fetchUserLoans(user.id),
+        LoanService.fetchUserReservations(user.id),
+      ]);
+      setActiveLoans(active);
+      setLoanHistory(history);
+      setReservations(userRes);
+    } catch (error) {
+      console.error('Error loading loan data:', error);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     loadData();
-    const unsubscribe = StorageService.subscribe(loadData);
-    return () => unsubscribe();
   }, [loadData]);
 
   if (!user) {

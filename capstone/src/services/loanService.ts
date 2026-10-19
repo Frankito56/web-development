@@ -13,7 +13,17 @@ export const LoanService = {
         bookId: sl.bookId,
         bookTitle: (sl as any).book?.title || 'Library Book',
         bookCoverUrl: (sl as any).book?.coverUrl || undefined,
-        bookAuthors: (sl as any).book?.authors ? JSON.parse((sl as any).book.authors) : ['Author'],
+        bookAuthors: Array.isArray((sl as any).book?.authors)
+          ? (sl as any).book.authors
+          : typeof (sl as any).book?.authors === 'string'
+          ? (() => {
+              try {
+                return JSON.parse((sl as any).book.authors);
+              } catch {
+                return [(sl as any).book.authors];
+              }
+            })()
+          : ['Author'],
         userId: sl.userId,
         userName: 'Student User',
         userRole: 'STUDENT',

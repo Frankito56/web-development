@@ -45,7 +45,17 @@ export class SequelizeBookRepository implements IBookRepository {
     };
   }
 
+  private isUUID(value: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  }
+
   async findById(id: string): Promise<BookEntity | null> {
+    // Non-UUID strings (e.g. OpenLibrary keys like "OL262758W") would cause
+    // Postgres to throw "invalid input syntax for type uuid". Skip PK lookup
+    // for those and let callers fall through to findByOpenLibraryKey.
+    if (!this.isUUID(id)) {
+      return null;
+    }
     const record = await BookModel.findByPk(id);
     return record ? this.toEntity(record) : null;
   }
