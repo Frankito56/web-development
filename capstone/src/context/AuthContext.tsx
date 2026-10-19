@@ -1,74 +1,77 @@
-/**
- * UniLib - Authentication Context
- * Simulates university authentication with role-based UI access (Student, Professor, Librarian)
- */
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
-import { StorageService } from '@/services/storageService';
-import { INITIAL_USERS } from '@/utils/mockData';
+import { apiClient } from '@/services/apiClient';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   role: UserRole | null;
-  login: (email: string, role?: UserRole) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  switchRole: (newRole: UserRole) => void;
-  allDemoUsers: User[];
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    return StorageService.getItem<User | null>(StorageService.KEYS.CURRENT_USER, INITIAL_USERS[0]);
-  });
-
-  const [allDemoUsers] = useState<User[]>(INITIAL_USERS);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (user) {
-      StorageService.setItem(StorageService.KEYS.CURRENT_USER, user);
-    } else {
-      StorageService.removeItem(StorageService.KEYS.CURRENT_USER);
-    }
-  }, [user]);
+    const initializeAuth = async () => {
+      const token = apiClient.getToken();
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
 
-  const login = (email: string, role?: UserRole): boolean => {
-    // Find matching user from mock users or assign selected role
-    const matched = allDemoUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (matched) {
-      setUser(matched);
+      try {
+        const profile = await apiClient.auth.getProfile();
+        setUser({
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          role: profile.role,
+          studentOrEmployeeId: profile.studentOrEmployeeId,
+          department: profile.department,
+          avatarUrl: profile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+          maxBorrowLimit: profile.role === 'LIBRARIAN' ? 25 : profile.role === 'PROFESSOR' ? 15 : 5,
+          joinedDate: '2024-01-01',
+        });
+      } catch {
+        apiClient.auth.logout();
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await apiClient.auth.login(email, password);
+      setUser({
+        id: res.user.id,
+        name: res.user.name,
+        email: res.user.email,
+        role: res.user.role,
+        studentOrEmployeeId: res.user.studentOrEmployeeId,
+        department: res.user.department,
+        avatarUrl: res.user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        maxBorrowLimit: res.user.role === 'LIBRARIAN' ? 25 : res.user.role === 'PROFESSOR' ? 15 : 5,
+        joinedDate: '2024-01-01',
+      });
       return true;
+    } catch {
+      return false;
     }
-
-    if (role) {
-      const template = allDemoUsers.find((u) => u.role === role) || allDemoUsers[0];
-      const customUser: User = {
-        ...template,
-        id: `user-${Date.now()}`,
-        email,
-        name: email.split('@')[0].replace('.', ' '),
-        role,
-      };
-      setUser(customUser);
-      return true;
-    }
-
-    return false;
   };
 
   const logout = () => {
+    apiClient.auth.logout();
     setUser(null);
-  };
-
-  const switchRole = (newRole: UserRole) => {
-    const targetUser = allDemoUsers.find((u) => u.role === newRole) || {
-      ...allDemoUsers[0],
-      role: newRole,
-    };
-    setUser(targetUser);
   };
 
   return (
@@ -79,8 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: user?.role || null,
         login,
         logout,
-        switchRole,
-        allDemoUsers,
+        isLoading,
       }}
     >
       {children}

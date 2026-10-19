@@ -1,0 +1,104 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  email               String   @unique
+  passwordHash        String
+  name                String
+  role                String   @default("STUDENT")
+  studentOrEmployeeId String   @unique
+  department          String
+  avatarUrl           String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  loans          Loan[]
+  reservations   Reservation[]
+  readingRecords ReadingRecord[]
+  wishlistItems  WishlistItem[]
+}
+
+model Book {
+  id                 String   @id @default(uuid())
+  openLibraryKey     String?  @unique
+  isbn               String?
+  title              String
+  authors            String
+  publishYear        Int?
+  coverUrl           String?
+  description        String?
+  subjects           String   @default("[]")
+  totalCopies        Int      @default(1)
+  availableCopies    Int      @default(1)
+  shelfLocation      String   @default("Floor 1 - Main Desk")
+  availabilityStatus String   @default("AVAILABLE")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  loans          Loan[]
+  reservations   Reservation[]
+  readingRecords ReadingRecord[]
+  wishlistItems  WishlistItem[]
+}
+
+model Loan {
+  id         String    @id @default(uuid())
+  bookId     String
+  userId     String
+  borrowDate DateTime  @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  renewCount Int       @default(0)
+  status     String    @default("ACTIVE")
+  notes      String?
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Reservation {
+  id            String   @id @default(uuid())
+  bookId        String
+  userId        String
+  reservedAt    DateTime @default(now())
+  status        String   @default("WAITING")
+  priorityOrder Int      @default(1)
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ReadingRecord {
+  id                 String   @id @default(uuid())
+  userId             String
+  bookId             String
+  status             String   @default("WANT_TO_READ")
+  progressPercentage Int      @default(0)
+  notes              String?
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+}
+
+model WishlistItem {
+  id                  String   @id @default(uuid())
+  userId              String
+  bookId              String
+  addedAt             DateTime @default(now())
+  notifyWhenAvailable Boolean  @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+}

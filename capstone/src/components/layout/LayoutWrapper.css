@@ -1,0 +1,26 @@
+/* ==========================================================================
+   LayoutWrapper Component Styles
+   ========================================================================== */
+
+.unilib-app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-body);
+  color: var(--color-text-main);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.unilib-main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-main-content {
+    padding: 2rem 1.5rem 4rem 1.5rem;
+  }
+}

@@ -20,14 +20,12 @@ import { calculateDueDate, formatDate } from '@/utils/dateUtils';
 import { ROLE_LIMITS } from '@/config';
 import {
   BookOpen,
-  Calendar,
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  ShieldAlert,
-  GraduationCap,
   Clock,
 } from 'lucide-react';
+import './BookCatalogPage.css';
 
 export const BookCatalogPage: React.FC = () => {
   const { user } = useAuth();
@@ -55,11 +53,11 @@ export const BookCatalogPage: React.FC = () => {
   const pageSize = 12;
   const totalPages = Math.max(1, Math.ceil(allBooksCount / pageSize));
 
-  const handleConfirmBorrow = () => {
+  const handleConfirmBorrow = async () => {
     if (!selectedBookForBorrow || !user) return;
     setActionLoading(true);
 
-    const result = LoanService.borrowBook(selectedBookForBorrow, user);
+    const result = await LoanService.borrowBook(selectedBookForBorrow, user);
     setActionLoading(false);
     setSelectedBookForBorrow(null);
 
@@ -70,11 +68,11 @@ export const BookCatalogPage: React.FC = () => {
     }
   };
 
-  const handleConfirmReserve = () => {
+  const handleConfirmReserve = async () => {
     if (!selectedBookForReserve || !user) return;
     setActionLoading(true);
 
-    const result = LoanService.reserveBook(selectedBookForReserve, user);
+    const result = await LoanService.reserveBook(selectedBookForReserve, user);
     setActionLoading(false);
     setSelectedBookForReserve(null);
 
@@ -89,28 +87,25 @@ export const BookCatalogPage: React.FC = () => {
   const simulatedDueDate = calculateDueDate(new Date(), loanDays);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="unilib-catalog-container animate-fade-in">
       {/* University Hero Section */}
-      <section className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary-900 via-indigo-900 to-slate-900 text-white p-6 sm:p-10 shadow-xl shadow-primary-950/20">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-        
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-md text-primary-200 border border-white/10">
-            <Sparkles className="w-3.5 h-3.5 text-primary-300" />
+      <section className="unilib-hero-banner">
+        <div style={{ maxWidth: '48rem' }}>
+          <div className="unilib-hero-badge">
+            <Sparkles size={14} />
             <span>Academic Resource Discovery System</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          <h1 className="unilib-hero-title">
             Explore the Central Academic Library Repository
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+          <p className="unilib-hero-description">
             Access thousands of academic works, textbooks, research monographs, and classic literature.
             Manage instant loans, reserve waiting copies, and track your scholarly reading progress.
           </p>
 
-          {/* Quick Search inside Hero */}
-          <div className="pt-2 max-w-2xl">
+          <div className="unilib-hero-search-wrap">
             <SearchBar
               value={filters.searchQuery}
               onChange={updateSearchQuery}
@@ -122,28 +117,28 @@ export const BookCatalogPage: React.FC = () => {
         </div>
 
         {/* Floating Quick Stats */}
-        <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+        <div className="unilib-hero-stats-row">
           <div>
-            <span className="text-xl sm:text-2xl font-bold font-mono">14 Days</span>
-            <p className="text-[11px] text-slate-400">Standard Loan Period</p>
+            <div className="unilib-stat-number">14 Days</div>
+            <div className="unilib-stat-label">Standard Loan Period</div>
           </div>
           <div>
-            <span className="text-xl sm:text-2xl font-bold font-mono">24/7</span>
-            <p className="text-[11px] text-slate-400">Digital Reservation Queue</p>
+            <div className="unilib-stat-number">24/7</div>
+            <div className="unilib-stat-label">Digital Reservation Queue</div>
           </div>
           <div>
-            <span className="text-xl sm:text-2xl font-bold font-mono">Auto-Sync</span>
-            <p className="text-[11px] text-slate-400">Real-Time Open Library API</p>
+            <div className="unilib-stat-number">Auto-Sync</div>
+            <div className="unilib-stat-label">Real-Time Open Library API</div>
           </div>
           <div>
-            <span className="text-xl sm:text-2xl font-bold font-mono">Zero Penalties</span>
-            <p className="text-[11px] text-slate-400">On-Time Return Alerts</p>
+            <div className="unilib-stat-number">Zero Penalties</div>
+            <div className="unilib-stat-label">On-Time Return Alerts</div>
           </div>
         </div>
       </section>
 
       {/* Catalog Filters Bar */}
-      <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xs space-y-4">
+      <section className="unilib-filters-card">
         <BookFilters
           filters={filters}
           onCategoryChange={updateCategory}
@@ -154,12 +149,10 @@ export const BookCatalogPage: React.FC = () => {
       </section>
 
       {/* Results Header */}
-      <div className="flex items-center justify-between">
+      <div className="unilib-catalog-header">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-            Available Academic Works
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <h2 className="unilib-catalog-title">Available Academic Works</h2>
+          <p className="unilib-catalog-count">
             Showing {books.length} works (Page {currentPage} of {totalPages})
           </p>
         </div>
@@ -167,21 +160,21 @@ export const BookCatalogPage: React.FC = () => {
 
       {/* Books Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="unilib-books-grid">
           {Array.from({ length: 8 }).map((_, i) => (
             <BookCardSkeleton key={i} />
           ))}
         </div>
       ) : books.length === 0 ? (
         <EmptyState
-          icon={<BookOpen className="w-8 h-8 text-slate-400" />}
+          icon={<BookOpen size={32} />}
           title="No books match your current search"
           description="Try broadening your search term, switching categories, or clearing active filters."
           actionText="Clear All Filters"
           onAction={resetFilters}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="unilib-books-grid">
           {books.map((book) => (
             <BookCard
               key={book.id}
@@ -195,21 +188,18 @@ export const BookCatalogPage: React.FC = () => {
 
       {/* Pagination Controls */}
       {!isLoading && books.length > 0 && totalPages > 1 && (
-        <nav
-          aria-label="Catalog pagination"
-          className="flex items-center justify-center gap-2 pt-6 border-t border-slate-200 dark:border-slate-800"
-        >
+        <nav aria-label="Catalog pagination" className="unilib-pagination">
           <Button
             variant="outline"
             size="sm"
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage(currentPage - 1)}
-            leftIcon={<ChevronLeft className="w-4 h-4" />}
+            leftIcon={<ChevronLeft size={16} />}
           >
             Previous
           </Button>
 
-          <span className="text-xs font-semibold px-4 py-2 text-slate-700 dark:text-slate-300">
+          <span className="unilib-page-counter">
             Page {currentPage} of {totalPages}
           </span>
 
@@ -218,7 +208,7 @@ export const BookCatalogPage: React.FC = () => {
             size="sm"
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage(currentPage + 1)}
-            rightIcon={<ChevronRight className="w-4 h-4" />}
+            rightIcon={<ChevronRight size={16} />}
           >
             Next
           </Button>
@@ -233,54 +223,48 @@ export const BookCatalogPage: React.FC = () => {
         description="Review your borrowing details before confirming."
       >
         {selectedBookForBorrow && (
-          <div className="space-y-4">
-            <div className="flex gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-bg-card-subtle)', border: '1px solid var(--color-border)' }}>
               {selectedBookForBorrow.coverUrl ? (
                 <img
                   src={selectedBookForBorrow.coverUrl}
                   alt={selectedBookForBorrow.title}
-                  className="w-16 h-22 object-cover rounded-lg shrink-0 shadow-sm"
+                  style={{ width: '4rem', height: '5.5rem', objectFit: 'cover', borderRadius: '6px' }}
                 />
               ) : (
-                <div className="w-16 h-22 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center shrink-0">
-                  <BookOpen className="w-6 h-6 text-slate-400" />
+                <div style={{ width: '4rem', height: '5.5rem', backgroundColor: 'var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen size={24} color="var(--color-text-subtle)" />
                 </div>
               )}
-              <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 line-clamp-2">
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>
                   {selectedBookForBorrow.title}
                 </h4>
-                <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0.2rem 0' }}>
                   {selectedBookForBorrow.authors.join(', ')}
                 </p>
-                <div className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                  <span>Physical copies available: {selectedBookForBorrow.availableCopies}</span>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--color-success-text)', fontWeight: 600 }}>
+                  Physical copies available: {selectedBookForBorrow.availableCopies}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 pt-3">
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">Borrower:</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  {user?.name} ({user?.role})
-                </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-muted)' }}>Borrower:</span>
+                <strong>{user?.name} ({user?.role})</strong>
               </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">Loan Duration:</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  {loanDays} Calendar Days
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-muted)' }}>Loan Duration:</span>
+                <strong>{loanDays} Calendar Days</strong>
               </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">Due Date:</span>
-                <span className="font-bold text-primary-600 dark:text-primary-400">
-                  {formatDate(simulatedDueDate)}
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-muted)' }}>Due Date:</span>
+                <strong style={{ color: 'var(--color-primary-600)' }}>{formatDate(simulatedDueDate)}</strong>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -310,20 +294,20 @@ export const BookCatalogPage: React.FC = () => {
         description="All copies of this title are currently loaned out."
       >
         {selectedBookForReserve && (
-          <div className="space-y-4">
-            <div className="flex gap-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-              <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <div className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-warning-bg)', border: '1px solid var(--color-warning-border)' }}>
+              <Clock size={20} color="var(--color-warning)" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-warning-text)', lineHeight: 1.4 }}>
                 Placing a reservation puts you into the priority pickup queue. As soon as another student returns a copy, you will receive an in-app alert.
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
-              <p className="font-bold text-slate-900 dark:text-slate-100">{selectedBookForReserve.title}</p>
-              <p className="text-slate-500">{selectedBookForReserve.authors.join(', ')}</p>
+            <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-bg-card-subtle)', border: '1px solid var(--color-border)', fontSize: '0.75rem' }}>
+              <p style={{ fontWeight: 700, margin: 0 }}>{selectedBookForReserve.title}</p>
+              <p style={{ color: 'var(--color-text-muted)', margin: '0.2rem 0 0 0' }}>{selectedBookForReserve.authors.join(', ')}</p>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
               <Button
                 variant="ghost"
                 size="sm"

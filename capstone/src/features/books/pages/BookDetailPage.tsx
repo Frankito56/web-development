@@ -10,7 +10,6 @@ import { OpenLibraryService } from '@/services/openLibraryService';
 import { StorageService } from '@/services/storageService';
 import { LoanService } from '@/services/loanService';
 import { WishlistService } from '@/services/wishlistService';
-import { ReadingTrackerService } from '@/services/readingTrackerService';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { Badge } from '@/components/ui/Badge';
@@ -23,17 +22,10 @@ import { ROLE_LIMITS } from '@/config';
 import {
   ArrowLeft,
   BookOpen,
-  Calendar,
-  Building,
-  Hash,
-  MapPin,
   Star,
   Heart,
-  Share2,
-  CheckCircle2,
-  Clock,
-  Layers,
 } from 'lucide-react';
+import './BookDetailPage.css';
 
 export const BookDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -94,11 +86,11 @@ export const BookDetailPage: React.FC = () => {
     }
   };
 
-  const handleConfirmBorrow = () => {
+  const handleConfirmBorrow = async () => {
     if (!book || !user) return;
     setActionLoading(true);
 
-    const result = LoanService.borrowBook(book, user);
+    const result = await LoanService.borrowBook(book, user);
     setActionLoading(false);
     setIsBorrowModalOpen(false);
 
@@ -109,11 +101,11 @@ export const BookDetailPage: React.FC = () => {
     }
   };
 
-  const handleConfirmReserve = () => {
+  const handleConfirmReserve = async () => {
     if (!book || !user) return;
     setActionLoading(true);
 
-    const result = LoanService.reserveBook(book, user);
+    const result = await LoanService.reserveBook(book, user);
     setActionLoading(false);
     setIsReserveModalOpen(false);
 
@@ -126,14 +118,14 @@ export const BookDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6 animate-pulse">
-        <Skeleton className="w-32 h-6" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Skeleton className="h-96 rounded-2xl" />
-          <div className="md:col-span-2 space-y-4">
-            <Skeleton className="w-3/4 h-10" />
-            <Skeleton className="w-1/2 h-6" />
-            <Skeleton className="w-full h-32" />
+      <div className="unilib-detail-container">
+        <Skeleton style={{ width: '8rem', height: '1.5rem' }} />
+        <div className="unilib-detail-layout">
+          <Skeleton style={{ height: '24rem', borderRadius: '16px' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Skeleton style={{ width: '75%', height: '2.5rem' }} />
+            <Skeleton style={{ width: '50%', height: '1.5rem' }} />
+            <Skeleton style={{ width: '100%', height: '8rem' }} />
           </div>
         </div>
       </div>
@@ -142,9 +134,9 @@ export const BookDetailPage: React.FC = () => {
 
   if (!book) {
     return (
-      <div className="text-center py-16 space-y-4">
-        <BookOpen className="w-12 h-12 text-slate-400 mx-auto" />
-        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
+      <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+        <BookOpen size={48} color="var(--color-text-subtle)" style={{ margin: '0 auto 1rem auto' }} />
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>
           Book record not found in university catalog
         </h2>
         <Button variant="outline" size="sm" onClick={() => navigate('/books')}>
@@ -160,38 +152,35 @@ export const BookDetailPage: React.FC = () => {
   const dueDate = calculateDueDate(new Date(), loanDays);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+    <div className="unilib-detail-container animate-fade-in">
       {/* Breadcrumb back navigation */}
       <nav aria-label="Breadcrumb">
-        <Link
-          to="/books"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-primary-600 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
+        <Link to="/books" className="unilib-back-link">
+          <ArrowLeft size={16} />
           <span>Back to Academic Catalog</span>
         </Link>
       </nav>
 
-      {/* Main Book Detail Container */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+      {/* Main Book Detail Layout */}
+      <div className="unilib-detail-layout">
         {/* Cover Column */}
-        <div className="md:col-span-4 space-y-4">
-          <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-book flex items-center justify-center">
+        <div className="unilib-detail-left">
+          <div className="unilib-detail-cover-card">
             {book.coverUrl ? (
               <img
                 src={book.coverUrl}
                 alt={`Cover for ${book.title}`}
-                className="w-full h-full object-cover object-center"
+                className="unilib-detail-cover-img"
               />
             ) : (
-              <div className="p-8 text-center text-slate-400">
-                <BookOpen className="w-16 h-16 mx-auto mb-2 opacity-60" />
-                <span className="text-xs font-bold uppercase tracking-wider">{book.title}</span>
+              <div style={{ textAlign: 'center', color: 'var(--color-text-subtle)', padding: '2rem' }}>
+                <BookOpen size={64} style={{ opacity: 0.6, marginBottom: '0.5rem' }} />
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>{book.title}</div>
               </div>
             )}
 
             {/* Availability Floating Badge */}
-            <div className="absolute top-4 left-4">
+            <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
               {isAvailable ? (
                 <Badge variant="available">Available ({book.availableCopies} in stock)</Badge>
               ) : isOnLoan ? (
@@ -203,19 +192,19 @@ export const BookDetailPage: React.FC = () => {
           </div>
 
           {/* Quick Actions Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Reading Status</span>
+          <div className="unilib-detail-quick-actions">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Reading Status</span>
               <ReadingTrackerDropdown book={book} />
             </div>
 
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex gap-2">
+            <div style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--color-border-subtle)' }}>
               <Button
                 variant={inWishlist ? 'danger' : 'outline'}
                 size="sm"
-                leftIcon={<Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />}
+                leftIcon={<Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />}
                 onClick={handleToggleWishlist}
-                className="w-full"
+                style={{ width: '100%' }}
               >
                 {inWishlist ? 'Saved in Wishlist' : 'Add to Wishlist'}
               </Button>
@@ -224,96 +213,79 @@ export const BookDetailPage: React.FC = () => {
         </div>
 
         {/* Info Column */}
-        <div className="md:col-span-8 space-y-6">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
+        <div className="unilib-detail-right">
+          <div>
+            <div className="unilib-subjects-list">
               {book.subjects.slice(0, 4).map((sub, i) => (
-                <span
-                  key={i}
-                  className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 border border-primary-100 dark:border-primary-900"
-                >
+                <span key={i} className="unilib-subject-chip">
                   {sub}
                 </span>
               ))}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
-              {book.title}
-            </h1>
+            <h1 className="unilib-detail-title">{book.title}</h1>
 
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              By <span className="font-bold text-slate-800 dark:text-slate-200">{book.authors.join(', ')}</span>
+            <p className="unilib-detail-authors" style={{ marginTop: '0.5rem' }}>
+              By <strong>{book.authors.join(', ')}</strong>
             </p>
           </div>
 
           {/* Rating & Availability Card */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="unilib-meta-cards-row">
             <div>
-              <span className="text-slate-400 block">Campus Shelf</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">
+              <span className="unilib-meta-card-label">Campus Shelf</span>
+              <span className="unilib-meta-card-value" style={{ fontFamily: 'monospace' }}>
                 {book.locationShelf || 'Circulation Desk'}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block">First Published</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200">
+              <span className="unilib-meta-card-label">First Published</span>
+              <span className="unilib-meta-card-value">
                 {book.firstPublishYear || 'Classical Edition'}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block">Rating Score</span>
-              <span className="font-bold text-amber-500 flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 fill-current" />
+              <span className="unilib-meta-card-label">Rating Score</span>
+              <span className="unilib-meta-card-value" style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <Star size={14} fill="currentColor" />
                 {book.averageRating || '4.5'} / 5.0
               </span>
             </div>
           </div>
 
           {/* Description */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+          <div>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
               Overview & Abstract
             </h3>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+            <p className="unilib-overview-text">
               {book.description || 'Academic catalog summary currently in preparation.'}
             </p>
           </div>
 
           {/* Publishing Metadata Details */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-              Bibliographic Information
-            </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 text-xs">
-              <div>
-                <span className="text-slate-400 block">Publisher</span>
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {book.publisher || 'University Press'}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 block">ISBN</span>
-                <span className="font-mono text-slate-700 dark:text-slate-300">
-                  {book.isbn || 'N/A'}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 block">Length</span>
-                <span className="text-slate-700 dark:text-slate-300">
-                  {book.pageCount ? `${book.pageCount} pages` : 'Standard monograph'}
-                </span>
-              </div>
+          <div className="unilib-bibliographic-grid">
+            <div>
+              <span className="unilib-meta-card-label">Publisher</span>
+              <span>{book.publisher || 'University Press'}</span>
+            </div>
+            <div>
+              <span className="unilib-meta-card-label">ISBN</span>
+              <span style={{ fontFamily: 'monospace' }}>{book.isbn || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="unilib-meta-card-label">Length</span>
+              <span>{book.pageCount ? `${book.pageCount} pages` : 'Standard monograph'}</span>
             </div>
           </div>
 
           {/* Primary Action Button */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center gap-3">
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', paddingTop: '1rem' }}>
             {isAvailable ? (
               <Button
                 variant="primary"
                 size="lg"
                 onClick={() => setIsBorrowModalOpen(true)}
-                className="w-full sm:w-auto px-8"
               >
                 Borrow Book Now ({loanDays} Days)
               </Button>
@@ -322,15 +294,14 @@ export const BookDetailPage: React.FC = () => {
                 variant="outline"
                 size="lg"
                 onClick={() => setIsReserveModalOpen(true)}
-                className="w-full sm:w-auto px-8"
               >
                 Reserve Next Available Copy
               </Button>
             )}
 
-            <p className="text-[11px] text-slate-400">
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', margin: 0 }}>
               {isAvailable
-                ? `Free checkout for enrolled students & faculty. Due on ${formatDate(dueDate)}.`
+                ? `Free checkout for enrolled patrons. Due on ${formatDate(dueDate)}.`
                 : 'All copies checked out. Reservation queue notifies you immediately upon return.'}
             </p>
           </div>
@@ -344,23 +315,23 @@ export const BookDetailPage: React.FC = () => {
         title="Confirm Book Checkout"
         description="Verify borrowing details for this academic title."
       >
-        <div className="space-y-4">
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-            <div className="flex justify-between">
-              <span className="text-slate-500">Title:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">{book.title}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.8rem' }}>
+          <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-bg-card-subtle)', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-text-muted)' }}>Title:</span>
+              <strong>{book.title}</strong>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Duration:</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">{loanDays} Days</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-text-muted)' }}>Duration:</span>
+              <strong>{loanDays} Days</strong>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Scheduled Due Date:</span>
-              <span className="font-bold text-primary-600 dark:text-primary-400">{formatDate(dueDate)}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-text-muted)' }}>Scheduled Due Date:</span>
+              <strong style={{ color: 'var(--color-primary-600)' }}>{formatDate(dueDate)}</strong>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
             <Button variant="ghost" size="sm" onClick={() => setIsBorrowModalOpen(false)}>
               Cancel
             </Button>
@@ -378,12 +349,12 @@ export const BookDetailPage: React.FC = () => {
         title="Place Reservation Queue"
         description="Queue for the next physical copy returned."
       >
-        <div className="space-y-4">
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', lineHeight: 1.5, margin: 0 }}>
             When another patron returns "{book.title}", the library circulation desk will hold the copy under your name for 3 days.
           </p>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
             <Button variant="ghost" size="sm" onClick={() => setIsReserveModalOpen(false)}>
               Cancel
             </Button>

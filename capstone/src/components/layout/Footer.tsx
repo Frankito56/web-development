@@ -3,56 +3,55 @@
  */
 
 import React from 'react';
-import { BookOpen, ShieldCheck, Heart, Sparkles } from 'lucide-react';
+import { BookOpen, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import './Footer.css';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 py-8 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+    <footer className="unilib-footer">
+      <div className="unilib-footer__container">
+        <div className="unilib-footer__grid">
           {/* Brand info */}
-          <div className="md:col-span-2 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary-600 text-white flex items-center justify-center">
-                <BookOpen className="w-4 h-4" />
+          <div className="unilib-footer__brand-block">
+            <div className="unilib-footer__brand-header">
+              <div className="unilib-footer__logo-box">
+                <BookOpen size={16} />
               </div>
-              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-100">
+              <span className="unilib-footer__brand-name">
                 UniLib Central System
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
+            <p className="unilib-footer__desc">
               University Library Single Page Application providing academic resource cataloging, dynamic book loans, reservation queues, and reading tracking.
             </p>
-            <div className="flex items-center gap-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-              <ShieldCheck className="w-4 h-4" />
+            <div className="unilib-footer__status-badge">
+              <ShieldCheck size={16} />
               <span>Campus Digital Services • Verified System Status: Operational</span>
             </div>
           </div>
 
           {/* Quick links */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200 mb-3">
-              Library Services
-            </h4>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
+            <h4 className="unilib-footer__section-title">Library Services</h4>
+            <ul className="unilib-footer__links-list">
               <li>
-                <Link to="/books" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link to="/books" className="unilib-footer__link">
                   Catalog Search
                 </Link>
               </li>
               <li>
-                <Link to="/my-loans" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link to="/my-loans" className="unilib-footer__link">
                   Loans & Due Dates
                 </Link>
               </li>
               <li>
-                <Link to="/reading-tracker" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link to="/reading-tracker" className="unilib-footer__link">
                   Reading Progress
                 </Link>
               </li>
               <li>
-                <Link to="/wishlist" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Link to="/wishlist" className="unilib-footer__link">
                   Wishlist & Alerts
                 </Link>
               </li>
@@ -61,25 +60,21 @@ export const Footer: React.FC = () => {
 
           {/* Academic Hours */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200 mb-3">
-              Circulation Hours
-            </h4>
-            <div className="space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
+            <h4 className="unilib-footer__section-title">Circulation Hours</h4>
+            <div className="unilib-footer__hours-list">
               <p>Mon - Fri: 08:00 - 22:00</p>
               <p>Saturday: 09:00 - 18:00</p>
               <p>Sunday: 10:00 - 16:00 (Reading Room only)</p>
-              <p className="text-[11px] text-primary-600 dark:text-primary-400 font-medium mt-2">
+              <p style={{ color: 'var(--color-primary-600)', fontWeight: 600, marginTop: '0.25rem' }}>
                 Standard Loan: 14 Days
               </p>
             </div>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-slate-500">
+        <div className="unilib-footer__bottom-row">
           <p>© {new Date().getFullYear()} UniLib Academic Library. Built for Web Development Capstone.</p>
-          <div className="flex items-center gap-1">
-            <span>Crafted with Clean Architecture & React 18/19</span>
-          </div>
+          <p>Crafted with Clean Architecture & React 18/19</p>
         </div>
       </div>
     </footer>

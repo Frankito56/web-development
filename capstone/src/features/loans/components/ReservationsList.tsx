@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/utils/dateUtils';
 import { LoanService } from '@/services/loanService';
 import { useNotification } from '@/context/NotificationContext';
-import { Clock, BookOpen, AlertCircle, X } from 'lucide-react';
+import { Clock, BookOpen, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import '../loans.css';
 
 export const ReservationsList: React.FC<{
   reservations: Reservation[];
@@ -19,9 +20,9 @@ export const ReservationsList: React.FC<{
   const { showToast } = useNotification();
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
-  const handleCancel = (res: Reservation) => {
+  const handleCancel = async (res: Reservation) => {
     setCancellingId(res.id);
-    const result = LoanService.cancelReservation(res.id);
+    const result = await LoanService.cancelReservation(res.id);
     setCancellingId(null);
 
     if (result.success) {
@@ -31,64 +32,64 @@ export const ReservationsList: React.FC<{
   };
 
   return (
-    <div className="space-y-4">
+    <div className="unilib-loans-list">
       {reservations.map((res) => {
         const isReady = res.status === 'READY_FOR_PICKUP';
 
         return (
           <article
             key={res.id}
-            className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 rounded-2xl border shadow-xs transition-all gap-4 ${
-              isReady
-                ? 'bg-amber-50/60 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800'
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
-            }`}
+            className="unilib-loan-card"
+            style={{
+              backgroundColor: isReady ? 'var(--color-warning-bg)' : undefined,
+              borderColor: isReady ? 'var(--color-warning-border)' : undefined,
+            }}
           >
-            <div className="flex items-start gap-4 min-w-0">
+            <div className="unilib-loan-card__main">
               {res.bookCoverUrl ? (
                 <img
                   src={res.bookCoverUrl}
                   alt={res.bookTitle}
-                  className="w-12 h-18 object-cover rounded-lg shrink-0 shadow-sm"
+                  className="unilib-loan-card__cover"
                 />
               ) : (
-                <div className="w-12 h-18 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
-                  <BookOpen className="w-5 h-5 text-slate-400" />
+                <div className="unilib-loan-card__cover" style={{ backgroundColor: 'var(--color-bg-card-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen size={24} color="var(--color-text-subtle)" />
                 </div>
               )}
 
-              <div className="min-w-0 space-y-1">
+              <div className="unilib-loan-card__info">
                 <Link
                   to={`/books/${res.bookId}`}
-                  className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 hover:text-primary-600 transition-colors line-clamp-1"
+                  className="unilib-loan-card__title"
                 >
                   {res.bookTitle}
                 </Link>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="unilib-loan-card__author">
                   Reserved on: {formatDate(res.reservationDate)}
                 </p>
 
                 {isReady ? (
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 pt-1">
-                    <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-warning-text)', paddingTop: '0.35rem' }}>
+                    <AlertCircle size={14} color="var(--color-warning)" />
                     <span>Ready for pickup! Desk deadline: {formatDate(res.pickupDeadline || '')}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 pt-1">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Queue Position: <strong className="text-primary-600 dark:text-primary-400">#{res.queuePosition}</strong> in line</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', paddingTop: '0.35rem' }}>
+                    <Clock size={14} />
+                    <span>Queue Position: <strong style={{ color: 'var(--color-primary-600)' }}>#{res.queuePosition}</strong> in line</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center justify-end w-full sm:w-auto pt-2 sm:pt-0">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
               <Button
                 variant="ghost"
                 size="sm"
                 isLoading={cancellingId === res.id}
                 onClick={() => handleCancel(res)}
-                className="text-slate-500 hover:text-rose-600 dark:hover:text-rose-400"
+                style={{ color: 'var(--color-danger)' }}
               >
                 Cancel Queue
               </Button>

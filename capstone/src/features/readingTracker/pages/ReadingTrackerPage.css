@@ -1,0 +1,124 @@
+/* ==========================================================================
+   ReadingTrackerPage Component Styles
+   ========================================================================== */
+
+.unilib-tracker-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.unilib-tracker-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+}
+
+@media (min-width: 640px) {
+  .unilib-tracker-title {
+    font-size: 2rem;
+  }
+}
+
+.unilib-tracker-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.unilib-tracker-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-tracker-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.unilib-tracker-stat-btn {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.unilib-tracker-stat-btn:hover {
+  border-color: var(--color-primary-500);
+}
+
+.unilib-tracker-stat-btn--active {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+}
+
+.dark .unilib-tracker-stat-btn--active {
+  background-color: rgba(37, 68, 235, 0.15);
+}
+
+.unilib-tracker-items-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .unilib-tracker-items-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.unilib-tracker-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.unilib-tracker-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.unilib-tracker-card__cover {
+  width: 3.5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.unilib-tracker-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.unilib-tracker-card__slider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.unilib-tracker-card__slider {
+  width: 100%;
+  accent-color: var(--color-primary-600);
+  cursor: pointer;
+}

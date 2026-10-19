@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Toast Notification Styles
+   ========================================================================== */
+
+.unilib-toast-container {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+  width: calc(100% - 2.5rem);
+  pointer-events: none;
+}
+
+.unilib-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  box-shadow: var(--shadow-lg);
+  animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastSlideUp {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.unilib-toast--SUCCESS {
+  border-color: var(--color-success-border);
+  background-color: var(--color-bg-card);
+}
+.unilib-toast--WARNING {
+  border-color: var(--color-warning-border);
+  background-color: var(--color-bg-card);
+}
+.unilib-toast--ERROR {
+  border-color: var(--color-danger-border);
+  background-color: var(--color-bg-card);
+}
+.unilib-toast--INFO {
+  border-color: var(--color-info-border);
+  background-color: var(--color-bg-card);
+}
+
+.unilib-toast__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.unilib-toast__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.unilib-toast__message {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+  line-height: 1.4;
+}
+
+.unilib-toast__close-btn {
+  color: var(--color-text-subtle);
+  padding: 0.2rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.unilib-toast__close-btn:hover {
+  color: var(--color-text-main);
+}

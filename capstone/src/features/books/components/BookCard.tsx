@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/Button';
 import { WishlistService } from '@/services/wishlistService';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
-import { Heart, Star, BookOpen, Clock, Calendar } from 'lucide-react';
+import { Heart, Star, BookOpen, Calendar } from 'lucide-react';
 import { ReadingTrackerDropdown } from './ReadingTrackerDropdown';
+import './BookCard.css';
 
 export interface BookCardProps {
   book: Book;
@@ -49,22 +50,22 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
   return (
     <article
       aria-labelledby={`book-title-${book.id}`}
-      className="group relative flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-book-hover transition-all duration-300 hover:-translate-y-1"
+      className="unilib-book-card"
     >
       {/* Top Banner / Cover */}
-      <div className="relative aspect-[3/4] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center">
+      <div className="unilib-book-card__cover-wrap">
         {book.coverUrl && !imageError ? (
           <img
             src={book.coverUrl}
             alt={`Cover of ${book.title}`}
             loading="lazy"
             onError={() => setImageError(true)}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className="unilib-book-card__cover-img"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center p-6 text-center text-slate-400 dark:text-slate-600">
-            <BookOpen className="w-12 h-12 stroke-[1.5] mb-2 opacity-60" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider line-clamp-2">
+          <div className="unilib-book-card__cover-fallback">
+            <BookOpen size={48} strokeWidth={1.5} style={{ opacity: 0.6, marginBottom: '0.5rem' }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase' }}>
               {book.title}
             </span>
           </div>
@@ -74,17 +75,15 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
         <button
           onClick={handleToggleWishlist}
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-          className={`absolute top-3 right-3 p-2 rounded-xl backdrop-blur-md transition-all ${
-            inWishlist
-              ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30'
-              : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:text-rose-500 hover:bg-white dark:hover:bg-slate-900'
+          className={`unilib-book-card__wishlist-btn ${
+            inWishlist ? 'unilib-book-card__wishlist-btn--active' : ''
           }`}
         >
-          <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
+          <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
         </button>
 
         {/* Availability Badge */}
-        <div className="absolute top-3 left-3">
+        <div className="unilib-book-card__badge-wrap">
           {isAvailable ? (
             <Badge variant="available">Available ({book.availableCopies})</Badge>
           ) : isOnLoan ? (
@@ -96,46 +95,41 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between gap-3">
+      <div className="unilib-book-card__body">
         <div>
           {/* Category & Rating */}
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate max-w-[140px]">
+          <div className="unilib-book-card__category-row">
+            <span className="unilib-book-card__category">
               {book.subjects[0] || 'Academic'}
             </span>
             {book.averageRating && (
-              <div className="flex items-center gap-1 text-xs font-semibold text-amber-500">
-                <Star className="w-3.5 h-3.5 fill-current" />
+              <div className="unilib-book-card__rating">
+                <Star size={14} fill="currentColor" />
                 <span>{book.averageRating}</span>
               </div>
             )}
           </div>
 
           {/* Title */}
-          <Link to={`/books/${book.id}`} className="group-hover:text-primary-600 transition-colors">
-            <h3
-              id={`book-title-${book.id}`}
-              className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 line-clamp-2 leading-snug"
-            >
-              {book.title}
-            </h3>
+          <Link to={`/books/${book.id}`} className="unilib-book-card__title" id={`book-title-${book.id}`}>
+            {book.title}
           </Link>
 
           {/* Authors */}
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
+          <p className="unilib-book-card__author">
             {book.authors.join(', ')}
           </p>
 
           {/* Meta Year / Shelf */}
-          <div className="flex items-center gap-3 text-[11px] text-slate-400 dark:text-slate-500 mt-2.5">
+          <div className="unilib-book-card__meta">
             {book.firstPublishYear && (
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <Calendar size={12} />
                 <span>{book.firstPublishYear}</span>
               </div>
             )}
             {book.locationShelf && (
-              <div className="flex items-center gap-1 font-mono">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'monospace' }}>
                 <span>📍 {book.locationShelf}</span>
               </div>
             )}
@@ -143,10 +137,10 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
         </div>
 
         {/* Bottom Actions */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+        <div className="unilib-book-card__footer">
           <ReadingTrackerDropdown book={book} />
 
-          <div className="flex items-center gap-1.5">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             {isAvailable ? (
               <Button
                 size="sm"

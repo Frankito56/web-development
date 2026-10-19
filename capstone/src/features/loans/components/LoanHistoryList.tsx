@@ -8,53 +8,65 @@ import { Loan } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
 import { BookOpen, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import '../loans.css';
 
 export const LoanHistoryList: React.FC<{ loans: Loan[] }> = ({ loans }) => {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
-      <table className="w-full text-left text-xs">
-        <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
+    <div className="unilib-history-table-container">
+      <table className="unilib-history-table">
+        <thead>
           <tr>
-            <th className="py-3.5 px-4">Academic Work</th>
-            <th className="py-3.5 px-4">Borrow Date</th>
-            <th className="py-3.5 px-4">Return Date</th>
-            <th className="py-3.5 px-4">Status</th>
+            <th>Academic Work</th>
+            <th>Borrow Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
+        <tbody>
           {loans.map((loan) => (
-            <tr key={loan.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-              <td className="py-3.5 px-4">
-                <div className="flex items-center gap-3">
+            <tr key={loan.id}>
+              <td>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   {loan.bookCoverUrl ? (
                     <img
                       src={loan.bookCoverUrl}
                       alt={loan.bookTitle}
-                      className="w-8 h-12 object-cover rounded shadow-xs shrink-0"
+                      style={{ width: '2rem', height: '3rem', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
                     />
                   ) : (
-                    <div className="w-8 h-12 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center shrink-0">
-                      <BookOpen className="w-4 h-4 text-slate-400" />
+                    <div style={{ width: '2rem', height: '3rem', backgroundColor: 'var(--color-bg-card-subtle)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <BookOpen size={16} color="var(--color-text-subtle)" />
                     </div>
                   )}
                   <div>
                     <Link
                       to={`/books/${loan.bookId}`}
-                      className="font-bold text-slate-900 dark:text-slate-100 hover:text-primary-600 transition-colors line-clamp-1"
+                      style={{ fontWeight: 700, color: 'var(--color-text-main)', display: 'block' }}
                     >
                       {loan.bookTitle}
                     </Link>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
                       {loan.bookAuthors.join(', ')}
                     </span>
                   </div>
                 </div>
               </td>
-              <td className="py-3.5 px-4 whitespace-nowrap">{formatDate(loan.borrowDate)}</td>
-              <td className="py-3.5 px-4 whitespace-nowrap">{formatDate(loan.returnDate || loan.dueDate)}</td>
-              <td className="py-3.5 px-4 whitespace-nowrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <td style={{ whiteSpace: 'nowrap' }}>{formatDate(loan.borrowDate)}</td>
+              <td style={{ whiteSpace: 'nowrap' }}>{formatDate(loan.returnDate || loan.dueDate)}</td>
+              <td style={{ whiteSpace: 'nowrap' }}>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  backgroundColor: 'var(--color-success-bg)',
+                  color: 'var(--color-success-text)',
+                  border: '1px solid var(--color-success-border)'
+                }}>
+                  <CheckCircle2 size={14} color="var(--color-success)" />
                   <span>Returned</span>
                 </span>
               </td>

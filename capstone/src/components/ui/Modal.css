@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Modal Component Styles
+   ========================================================================== */
+
+.unilib-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.unilib-modal {
+  width: 100%;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-hover);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: var(--color-text-main);
+  animation: modalScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalScale {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.unilib-modal--sm { max-width: 24rem; }
+.unilib-modal--md { max-width: 30rem; }
+.unilib-modal--lg { max-width: 36rem; }
+.unilib-modal--xl { max-width: 44rem; }
+
+.unilib-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.unilib-modal__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text-main);
+}
+
+.unilib-modal__description {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.unilib-modal__close-btn {
+  color: var(--color-text-subtle);
+  padding: 0.35rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.unilib-modal__close-btn:hover {
+  color: var(--color-text-main);
+  background-color: var(--color-bg-hover);
+}
+
+.unilib-modal__content {
+  margin-top: 0.25rem;
+}

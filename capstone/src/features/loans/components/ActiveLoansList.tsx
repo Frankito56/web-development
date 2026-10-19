@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/utils/dateUtils';
 import { LoanService } from '@/services/loanService';
 import { useNotification } from '@/context/NotificationContext';
-import { BookOpen, RotateCcw, Calendar, CheckCircle } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import '../loans.css';
 
 export interface ActiveLoansListProps {
   loans: Loan[];
@@ -23,9 +24,9 @@ export const ActiveLoansList: React.FC<ActiveLoansListProps> = ({ loans, onRefre
   const [returningId, setReturningId] = useState<string | null>(null);
   const [renewingId, setRenewingId] = useState<string | null>(null);
 
-  const handleReturn = (loan: Loan) => {
+  const handleReturn = async (loan: Loan) => {
     setReturningId(loan.id);
-    const result = LoanService.returnBook(loan.id);
+    const result = await LoanService.returnBook(loan.id);
     setReturningId(null);
 
     if (result.success) {
@@ -36,9 +37,9 @@ export const ActiveLoansList: React.FC<ActiveLoansListProps> = ({ loans, onRefre
     }
   };
 
-  const handleRenew = (loan: Loan) => {
+  const handleRenew = async (loan: Loan) => {
     setRenewingId(loan.id);
-    const result = LoanService.renewLoan(loan.id);
+    const result = await LoanService.renewLoan(loan.id);
     setRenewingId(null);
 
     if (result.success) {
@@ -50,49 +51,46 @@ export const ActiveLoansList: React.FC<ActiveLoansListProps> = ({ loans, onRefre
   };
 
   return (
-    <div className="space-y-4">
+    <div className="unilib-loans-list">
       {loans.map((loan) => (
-        <article
-          key={loan.id}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all gap-4"
-        >
+        <article key={loan.id} className="unilib-loan-card">
           {/* Book Info */}
-          <div className="flex items-start gap-4 min-w-0">
+          <div className="unilib-loan-card__main">
             {loan.bookCoverUrl ? (
               <img
                 src={loan.bookCoverUrl}
                 alt={loan.bookTitle}
-                className="w-14 h-20 object-cover rounded-lg shrink-0 shadow-sm"
+                className="unilib-loan-card__cover"
               />
             ) : (
-              <div className="w-14 h-20 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
-                <BookOpen className="w-6 h-6 text-slate-400" />
+              <div className="unilib-loan-card__cover" style={{ backgroundColor: 'var(--color-bg-card-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BookOpen size={24} color="var(--color-text-subtle)" />
               </div>
             )}
 
-            <div className="min-w-0 space-y-1">
+            <div className="unilib-loan-card__info">
               <Link
                 to={`/books/${loan.bookId}`}
-                className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 hover:text-primary-600 transition-colors line-clamp-1"
+                className="unilib-loan-card__title"
               >
                 {loan.bookTitle}
               </Link>
-              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+              <p className="unilib-loan-card__author">
                 {loan.bookAuthors.join(', ')}
               </p>
 
               {/* Dates */}
-              <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-slate-400" />
+              <div className="unilib-loan-card__dates">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Calendar size={12} />
                   <span>Borrowed: {formatDate(loan.borrowDate)}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">Due:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>Due:</span>
                   <span>{formatDate(loan.dueDate)}</span>
                 </div>
                 {loan.renewCount > 0 && (
-                  <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950">
+                  <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '0.1rem 0.35rem', borderRadius: '4px', backgroundColor: 'var(--color-primary-50)', color: 'var(--color-primary-700)' }}>
                     Renewed {loan.renewCount}x
                   </span>
                 )}
@@ -101,10 +99,10 @@ export const ActiveLoansList: React.FC<ActiveLoansListProps> = ({ loans, onRefre
           </div>
 
           {/* Status & Action Buttons */}
-          <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+          <div className="unilib-loan-card__actions">
             <DueDateBadge dueDate={loan.dueDate} />
 
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Button
                 variant="outline"
                 size="sm"
@@ -120,7 +118,7 @@ export const ActiveLoansList: React.FC<ActiveLoansListProps> = ({ loans, onRefre
                 size="sm"
                 isLoading={returningId === loan.id}
                 onClick={() => handleReturn(loan)}
-                leftIcon={<CheckCircle className="w-4 h-4" />}
+                leftIcon={<CheckCircle size={16} />}
               >
                 Return Book
               </Button>

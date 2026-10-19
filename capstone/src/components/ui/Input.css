@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Input Component Styles
+   ========================================================================== */
+
+.unilib-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+}
+
+.unilib-input__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.unilib-input__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.unilib-input__icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
+.unilib-input__icon--left {
+  left: 0.75rem;
+}
+
+.unilib-input__icon--right {
+  right: 0.75rem;
+}
+
+.unilib-input {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.unilib-input--has-left-icon {
+  padding-left: 2.5rem;
+}
+
+.unilib-input--has-right-icon {
+  padding-right: 2.5rem;
+}
+
+.unilib-input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(37, 68, 235, 0.15);
+}
+
+.unilib-input--error {
+  border-color: var(--color-danger);
+}
+
+.unilib-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.unilib-input__error {
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.unilib-input__helper {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}

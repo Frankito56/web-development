@@ -1,10 +1,6 @@
-/**
- * UniLib - Reading Tracker Service
- * Allows users to track their reading status (Want to Read, Currently Reading, Completed)
- */
-
 import { ReadingProgressItem, ReadingStatus, Book } from '@/types';
 import { StorageService } from './storageService';
+import { apiClient } from './apiClient';
 
 export const ReadingTrackerService = {
   getUserItems(userId: string): ReadingProgressItem[] {
@@ -49,6 +45,18 @@ export const ReadingTrackerService = {
     }
 
     StorageService.setItem(StorageService.KEYS.READING_ITEMS, allItems);
+
+    if (apiClient.getToken()) {
+      apiClient.readingRecords
+        .upsert({
+          bookId: book.id,
+          status,
+          progressPercentage: status === 'COMPLETED' ? 100 : progressPercentage,
+          notes,
+        })
+        .catch(() => {});
+    }
+
     return updatedItem;
   },
 
@@ -56,5 +64,9 @@ export const ReadingTrackerService = {
     const allItems = StorageService.getItem<ReadingProgressItem[]>(StorageService.KEYS.READING_ITEMS, []);
     const filtered = allItems.filter((i) => !(i.userId === userId && i.bookId === bookId));
     StorageService.setItem(StorageService.KEYS.READING_ITEMS, filtered);
+
+    if (apiClient.getToken()) {
+      apiClient.readingRecords.delete(bookId).catch(() => {});
+    }
   },
 };

@@ -3,11 +3,16 @@
  */
 
 import React from 'react';
+import './Skeleton.css';
 
-export const Skeleton: React.FC<{ className?: string }> = ({ className = '' }) => {
+export const Skeleton: React.FC<{ className?: string; style?: React.CSSProperties }> = ({
+  className = '',
+  style,
+}) => {
   return (
     <div
-      className={`animate-pulse bg-slate-200 dark:bg-slate-800 rounded-md ${className}`}
+      className={`unilib-skeleton ${className}`}
+      style={style}
       aria-hidden="true"
     />
   );
@@ -15,17 +20,17 @@ export const Skeleton: React.FC<{ className?: string }> = ({ className = '' }) =
 
 export const BookCardSkeleton: React.FC = () => {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col gap-3 shadow-sm">
-      <Skeleton className="w-full h-48 rounded-lg" />
-      <div className="flex gap-2">
-        <Skeleton className="w-16 h-5 rounded-full" />
-        <Skeleton className="w-20 h-5 rounded-full" />
+    <div className="unilib-book-skeleton">
+      <Skeleton className="unilib-book-skeleton__cover" />
+      <div className="unilib-book-skeleton__chips">
+        <Skeleton style={{ width: '4.5rem', height: '1.25rem', borderRadius: '9999px' }} />
+        <Skeleton style={{ width: '5rem', height: '1.25rem', borderRadius: '9999px' }} />
       </div>
-      <Skeleton className="w-3/4 h-5 mt-1" />
-      <Skeleton className="w-1/2 h-4" />
-      <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-        <Skeleton className="w-24 h-4" />
-        <Skeleton className="w-20 h-8 rounded-lg" />
+      <Skeleton style={{ width: '80%', height: '1.25rem', marginTop: '0.25rem' }} />
+      <Skeleton style={{ width: '55%', height: '0.9rem' }} />
+      <div className="unilib-book-skeleton__footer">
+        <Skeleton style={{ width: '5rem', height: '1rem' }} />
+        <Skeleton style={{ width: '4.5rem', height: '2rem', borderRadius: '8px' }} />
       </div>
     </div>
   );
@@ -33,10 +38,10 @@ export const BookCardSkeleton: React.FC = () => {
 
 export const TableSkeleton: React.FC<{ rows?: number }> = ({ rows = 4 }) => {
   return (
-    <div className="w-full space-y-3">
-      <Skeleton className="w-full h-10 rounded-lg" />
+    <div className="unilib-table-skeleton">
+      <Skeleton style={{ width: '100%', height: '2.5rem', borderRadius: '8px' }} />
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="w-full h-16 rounded-lg" />
+        <Skeleton key={i} style={{ width: '100%', height: '4rem', borderRadius: '8px' }} />
       ))}
     </div>
   );

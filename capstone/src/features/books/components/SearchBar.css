@@ -1,0 +1,81 @@
+/* ==========================================================================
+   SearchBar Component Styles
+   ========================================================================== */
+
+.unilib-searchbar-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.unilib-searchbar__icon {
+  position: absolute;
+  left: 0.875rem;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.unilib-searchbar__input {
+  width: 100%;
+  padding: 0.75rem 5rem 0.75rem 2.6rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.unilib-searchbar__input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(37, 68, 235, 0.15);
+}
+
+.unilib-searchbar__input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.unilib-searchbar__actions {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.unilib-searchbar__clear-btn {
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.unilib-searchbar__clear-btn:hover {
+  color: var(--color-text-main);
+}
+
+.unilib-searchbar__shortcut {
+  display: none;
+  font-family: monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-subtle);
+  background-color: var(--color-bg-card-subtle);
+}
+
+@media (min-width: 640px) {
+  .unilib-searchbar__shortcut {
+    display: inline-block;
+  }
+}

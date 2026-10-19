@@ -1,0 +1,99 @@
+/* ==========================================================================
+   BookFilters Component Styles
+   ========================================================================== */
+
+.unilib-filters-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unilib-category-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scrollbar-width: none;
+}
+.unilib-category-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.unilib-cat-pill {
+  white-space: nowrap;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.unilib-cat-pill:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-main);
+}
+
+.unilib-cat-pill--active {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(37, 68, 235, 0.25);
+}
+
+.unilib-filters-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.unilib-avail-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: var(--color-bg-card-subtle);
+  border: 1px solid var(--color-border);
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+}
+
+.unilib-avail-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.unilib-avail-btn:hover {
+  color: var(--color-text-main);
+}
+
+.unilib-avail-btn--active {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  box-shadow: var(--shadow-sm);
+}
+
+.unilib-sort-select {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.65rem;
+  outline: none;
+}
+
+.unilib-sort-select:focus {
+  border-color: var(--color-primary-500);
+}

@@ -36,15 +36,15 @@ const ProfilePage = lazy(() =>
 );
 
 const PageLoadingFallback: React.FC = () => (
-  <div className="w-full py-16 space-y-6 animate-pulse">
-    <div className="flex justify-between items-center">
-      <Skeleton className="w-48 h-8 rounded-xl" />
-      <Skeleton className="w-24 h-8 rounded-lg" />
+  <div style={{ width: '100%', padding: '4rem 0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Skeleton style={{ width: '12rem', height: '2rem', borderRadius: 'var(--radius-md)' }} />
+      <Skeleton style={{ width: '6rem', height: '2rem', borderRadius: 'var(--radius-md)' }} />
     </div>
-    <Skeleton className="w-full h-32 rounded-2xl" />
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+    <Skeleton style={{ width: '100%', height: '8rem', borderRadius: 'var(--radius-lg)' }} />
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-64 rounded-2xl" />
+        <Skeleton key={i} style={{ height: '16rem', borderRadius: 'var(--radius-lg)' }} />
       ))}
     </div>
   </div>

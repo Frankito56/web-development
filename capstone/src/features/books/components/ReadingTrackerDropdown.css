@@ -1,0 +1,65 @@
+/* ==========================================================================
+   ReadingTrackerDropdown Component Styles
+   ========================================================================== */
+
+.unilib-tracker-dropdown {
+  position: relative;
+  display: inline-block;
+  text-align: left;
+}
+
+.unilib-tracker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  transition: all var(--transition-fast);
+}
+
+.unilib-tracker-btn:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.unilib-tracker-menu {
+  position: absolute;
+  right: 0;
+  margin-top: 0.25rem;
+  width: 12rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  padding: 0.35rem;
+  z-index: 30;
+  animation: fadeIn 0.15s ease-out forwards;
+}
+
+.unilib-tracker-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.75rem;
+  color: var(--color-text-main);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+  text-align: left;
+}
+
+.unilib-tracker-option:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.unilib-tracker-option--remove {
+  color: var(--color-danger);
+}
+.unilib-tracker-option--remove:hover {
+  background-color: var(--color-danger-bg);
+}

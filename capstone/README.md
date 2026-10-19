@@ -1,189 +1,245 @@
-# UniLib - University Library Management SPA
+# UniLib — University Library SPA
 
-Production-ready, accessible, and fully functional Single Page Application (SPA) for a University Library Management System called **"UniLib"**, built with **React**, **TypeScript**, **Tailwind CSS**, and **Vite**.
-
----
-
-## 1. Project Overview & Features
-
-UniLib is designed for university students, professors, and library staff to manage scholarly books, academic loans, reservation queues, and reading trackers:
-
-1. **Academic Catalog & Live Search:**
-   - Real-time catalog querying with live integration to the public **Open Library API** (`https://openlibrary.org/search.json`), with resilient fallback to local academic repositories.
-   - **Debounced search** (300ms) by title, author, subject, or ISBN with keyboard shortcut (`/` to focus).
-   - Domain filtering by subject categories (*Computer Science, Science & Physics, History & Civilization, Literature & Poetry, Philosophy & Ethics, Mathematics, Arts*).
-   - Multi-criteria sorting (Relevance, Title A-Z/Z-A, Newest/Oldest Publication, Highest Rated).
-   - High-performance image handling with native lazy loading (`loading="lazy"`) and SVG fallback placeholders.
-   - Full pagination controls with dynamic page calculation.
-
-2. **Dedicated Book Details View (`/books/:id`):**
-   - Detailed monograph view displaying high-resolution book cover, author list, publication metadata, subject chips, overview abstract, and physical campus shelf location.
-   - Dynamic physical inventory badge: *"Available"*, *"All Copies On Loan"*, or *"Reserved for Queue"*.
-   - Interactive reading tracker button (*"Want to Read"*, *"Currently Reading"*, *"Completed"*).
-
-3. **Circulation & Loan Management System (`/my-loans`):**
-   - **Borrow Books:** Calculates standard due dates (14 calendar days from checkout for students; 30 days for professors) and checks loan quotas.
-   - **Reserve Books:** If all copies are loaned out, users can join the priority reservation queue.
-   - **Color-Coded Due Date Badges:**
-     - 🟢 **Green:** More than 3 days remaining.
-     - 🟡 **Yellow (Alert):** Due in $\le 3$ days or due today.
-     - 🔴 **Red (Overdue):** Past scheduled return deadline.
-   - **Return Book:** Instant return action restoring physical inventory and moving the loan to the user's permanent **Borrowing History**.
-   - **Queue Fulfillment:** When a reserved book is returned, the next user in the reservation queue is automatically notified and the book is held for 3 days.
-
-4. **Academic Reading Tracker (`/reading-tracker`):**
-   - Track progress across *Currently Reading*, *Want to Read*, and *Completed* literature.
-   - Interactive progress percentage sliders (0% - 100%) and personal study notes.
-
-5. **Wishlist & Local Availability Alerts (`/wishlist`):**
-   - Bookmark academic titles for future semesters.
-   - Integrated notification triggers: when any loaned copy of a wished book is returned to the library, an alert is automatically dispatched to the student.
-
-6. **Role Simulation & University Authentication:**
-   - Role-based UI views and quotas for **Student** (5 loans max, 14 days), **Professor** (15 loans max, 30 days), and **Librarian / Staff** (25 loans max, 60 days).
-   - One-click account switcher for testing multiple user perspectives and privileges.
-   - State reset utility to restore initial demo seeds at any time.
+Production-ready Single Page Application (SPA) for a University Library Management System, built with **React 18**, **TypeScript**, **Vite**, and **Pure Modular CSS**. The frontend integrates with the Open Library public API for book catalog browsing and communicates with the UniLib backend REST API for all authenticated user actions.
 
 ---
 
-## 2. Clean Architecture & Folder Structure
+## Table of Contents
 
-```text
+1. [Features](#1-features)
+2. [Architecture & Folder Structure](#2-architecture--folder-structure)
+3. [Tech Stack & Styling](#3-tech-stack--styling)
+4. [Setup & Running](#4-setup--running)
+5. [Environment Variables](#5-environment-variables)
+6. [Role-Based Access](#6-role-based-access)
+7. [Security & Accessibility](#7-security--accessibility)
+
+---
+
+## 1. Features
+
+### Academic Catalog & Live Search
+- Real-time querying of the **Open Library API** (`https://openlibrary.org/search.json`) for millions of titles.
+- **Debounced search** (300 ms) by title, author, subject, or ISBN with `/` keyboard shortcut.
+- Subject category filter (Computer Science, Science & Physics, History, Literature, Philosophy, Mathematics, Arts).
+- Multi-criteria sorting: Relevance, Title A–Z / Z–A, Newest / Oldest, Highest Rated.
+- Native lazy-loading images with SVG fallback placeholders. Full pagination.
+
+### Book Detail View (`/books/:id`)
+- High-resolution cover, author list, publication metadata, subject chips, and description.
+- Dynamic physical inventory badge: *Available*, *All Copies On Loan*, or *Reserved for Queue*.
+- Inline reading tracker selector (*Want to Read*, *Reading*, *Completed*).
+
+### Loan Management (`/my-loans`)
+- **Borrow** books with automatic due-date calculation based on role.
+- **Reserve** books when all copies are on loan — join the priority queue.
+- Color-coded due-date badges (Safe / Alert / Overdue).
+- **Return** and **Renew** loans directly from the dashboard.
+- Full borrowing history.
+
+### Reading Tracker (`/reading-tracker`)
+- Track status across *Want to Read*, *Reading*, and *Completed*.
+- Progress sliders (0%–100%) and personal study notes per book.
+
+### Wishlist (`/wishlist`)
+- Save books for future semesters.
+- Toggle availability notifications.
+
+### Authentication
+- JWT-based login backed by the UniLib API server.
+- Token persisted to `localStorage` and sent on every authenticated request.
+- Protected routes redirect unauthenticated users to `/login`.
+
+---
+
+## 2. Architecture & Folder Structure
+
+```
 capstone/
 ├── .env                     # Local environment settings
-├── .env.example             # Template environment variables
-├── index.html               # Semantic HTML5 entry with Inter font
-├── package.json             # Scripts & dependencies
-├── postcss.config.js        # PostCSS configuration
-├── tailwind.config.js       # Tailwind CSS theme with Dark Mode
-├── tsconfig.json            # Solution TypeScript configuration
-├── tsconfig.app.json        # Strict application TypeScript settings
-├── tsconfig.node.json       # Node TypeScript configuration
-├── vite.config.ts           # Vite bundler with @/ path alias
+├── .env.example             # Environment variable template
+├── index.html               # Semantic HTML5 entry with Inter font (Google Fonts)
+├── package.json
+├── vite.config.ts           # Vite with @/ path alias
+├── tsconfig.json            # Solution TypeScript config
+├── tsconfig.app.json        # Strict application TS settings
+├── tsconfig.node.json       # Node/Vite TS settings
 └── src/
     ├── App.tsx              # Router with code splitting (React.lazy + Suspense)
-    ├── main.tsx             # Application entry point with providers
-    ├── index.css            # Tailwind directives, animations & custom scrollbars
+    ├── main.tsx             # Entry point with context providers
+    ├── index.css            # Design tokens, CSS variables, dark/light mode resets
+    ├── vite-env.d.ts        # Client-side ImportMetaEnv declarations
     ├── config/
-    │   └── index.ts         # Constants, API endpoints, role limits & categories
+    │   └── index.ts         # App constants, role limits, category definitions
     ├── context/
-    │   ├── AuthContext.tsx  # Authentication and role simulation context
-    │   ├── NotificationContext.tsx # In-app notification & toast dispatch
-    │   └── ThemeContext.tsx # Persistent Dark / Light mode toggle
+    │   ├── AuthContext.tsx  # JWT auth state, login/logout, profile fetch
+    │   ├── NotificationContext.tsx # In-app toast notifications
+    │   └── ThemeContext.tsx # Persistent dark/light mode toggle
     ├── hooks/
-    │   ├── useBooks.ts      # Catalog fetching, debouncing & filter logic
-    │   ├── useDebounce.ts   # Generic debouncing hook
-    │   ├── useLocalStorage.ts # Reactive local storage hook
-    │   └── usePagination.ts # Slice and page bounds calculation hook
+    │   ├── useBooks.ts      # Open Library catalog fetching + filtering logic
+    │   ├── useDebounce.ts   # Generic debounce hook
+    │   ├── useLocalStorage.ts # Reactive localStorage hook
+    │   └── usePagination.ts # Page bounds and slice calculation
     ├── services/
-    │   ├── loanService.ts   # Domain rules for loans, returns, and reservations
-    │   ├── openLibraryService.ts # Real-time Open Library API integration
-    │   ├── readingTrackerService.ts # Reading lists and progress updates
-    │   ├── storageService.ts# Type-safe localStorage persistence wrapper
-    │   └── wishlistService.ts # Wishlist and alert trigger management
+    │   ├── apiClient.ts          # Typed fetch wrapper for the backend REST API
+    │   ├── loanService.ts        # Loan, return, renew, reserve domain logic
+    │   ├── openLibraryService.ts # Open Library API integration
+    │   ├── readingTrackerService.ts # Reading record management (localStorage cache)
+    │   ├── storageService.ts     # Type-safe localStorage wrapper with listeners
+    │   └── wishlistService.ts    # Wishlist management (localStorage cache)
     ├── types/
-    │   └── index.ts         # Complete domain interfaces (Book, User, Loan, etc.)
+    │   └── index.ts         # Full domain type definitions (Book, User, Loan, etc.)
     ├── utils/
-    │   ├── dateUtils.ts     # Due date math, countdowns & badge variant mapping
-    │   ├── mockData.ts      # Pre-seeded books, users, and active loans
-    │   ├── sanitizer.ts    # Input sanitization and XSS prevention
-    │   └── validators.ts   # Form input validation helpers
+    │   ├── dateUtils.ts     # Due-date math, countdowns, badge variant mapping
+    │   ├── sanitizer.ts     # Input sanitization and XSS prevention
+    │   └── validators.ts    # Form validation helpers
     ├── components/
     │   ├── feedback/
-    │   │   ├── EmptyState.tsx # Empty state view
-    │   │   ├── ErrorBoundary.tsx # React error boundary component
-    │   │   └── Toast.tsx     # Animated toast popup container
+    │   │   ├── EmptyState.tsx & EmptyState.css
+    │   │   ├── ErrorBoundary.tsx & ErrorBoundary.css
+    │   │   └── Toast.tsx & Toast.css
     │   ├── layout/
-    │   │   ├── Footer.tsx    # Academic library footer
-    │   │   ├── LayoutWrapper.tsx # Shell container with Navbar & Outlet
-    │   │   └── Navbar.tsx    # Header with role switcher, notifications & links
+    │   │   ├── Footer.tsx & Footer.css
+    │   │   ├── LayoutWrapper.tsx & LayoutWrapper.css
+    │   │   └── Navbar.tsx & Navbar.css
     │   └── ui/
-    │       ├── Badge.tsx     # Accessible status badges
-    │       ├── Button.tsx    # Polymorphic button with loading spinners
-    │       ├── Input.tsx     # Accessible input with error and helper texts
-    │       ├── Modal.tsx     # ARIA-compliant accessible modal dialog
-    │       └── Skeleton.tsx  # Pulsing loaders for cards and tables
+    │       ├── Badge.tsx & Badge.css
+    │       ├── Button.tsx & Button.css
+    │       ├── Input.tsx & Input.css
+    │       ├── Modal.tsx & Modal.css
+    │       └── Skeleton.tsx & Skeleton.css
     └── features/
         ├── auth/
-        │   ├── components/AuthGuard.tsx # Protected route wrapper
-        │   ├── pages/LoginPage.tsx      # Authentication portal with test logins
-        │   └── pages/ProfilePage.tsx    # User quota & reset tool view
+        │   ├── auth.css
+        │   ├── components/AuthGuard.tsx     # Protected route wrapper
+        │   ├── pages/LoginPage.tsx          # Login with demo credentials
+        │   └── pages/ProfilePage.tsx        # User profile and quota info
         ├── books/
-        │   ├── components/BookCard.tsx  # Grid card with lazy image and actions
-        │   ├── components/BookFilters.tsx # Category pills, sorting & toggles
-        │   ├── components/ReadingTrackerDropdown.tsx # Quick status dropdown
-        │   ├── components/SearchBar.tsx # Debounced search input
-        │   ├── pages/BookCatalogPage.tsx # Main catalog page
-        │   └── pages/BookDetailPage.tsx # Dedicated book details page
+        │   ├── components/BookCard.tsx & BookCard.css
+        │   ├── components/BookFilters.tsx & BookFilters.css
+        │   ├── components/ReadingTrackerDropdown.tsx & ReadingTrackerDropdown.css
+        │   ├── components/SearchBar.tsx & SearchBar.css
+        │   ├── pages/BookCatalogPage.tsx & BookCatalogPage.css
+        │   └── pages/BookDetailPage.tsx & BookDetailPage.css
         ├── loans/
-        │   ├── components/ActiveLoansList.tsx # Active loans with countdowns
-        │   ├── components/DueDateBadge.tsx    # Color-coded due date badge
-        │   ├── components/LoanHistoryList.tsx # Past returned books table
-        │   ├── components/ReservationsList.tsx # Queued reservation items
-        │   └── pages/MyLoansPage.tsx          # Loan center dashboard
+        │   ├── loans.css
+        │   ├── components/ActiveLoansList.tsx
+        │   ├── components/DueDateBadge.tsx
+        │   ├── components/LoanHistoryList.tsx
+        │   ├── components/ReservationsList.tsx
+        │   └── pages/MyLoansPage.tsx
         ├── readingTracker/
-        │   └── pages/ReadingTrackerPage.tsx   # Study reading tracker
+        │   └── pages/ReadingTrackerPage.tsx & ReadingTrackerPage.css
         └── wishlist/
-            └── pages/WishlistPage.tsx         # Wishlist with availability alerts
+            └── pages/WishlistPage.tsx & WishlistPage.css
 ```
 
 ---
 
-## 3. Tech Stack
+## 3. Tech Stack & Styling
 
-* **React 18 / 19** with **TypeScript** (Strict mode enabled).
-* **Vite** for fast HMR and optimized production bundles.
-* **React Router DOM v6** with code splitting via `React.lazy()` and `<Suspense>`.
-* **Tailwind CSS** with mobile-first breakpoints and native Dark Mode support (`class` strategy).
-* **Lucide React** for clean and accessible UI iconography.
-* **LocalStorage Persistence Engine** with automatic seed data and reactive in-app subscribers.
+| Tool                  | Purpose                                              |
+|:--------------------- |:---------------------------------------------------- |
+| **React 18**          | UI library with hooks and concurrent features        |
+| **TypeScript** (strict) | Full static typing with `noUnusedLocals/Params`    |
+| **Vite**              | Fast HMR, optimized production bundles, `@/` alias   |
+| **React Router v6**   | Client-side routing with `React.lazy()` code splitting |
+| **Pure Modular CSS**  | Zero Tailwind — CSS custom properties design system  |
+| **Lucide React**      | Accessible SVG icon library                          |
+
+### Design System
+
+All styles are built on CSS custom properties defined in `src/index.css`:
+
+- **Color tokens:** `--color-primary-*`, `--color-bg-*`, `--color-text-*`, `--color-border-*`
+- **Spacing & Radius:** `--space-*`, `--radius-sm/md/lg/xl`
+- **Shadows:** `--shadow-sm/md/lg`
+- **Dark Mode:** All tokens switch via the `.dark` class on `<html>` — no JavaScript color values.
 
 ---
 
-## 4. Setup & Running Instructions
+## 4. Setup & Running
 
-### 1. Navigate to the Capstone Directory
+### Prerequisites
+
+- Node.js 18+ (22.x recommended)
+- UniLib backend server running on port 3000
+
+### Steps
+
 ```bash
+# 1. Navigate to the capstone directory
 cd capstone
-```
 
-### 2. Install Dependencies
-```bash
+# 2. Install dependencies
 npm install
+
+# 3. Configure environment (copy if needed)
+cp .env.example .env
+# Verify VITE_BACKEND_URL points to the running API server
+
+# 4. Start the development server
+npm run dev
 ```
 
-### 3. Verify Environment Configuration
-The project includes pre-configured `.env` and `.env.example` files:
+Open **http://localhost:5173** in your browser.
+
+### Available Scripts
+
+| Script             | Description                                 |
+|:------------------ |:------------------------------------------- |
+| `npm run dev`      | Start Vite development server               |
+| `npm run build`    | TypeScript check + production bundle        |
+| `npm run preview`  | Serve the production bundle locally         |
+| `npm run lint`     | Run ESLint across all TypeScript files      |
+
+---
+
+## 5. Environment Variables
+
 ```env
 VITE_APP_NAME="UniLib - University Library Management System"
 VITE_BOOK_API_BASE_URL="https://openlibrary.org"
 VITE_MAX_LOAN_DAYS=14
-VITE_ENABLE_MOCK_DATA=true
+VITE_BACKEND_URL="http://localhost:3000/api"
 ```
 
-### 4. Start the Development Server
-```bash
-npm run dev
-```
-Open your browser and navigate to the printed local address (typically `http://localhost:5173`).
-
-### 5. Build for Production
-```bash
-npm run build
-```
-Generates a strictly-typed, minified production build in the `dist/` folder.
-
-To preview the production build locally:
-```bash
-npm run preview
-```
+| Variable               | Description                                               |
+|:---------------------- |:--------------------------------------------------------- |
+| `VITE_APP_NAME`        | Display name used in the browser title                    |
+| `VITE_BOOK_API_BASE_URL` | Base URL for Open Library API catalog requests          |
+| `VITE_MAX_LOAN_DAYS`   | Default loan duration override (role limits take priority)|
+| `VITE_BACKEND_URL`     | UniLib REST API base URL for authenticated requests       |
 
 ---
 
-## 5. Security & Accessibility (a11y) Features
+## 6. Role-Based Access
 
-* **Input Sanitization:** User inputs are processed through `sanitizeInput()` in `src/utils/sanitizer.ts` to neutralize HTML delimiters and prevent XSS injection in query parameters and notes.
-* **Accessible Modals (`role="dialog"`):** Modals in `src/components/ui/Modal.tsx` include focus management, `aria-modal="true"`, `aria-labelledby`, body scroll lock, and `Escape` key listeners.
-* **Screen Reader Announcers (`aria-live="polite"`):** Live catalog search results provide real-time audio announcements of search status and match counts.
-* **Keyboard Navigation:** Full support for `Tab` index cycling, active focus rings (`focus-visible:ring-2`), and quick keyboard focus (`/` key to jump to search).
-* **High Contrast Colors:** Light and dark mode palettes meet WCAG AA standards for typography and interactive states.
+| Role          | Max Loans | Loan Days | Inventory Management |
+|:------------- |:---------:|:---------:|:--------------------:|
+| **Student**   | 5         | 14        | No                   |
+| **Professor** | 15        | 30        | No                   |
+| **Librarian** | 25        | 60        | Yes                  |
+
+### Seeded Database Accounts
+
+The backend seed script (`npm run prisma:seed` in `/server`) populates the database with test accounts for each institutional role:
+
+| Role       | Email                           | Password      |
+|:---------- |:------------------------------- |:------------- |
+| Librarian  | `biblioteca@unilib.edu`         | `Admin123!`   |
+| Professor  | `profesor.garcia@unilib.edu`    | `Prof123!`    |
+| Student    | `estudiante.franco@unilib.edu`  | `Student123!` |
+| Student    | `estudiante.maria@unilib.edu`   | `Student123!` |
+
+---
+
+## 7. Security & Accessibility
+
+- **Input Sanitization:** All user inputs are processed through `sanitizeInput()` in `src/utils/sanitizer.ts` to neutralize HTML delimiters and prevent XSS.
+- **Accessible Modals:** `Modal.tsx` implements `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, focus trapping, body scroll lock, and `Escape` key dismissal.
+- **Live Region Announcements:** Catalog search results announce match counts via `aria-live="polite"` for screen readers.
+- **Keyboard Navigation:** Full `Tab` index cycling, visible focus rings, and `/` shortcut to jump to the search field.
+- **WCAG AA Colors:** All text/background combinations in both light and dark themes meet minimum contrast ratios.
+- **Error Boundary:** `ErrorBoundary.tsx` wraps the entire application to catch and display unrecoverable React render errors without crashing the full page.
+- **JWT Security:** Tokens are stored in `localStorage` and attached as `Authorization: Bearer <token>` headers. The `apiClient` centralizes all authenticated requests.

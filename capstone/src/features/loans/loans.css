@@ -1,0 +1,269 @@
+/* ==========================================================================
+   Loans Feature Styles
+   ========================================================================== */
+
+.unilib-loans-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.unilib-loans-header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-loans-header-row {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.unilib-loans-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+}
+
+@media (min-width: 640px) {
+  .unilib-loans-title {
+    font-size: 2rem;
+  }
+}
+
+.unilib-loans-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.unilib-allowance-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  font-size: 0.8rem;
+}
+
+/* Metrics Row */
+.unilib-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.unilib-metric-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.unilib-metric-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.unilib-metric-card__value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--color-text-main);
+}
+
+.unilib-metric-card__subtext {
+  font-size: 0.7rem;
+  color: var(--color-text-subtle);
+}
+
+/* Navigation Tabs */
+.unilib-loans-tabs-bar {
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 1.5rem;
+}
+
+.unilib-loan-tab-btn {
+  padding: 0.85rem 0.25rem;
+  border-bottom: 2px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.unilib-loan-tab-btn:hover {
+  color: var(--color-text-main);
+}
+
+.unilib-loan-tab-btn--active {
+  border-bottom-color: var(--color-primary-600);
+  color: var(--color-primary-600);
+}
+
+.unilib-tab-counter {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-card-subtle);
+  color: var(--color-text-main);
+}
+
+/* Loan Cards List */
+.unilib-loans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unilib-loan-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  gap: 1rem;
+  transition: border-color var(--transition-fast);
+}
+
+@media (min-width: 640px) {
+  .unilib-loan-card {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.unilib-loan-card:hover {
+  border-color: var(--color-primary-200);
+}
+
+.unilib-loan-card__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.unilib-loan-card__cover {
+  width: 3.5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.unilib-loan-card__info {
+  min-width: 0;
+}
+
+.unilib-loan-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  text-decoration: none;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.unilib-loan-card__title:hover {
+  color: var(--color-primary-600);
+}
+
+.unilib-loan-card__author {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 0.15rem;
+}
+
+.unilib-loan-card__dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.72rem;
+  color: var(--color-text-subtle);
+  margin-top: 0.5rem;
+}
+
+.unilib-loan-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .unilib-loan-card__actions {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
+
+/* History Table */
+.unilib-history-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.unilib-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.unilib-history-table th {
+  padding: 0.85rem 1rem;
+  background-color: var(--color-bg-card-subtle);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+
+.unilib-history-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-main);
+}
+
+.unilib-history-table tr:hover td {
+  background-color: var(--color-bg-hover);
+}

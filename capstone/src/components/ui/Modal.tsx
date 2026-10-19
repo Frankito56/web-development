@@ -4,6 +4,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import './Modal.css';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -24,7 +25,6 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -34,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({
 
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden'; // Lock scroll
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
@@ -45,16 +45,9 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const maxWidthStyles: Record<string, string> = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-  };
-
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in"
+      className="unilib-modal-backdrop"
       onClick={onClose}
       aria-hidden="true"
     >
@@ -64,18 +57,18 @@ export const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
         aria-describedby={description ? 'modal-desc' : undefined}
-        className={`w-full ${maxWidthStyles[maxWidth]} bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 overflow-hidden transition-all transform scale-100 flex flex-col gap-4 text-slate-900 dark:text-slate-100`}
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking content
+        className={`unilib-modal unilib-modal--${maxWidth}`}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="unilib-modal__header">
           <div>
             {title && (
-              <h2 id="modal-title" className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h2 id="modal-title" className="unilib-modal__title">
                 {title}
               </h2>
             )}
             {description && (
-              <p id="modal-desc" className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p id="modal-desc" className="unilib-modal__description">
                 {description}
               </p>
             )}
@@ -83,13 +76,13 @@ export const Modal: React.FC<ModalProps> = ({
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="unilib-modal__close-btn"
           >
-            <X className="w-5 h-5" />
+            <X size={18} />
           </button>
         </div>
 
-        <div className="mt-1">{children}</div>
+        <div className="unilib-modal__content">{children}</div>
       </div>
     </div>
   );

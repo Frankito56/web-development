@@ -1,10 +1,6 @@
-/**
- * UniLib - Wishlist Service
- * Handles user wishlists and notification triggers when desired books become available.
- */
-
 import { WishlistItem, Book } from '@/types';
 import { StorageService } from './storageService';
+import { apiClient } from './apiClient';
 
 export const WishlistService = {
   getUserWishlist(userId: string): WishlistItem[] {
@@ -36,6 +32,11 @@ export const WishlistService = {
     };
 
     StorageService.setItem(StorageService.KEYS.WISHLIST, [newItem, ...allWishlists]);
+
+    if (apiClient.getToken()) {
+      apiClient.wishlist.add(book.id, notifyWhenAvailable).catch(() => {});
+    }
+
     return newItem;
   },
 
@@ -43,6 +44,10 @@ export const WishlistService = {
     const allWishlists = StorageService.getItem<WishlistItem[]>(StorageService.KEYS.WISHLIST, []);
     const filtered = allWishlists.filter((w) => !(w.userId === userId && w.bookId === bookId));
     StorageService.setItem(StorageService.KEYS.WISHLIST, filtered);
+
+    if (apiClient.getToken()) {
+      apiClient.wishlist.remove(bookId).catch(() => {});
+    }
   },
 
   toggleNotification(userId: string, bookId: string): boolean {

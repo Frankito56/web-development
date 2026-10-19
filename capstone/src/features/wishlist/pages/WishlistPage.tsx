@@ -13,8 +13,9 @@ import { WishlistItem, Book } from '@/types';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Heart, Bell, BellOff, BookOpen, Trash2, ArrowRight } from 'lucide-react';
+import { Heart, Bell, BellOff, BookOpen, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import './WishlistPage.css';
 
 export const WishlistPage: React.FC = () => {
   const { user } = useAuth();
@@ -54,12 +55,11 @@ export const WishlistPage: React.FC = () => {
     loadData();
   };
 
-  const handleQuickBorrow = (book: Book) => {
+  const handleQuickBorrow = async (book: Book) => {
     if (!user) return;
-    const result = LoanService.borrowBook(book, user);
+    const result = await LoanService.borrowBook(book, user);
     if (result.success) {
       showToast('Borrow Successful', result.message, 'SUCCESS');
-      // optionally remove from wishlist after borrowing
       WishlistService.removeFromWishlist(user.id, book.id);
     } else {
       showToast('Cannot Borrow', result.message, 'ERROR');
@@ -68,9 +68,9 @@ export const WishlistPage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="py-12 text-center">
+      <div style={{ padding: '3rem 0', textAlign: 'center' }}>
         <EmptyState
-          icon={<Heart className="w-8 h-8 text-slate-400" />}
+          icon={<Heart size={32} color="var(--color-text-muted)" />}
           title="Sign in to view your wishlist"
           description="Save upcoming books and receive alerts as soon as copies are returned to campus."
           actionText="Sign In"
@@ -81,33 +81,33 @@ export const WishlistPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="unilib-wishlist-container">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="unilib-wishlist-header-row">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+          <h1 className="unilib-wishlist-title">
             Scholarly Wishlist & Availability Alerts
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="unilib-wishlist-subtitle">
             Track books you intend to read later and receive instant in-app alerts when physical copies are returned.
           </p>
         </div>
 
-        <div className="px-3 py-1.5 rounded-xl bg-primary-50 dark:bg-primary-950/60 border border-primary-100 dark:border-primary-900 text-xs font-semibold text-primary-700 dark:text-primary-300">
+        <div className="unilib-wishlist-count-badge">
           {wishlist.length} Saved {wishlist.length === 1 ? 'Title' : 'Titles'}
         </div>
       </div>
 
       {wishlist.length === 0 ? (
         <EmptyState
-          icon={<Heart className="w-8 h-8 text-slate-400" />}
+          icon={<Heart size={32} color="var(--color-text-muted)" />}
           title="Your wishlist is empty"
           description="Browse the library catalog and click the heart icon on any book to add it here."
           actionText="Explore Academic Catalog"
           onAction={() => (window.location.href = '/books')}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="unilib-wishlist-grid">
           {wishlist.map((item) => {
             const matchedBook = books.find((b) => b.id === item.bookId);
             const isAvailable = matchedBook
@@ -115,25 +115,22 @@ export const WishlistPage: React.FC = () => {
               : false;
 
             return (
-              <article
-                key={item.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4"
-              >
-                <div className="flex items-start gap-4">
+              <article key={item.id} className="unilib-wishlist-card">
+                <div className="unilib-wishlist-card__main">
                   {item.bookCoverUrl ? (
                     <img
                       src={item.bookCoverUrl}
                       alt={item.bookTitle}
-                      className="w-16 h-24 object-cover rounded-lg shrink-0 shadow-sm"
+                      className="unilib-wishlist-card__cover"
                     />
                   ) : (
-                    <div className="w-16 h-24 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
-                      <BookOpen className="w-6 h-6 text-slate-400" />
+                    <div className="unilib-wishlist-card__cover-placeholder">
+                      <BookOpen size={24} />
                     </div>
                   )}
 
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex items-center justify-between gap-2">
+                  <div className="unilib-wishlist-card__info">
+                    <div className="unilib-wishlist-card__header">
                       {isAvailable ? (
                         <Badge variant="available">In Stock ({matchedBook?.availableCopies})</Badge>
                       ) : (
@@ -143,44 +140,42 @@ export const WishlistPage: React.FC = () => {
                       <button
                         onClick={() => handleRemove(item)}
                         aria-label="Remove from wishlist"
-                        className="text-slate-400 hover:text-rose-500 p-1 rounded transition-colors"
+                        className="unilib-wishlist-card__remove-btn"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 size={16} />
                       </button>
                     </div>
 
                     <Link
                       to={`/books/${item.bookId}`}
-                      className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary-600 transition-colors line-clamp-2"
+                      className="unilib-wishlist-card__title"
                     >
                       {item.bookTitle}
                     </Link>
 
-                    <p className="text-xs text-slate-500 line-clamp-1">
+                    <p className="unilib-wishlist-card__author">
                       {item.bookAuthors.join(', ')}
                     </p>
                   </div>
                 </div>
 
                 {/* Bottom Controls */}
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                <div className="unilib-wishlist-card__footer">
                   {/* Notification Toggle */}
                   <button
                     onClick={() => handleToggleNotification(item)}
-                    className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
-                      item.notifyWhenAvailable
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-                        : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    className={`unilib-alert-toggle-btn ${
+                      item.notifyWhenAvailable ? 'unilib-alert-toggle-btn--active' : ''
                     }`}
                   >
                     {item.notifyWhenAvailable ? (
                       <>
-                        <Bell className="w-3.5 h-3.5" />
+                        <Bell size={14} />
                         <span>Alert On</span>
                       </>
                     ) : (
                       <>
-                        <BellOff className="w-3.5 h-3.5" />
+                        <BellOff size={14} />
                         <span>Alert Off</span>
                       </>
                     )}

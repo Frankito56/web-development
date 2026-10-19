@@ -5,9 +5,9 @@
 export const APP_CONFIG = {
   APP_NAME: import.meta.env.VITE_APP_NAME || 'UniLib - University Library Management System',
   API_BASE_URL: import.meta.env.VITE_BOOK_API_BASE_URL || 'https://openlibrary.org',
+  BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api',
   MAX_LOAN_DAYS: Number(import.meta.env.VITE_MAX_LOAN_DAYS) || 14,
   MAX_RENEWS_ALLOWED: 2,
-  ENABLE_MOCK_DATA: import.meta.env.VITE_ENABLE_MOCK_DATA === 'true' || true,
   STORAGE_PREFIX: 'unilib_v1_',
   DEFAULT_PAGE_SIZE: 12,
   SEARCH_DEBOUNCE_MS: 300,

@@ -1,0 +1,308 @@
+/* ==========================================================================
+   UniLib Authentication & Profile Module Styles
+   ========================================================================== */
+
+/* Login View Layout */
+.unilib-auth-container {
+  max-width: 28rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-auth-container {
+    margin: 3.5rem auto;
+  }
+}
+
+.unilib-auth-branding {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.unilib-auth-logo-badge {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary-600), #4f46e5);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.35);
+  margin-bottom: 0.25rem;
+}
+
+.unilib-auth-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+}
+
+.unilib-auth-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  max-width: 22rem;
+  line-height: 1.4;
+}
+
+.unilib-auth-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unilib-auth-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+
+.unilib-role-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+}
+
+.unilib-role-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.unilib-role-select-btn {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.unilib-role-select-btn--active {
+  border-color: var(--color-primary-600);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+.dark .unilib-role-select-btn--active {
+  background-color: rgba(30, 41, 138, 0.4);
+  color: #93b1fd;
+  border-color: #3b82f6;
+}
+
+/* Profile View Layout */
+.unilib-profile-container {
+  max-width: 56rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.unilib-profile-hero-card {
+  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-profile-hero-card {
+    padding: 2rem;
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+.unilib-profile-avatar {
+  width: 6rem;
+  height: 6rem;
+  border-radius: var(--radius-xl);
+  object-fit: cover;
+  border: 3px solid var(--color-bg-secondary);
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0;
+}
+
+.unilib-profile-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.unilib-profile-header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-profile-header-row {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.unilib-profile-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.unilib-profile-email {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+
+.unilib-profile-role-pill {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+}
+
+.dark .unilib-profile-role-pill {
+  background-color: rgba(30, 41, 138, 0.4);
+  color: #93b1fd;
+}
+
+.unilib-profile-meta-row {
+  padding-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 640px) {
+  .unilib-profile-meta-row {
+    justify-content: flex-start;
+  }
+}
+
+.unilib-profile-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.unilib-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .unilib-profile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.unilib-profile-card {
+  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unilib-profile-card-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.unilib-profile-card-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.unilib-profile-quota-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.unilib-profile-quota-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 0.8rem;
+}
+
+.unilib-profile-quota-row:last-child {
+  border-bottom: none;
+}
+
+.unilib-profile-quota-label {
+  color: var(--color-text-muted);
+}
+
+.unilib-profile-quota-value {
+  font-weight: 700;
+  color: var(--color-text-main);
+  font-family: var(--font-mono);
+}
+
+.unilib-profile-quota-value--highlight {
+  color: var(--color-primary-600);
+}
+
+.unilib-profile-card-footer {
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-subtle);
+}

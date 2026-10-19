@@ -8,6 +8,7 @@ import { ReadingTrackerService } from '@/services/readingTrackerService';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { Bookmark, Check, ChevronDown, BookOpen, CheckCircle2 } from 'lucide-react';
+import './ReadingTrackerDropdown.css';
 
 export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
   const { user } = useAuth();
@@ -35,84 +36,77 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
     setIsOpen(false);
   };
 
-  const statusLabels: Record<ReadingStatus, { text: string; icon: React.ReactNode; color: string }> = {
+  const statusLabels: Record<ReadingStatus, { text: string; icon: React.ReactNode }> = {
     WANT_TO_READ: {
       text: 'Want to Read',
-      icon: <Bookmark className="w-3.5 h-3.5" />,
-      color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60',
+      icon: <Bookmark size={14} color="#6366f1" />,
     },
     READING: {
       text: 'Reading',
-      icon: <BookOpen className="w-3.5 h-3.5" />,
-      color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60',
+      icon: <BookOpen size={14} color="#f59e0b" />,
     },
     COMPLETED: {
       text: 'Completed',
-      icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-      color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60',
+      icon: <CheckCircle2 size={14} color="#10b981" />,
     },
   };
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="unilib-tracker-dropdown">
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-          currentStatus
-            ? `${statusLabels[currentStatus].color} border-current/20`
-            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-        }`}
+        className="unilib-tracker-btn"
       >
-        {currentStatus ? statusLabels[currentStatus].icon : <Bookmark className="w-3.5 h-3.5 text-slate-400" />}
+        {currentStatus ? statusLabels[currentStatus].icon : <Bookmark size={14} color="var(--color-text-subtle)" />}
         <span>{currentStatus ? statusLabels[currentStatus].text : 'Track Progress'}</span>
-        <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
+        <ChevronDown size={12} color="var(--color-text-subtle)" />
       </button>
 
       {isOpen && (
         <div
-          className="absolute right-0 sm:left-0 sm:right-auto mt-1 w-44 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl p-1 z-30 animate-fade-in"
+          className="unilib-tracker-menu"
           onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={() => handleSelect('WANT_TO_READ')}
-            className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-left"
+            className="unilib-tracker-option"
           >
-            <div className="flex items-center gap-2">
-              <Bookmark className="w-3.5 h-3.5 text-indigo-500" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Bookmark size={14} color="#6366f1" />
               <span>Want to Read</span>
             </div>
-            {currentStatus === 'WANT_TO_READ' && <Check className="w-3.5 h-3.5 text-primary-600" />}
+            {currentStatus === 'WANT_TO_READ' && <Check size={14} color="var(--color-primary-600)" />}
           </button>
 
           <button
             onClick={() => handleSelect('READING')}
-            className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-left"
+            className="unilib-tracker-option"
           >
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BookOpen size={14} color="#f59e0b" />
               <span>Currently Reading</span>
             </div>
-            {currentStatus === 'READING' && <Check className="w-3.5 h-3.5 text-primary-600" />}
+            {currentStatus === 'READING' && <Check size={14} color="var(--color-primary-600)" />}
           </button>
 
           <button
             onClick={() => handleSelect('COMPLETED')}
-            className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-left"
+            className="unilib-tracker-option"
           >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <CheckCircle2 size={14} color="#10b981" />
               <span>Completed</span>
             </div>
-            {currentStatus === 'COMPLETED' && <Check className="w-3.5 h-3.5 text-primary-600" />}
+            {currentStatus === 'COMPLETED' && <Check size={14} color="var(--color-primary-600)" />}
           </button>
 
           {currentStatus && (
-            <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-800">
+            <div style={{ paddingTop: '0.25rem', marginTop: '0.25rem', borderTop: '1px solid var(--color-border-subtle)' }}>
               <button
                 onClick={() => handleSelect('REMOVE')}
-                className="w-full px-2.5 py-1.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors text-left"
+                className="unilib-tracker-option unilib-tracker-option--remove"
               >
                 Untrack Book
               </button>
