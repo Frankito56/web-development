@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -14,7 +14,7 @@ interface LocationState {
 }
 
 export const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { showToast } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,6 +26,12 @@ export const LoginPage: React.FC = () => {
 
   const locationState = location.state as LocationState | null;
   const from = locationState?.from?.pathname || '/books';
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +71,7 @@ export const LoginPage: React.FC = () => {
           Enter University Credentials
         </span>
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleLogin} className="unilib-auth-form">
           <Input
             label="Institutional Email"
             type="email"
@@ -93,15 +99,15 @@ export const LoginPage: React.FC = () => {
             type="submit"
             variant="primary"
             size="md"
-            style={{ width: '100%', marginTop: '0.5rem' }}
+            className="unilib-auth-btn-full"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Authenticating...' : 'Sign In'}
           </Button>
 
-          <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+          <div className="unilib-auth-switch-link">
             Don't have an account?{' '}
-            <Link to="/register" style={{ color: 'var(--color-primary-600)', fontWeight: 600, textDecoration: 'none' }}>
+            <Link to="/register" className="unilib-auth-link-highlight">
               Create an Account
             </Link>
           </div>

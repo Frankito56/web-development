@@ -1,6 +1,4 @@
-/**
- * UniLib - Core Domain Type Definitions
- */
+
 
 export type UserRole = 'STUDENT' | 'PROFESSOR' | 'LIBRARIAN';
 
@@ -19,7 +17,7 @@ export interface User {
 export type BookAvailabilityStatus = 'AVAILABLE' | 'ON_LOAN' | 'RESERVED';
 
 export interface Book {
-  id: string; // OpenLibrary work ID or ISBN/key
+  id: string;
   title: string;
   authors: string[];
   coverUrl?: string;
@@ -37,34 +35,43 @@ export interface Book {
   locationShelf?: string;
 }
 
-export type LoanStatus = 'ACTIVE' | 'RETURNED' | 'OVERDUE';
+export type LoanStatus = 'PENDING_PICKUP' | 'ACTIVE' | 'DELIVERED' | 'RETURNED' | 'OVERDUE';
 
 export interface Loan {
   id: string;
   bookId: string;
+  openLibraryKey?: string;
   bookTitle: string;
   bookCoverUrl?: string;
   bookAuthors: string[];
   userId: string;
   userName: string;
-  userRole: UserRole;
-  borrowDate: string; // ISO date string
-  dueDate: string; // ISO date string
-  returnDate?: string | null; // ISO date string
+  userRole?: UserRole;
+  userEmail?: string;
+  studentOrEmployeeId?: string;
+  department?: string;
+  borrowDate: string;
+  dueDate: string;
+  returnDate?: string | null;
   status: LoanStatus;
   renewCount: number;
 }
 
-export type ReservationStatus = 'PENDING' | 'READY_FOR_PICKUP' | 'FULFILLED' | 'CANCELLED';
+export type ReservationStatus = 'PENDING' | 'WAITING' | 'READY_FOR_PICKUP' | 'FULFILLED' | 'CANCELLED';
 
 export interface Reservation {
   id: string;
   bookId: string;
+  openLibraryKey?: string;
   bookTitle: string;
   bookCoverUrl?: string;
   userId: string;
   userName: string;
-  reservationDate: string; // ISO date string
+  userRole?: UserRole;
+  userEmail?: string;
+  studentOrEmployeeId?: string;
+  department?: string;
+  reservationDate: string;
   queuePosition: number;
   status: ReservationStatus;
   pickupDeadline?: string;
@@ -89,12 +96,16 @@ export interface ReadingProgressItem {
 export interface WishlistItem {
   id: string;
   bookId: string;
+  openLibraryKey?: string;
   bookTitle: string;
   bookCoverUrl?: string;
   bookAuthors: string[];
   userId: string;
   addedAt: string;
   notifyWhenAvailable: boolean;
+  availableCopies?: number;
+  totalCopies?: number;
+  availabilityStatus?: BookAvailabilityStatus;
 }
 
 export type NotificationType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';

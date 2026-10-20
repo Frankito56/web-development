@@ -1,6 +1,4 @@
-/**
- * UniLib - Input and Form Validation Utilities
- */
+
 
 export function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -8,7 +6,7 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidStudentId(id: string): boolean {
-  // Accepts formats like U-2024-001 or standard numeric IDs
+
   return id.trim().length >= 4;
 }
 

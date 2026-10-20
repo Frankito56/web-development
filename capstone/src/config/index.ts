@@ -1,7 +1,3 @@
-/**
- * UniLib - Application Configuration & Constants
- */
-
 export const APP_CONFIG = {
   APP_NAME: import.meta.env.VITE_APP_NAME || 'UniLib - University Library Management System',
   API_BASE_URL: import.meta.env.VITE_BOOK_API_BASE_URL || 'https://openlibrary.org',

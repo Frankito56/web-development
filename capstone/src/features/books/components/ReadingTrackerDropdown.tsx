@@ -1,8 +1,6 @@
-/**
- * UniLib - ReadingTrackerDropdown Component
- */
 
-import React, { useState } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Book, ReadingStatus } from '@/types';
 import { ReadingTrackerService } from '@/services/readingTrackerService';
 import { useAuth } from '@/context/AuthContext';
@@ -14,6 +12,22 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
   const { user } = useAuth();
   const { showToast } = useNotification();
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   if (!user) return null;
 
@@ -39,20 +53,20 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
   const statusLabels: Record<ReadingStatus, { text: string; icon: React.ReactNode }> = {
     WANT_TO_READ: {
       text: 'Want to Read',
-      icon: <Bookmark size={14} color="#6366f1" />,
+      icon: <Bookmark size={14} color="var(--color-info)" />,
     },
     READING: {
       text: 'Reading',
-      icon: <BookOpen size={14} color="#f59e0b" />,
+      icon: <BookOpen size={14} color="var(--color-warning)" />,
     },
     COMPLETED: {
       text: 'Completed',
-      icon: <CheckCircle2 size={14} color="#10b981" />,
+      icon: <CheckCircle2 size={14} color="var(--color-success)" />,
     },
   };
 
   return (
-    <div className="unilib-tracker-dropdown">
+    <div className="unilib-tracker-dropdown" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="true"
@@ -73,8 +87,8 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
             onClick={() => handleSelect('WANT_TO_READ')}
             className="unilib-tracker-option"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Bookmark size={14} color="#6366f1" />
+            <div className="unilib-tracker-option__content">
+              <Bookmark size={14} color="var(--color-info)" />
               <span>Want to Read</span>
             </div>
             {currentStatus === 'WANT_TO_READ' && <Check size={14} color="var(--color-primary-600)" />}
@@ -84,8 +98,8 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
             onClick={() => handleSelect('READING')}
             className="unilib-tracker-option"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <BookOpen size={14} color="#f59e0b" />
+            <div className="unilib-tracker-option__content">
+              <BookOpen size={14} color="var(--color-warning)" />
               <span>Currently Reading</span>
             </div>
             {currentStatus === 'READING' && <Check size={14} color="var(--color-primary-600)" />}
@@ -95,15 +109,15 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
             onClick={() => handleSelect('COMPLETED')}
             className="unilib-tracker-option"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <CheckCircle2 size={14} color="#10b981" />
+            <div className="unilib-tracker-option__content">
+              <CheckCircle2 size={14} color="var(--color-success)" />
               <span>Completed</span>
             </div>
             {currentStatus === 'COMPLETED' && <Check size={14} color="var(--color-primary-600)" />}
           </button>
 
           {currentStatus && (
-            <div style={{ paddingTop: '0.25rem', marginTop: '0.25rem', borderTop: '1px solid var(--color-border-subtle)' }}>
+            <div className="unilib-tracker-menu__divider">
               <button
                 onClick={() => handleSelect('REMOVE')}
                 className="unilib-tracker-option unilib-tracker-option--remove"

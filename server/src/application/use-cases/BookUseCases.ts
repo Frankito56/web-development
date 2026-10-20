@@ -27,7 +27,17 @@ export class GetBookByIdUseCase {
   constructor(private readonly bookRepo: IBookRepository) {}
 
   async execute(id: string): Promise<BookEntity> {
-    const book = await this.bookRepo.findById(id);
+    let book = await this.bookRepo.findById(id);
+    if (!book) {
+      book = await this.bookRepo.findByOpenLibraryKey(id);
+    }
+    if (!book) {
+      const cleanKey = id.replace(/^\/?works\//, '');
+      book = await this.bookRepo.findByOpenLibraryKey(cleanKey);
+      if (!book) {
+        book = await this.bookRepo.findByOpenLibraryKey(`/works/${cleanKey}`);
+      }
+    }
     if (!book) {
       throw new NotFoundError('Book');
     }
@@ -52,7 +62,7 @@ export class ImportBookUseCase {
       throw new NotFoundError('Open Library book');
     }
 
-    const totalCopies = dto.totalCopies ?? 1;
+    const totalCopies = Math.min(8, Math.max(1, dto.totalCopies ?? 8));
 
     return this.bookRepo.create({
       openLibraryKey: dto.openLibraryKey,
@@ -85,9 +95,10 @@ export class UpdateBookInventoryUseCase {
     }
 
     if (dto.totalCopies !== undefined) {
-      const diff = dto.totalCopies - book.totalCopies;
-      const newAvailable = Math.max(0, book.availableCopies + diff);
-      updateData.totalCopies = dto.totalCopies;
+      const clampedCopies = Math.min(8, Math.max(1, dto.totalCopies));
+      const diff = clampedCopies - book.totalCopies;
+      const newAvailable = Math.min(clampedCopies, Math.max(0, book.availableCopies + diff));
+      updateData.totalCopies = clampedCopies;
       updateData.availableCopies = newAvailable;
       updateData.availabilityStatus = newAvailable > 0 ? 'AVAILABLE' : 'ON_LOAN';
     }

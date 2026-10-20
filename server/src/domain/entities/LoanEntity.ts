@@ -1,5 +1,6 @@
 import { LoanStatus } from '../types';
 import { BookEntity } from './BookEntity';
+import { UserPublic } from './UserEntity';
 
 export interface LoanEntity {
   id: string;
@@ -12,4 +13,5 @@ export interface LoanEntity {
   status: LoanStatus;
   notes?: string;
   book?: BookEntity;
+  user?: UserPublic;
 }

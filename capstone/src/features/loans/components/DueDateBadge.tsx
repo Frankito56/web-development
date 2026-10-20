@@ -1,10 +1,4 @@
-/**
- * UniLib - DueDateBadge Component
- * Color-coded status indicator:
- * - Green: > 3 days remaining
- * - Yellow: Due in <= 3 days
- * - Red: Overdue
- */
+
 
 import React from 'react';
 import { getDueStatus } from '@/utils/dateUtils';

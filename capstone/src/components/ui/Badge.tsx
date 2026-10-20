@@ -1,6 +1,4 @@
-/**
- * UniLib - Accessible Badge Component
- */
+
 
 import React from 'react';
 import './Badge.css';

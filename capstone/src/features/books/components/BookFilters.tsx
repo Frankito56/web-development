@@ -1,7 +1,4 @@
-/**
- * UniLib - BookFilters Component
- * Category pills, sorting options, availability filters, and filter reset
- */
+
 
 import React from 'react';
 import { CATEGORIES } from '@/config';
@@ -41,7 +38,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
 
   return (
     <div className="unilib-filters-wrap">
-      {/* Category Pills Slider */}
+      {}
       <div className="unilib-category-slider">
         {CATEGORIES.map((cat) => {
           const isSelected = filters.category === cat.id;
@@ -57,9 +54,9 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         })}
       </div>
 
-      {/* Second Row: Availability, Sorting & Reset */}
+      {}
       <div className="unilib-filters-secondary">
-        {/* Availability Toggle */}
+        {}
         <div className="unilib-avail-toggle-group">
           <button
             onClick={() => onAvailabilityChange('ALL')}
@@ -69,23 +66,21 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
           </button>
           <button
             onClick={() => onAvailabilityChange('AVAILABLE')}
-            className={`unilib-avail-btn ${filters.availability === 'AVAILABLE' ? 'unilib-avail-btn--active' : ''}`}
-            style={{ color: filters.availability === 'AVAILABLE' ? 'var(--color-success-text)' : undefined }}
+            className={`unilib-avail-btn ${filters.availability === 'AVAILABLE' ? 'unilib-avail-btn--active unilib-avail-btn--available-active' : ''}`}
           >
             Available Now
           </button>
           <button
             onClick={() => onAvailabilityChange('ON_LOAN')}
-            className={`unilib-avail-btn ${filters.availability === 'ON_LOAN' ? 'unilib-avail-btn--active' : ''}`}
-            style={{ color: filters.availability === 'ON_LOAN' ? 'var(--color-warning-text)' : undefined }}
+            className={`unilib-avail-btn ${filters.availability === 'ON_LOAN' ? 'unilib-avail-btn--active unilib-avail-btn--onloan-active' : ''}`}
           >
             On Loan
           </button>
         </div>
 
-        {/* Sort selector & reset */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+        {}
+        <div className="unilib-filters-actions">
+          <div className="unilib-sort-group">
             <ArrowUpDown size={14} />
             <span>Sort:</span>
             <select
@@ -105,14 +100,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
           {hasActiveFilters && (
             <button
               onClick={onReset}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                fontSize: '0.75rem',
-                color: 'var(--color-primary-600)',
-                cursor: 'pointer',
-              }}
+              className="unilib-reset-filters-btn"
             >
               <RotateCcw size={12} />
               <span>Reset</span>

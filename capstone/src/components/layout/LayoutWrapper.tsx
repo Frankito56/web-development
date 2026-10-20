@@ -1,6 +1,4 @@
-/**
- * UniLib - Layout Wrapper Component
- */
+
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';

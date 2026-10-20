@@ -1,8 +1,5 @@
-/* ==========================================================================
-   UniLib Authentication & Profile Module Styles
-   ========================================================================== */
 
-/* Login View Layout */
+
 .unilib-auth-container {
   max-width: 28rem;
   margin: 2rem auto;
@@ -72,14 +69,14 @@
   color: var(--color-text-muted);
 }
 
-
 .unilib-role-badge {
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-sm);
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-card-subtle);
+  border: 1px solid var(--color-border);
   color: var(--color-text-muted);
 }
 
@@ -104,17 +101,10 @@
 
 .unilib-role-select-btn--active {
   border-color: var(--color-primary-600);
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-700);
+  background-color: var(--color-chip-bg);
+  color: var(--color-chip-text);
 }
 
-.dark .unilib-role-select-btn--active {
-  background-color: rgba(30, 41, 138, 0.4);
-  color: #93b1fd;
-  border-color: #3b82f6;
-}
-
-/* Profile View Layout */
 .unilib-profile-container {
   max-width: 56rem;
   margin: 0 auto;
@@ -145,9 +135,13 @@
   }
 }
 
-.unilib-profile-avatar {
+.unilib-profile-hero-avatar {
   width: 6rem;
   height: 6rem;
+  min-width: 6rem;
+  min-height: 6rem;
+  max-width: 6rem;
+  max-height: 6rem;
   border-radius: var(--radius-xl);
   object-fit: cover;
   border: 3px solid var(--color-bg-secondary);
@@ -199,13 +193,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background-color: var(--color-primary-100);
-  color: var(--color-primary-700);
-}
-
-.dark .unilib-profile-role-pill {
-  background-color: rgba(30, 41, 138, 0.4);
-  color: #93b1fd;
+  background-color: var(--color-chip-bg);
+  color: var(--color-chip-text);
+  border: 1px solid var(--color-chip-border);
 }
 
 .unilib-profile-meta-row {
@@ -306,3 +296,169 @@
   padding-top: 1rem;
   border-top: 1px solid var(--color-border-subtle);
 }
+
+.unilib-auth-container--wide {
+  max-width: 32rem;
+}
+
+.unilib-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unilib-auth-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  font-size: 0.825rem;
+}
+
+.unilib-auth-error-icon {
+  flex-shrink: 0;
+}
+
+.unilib-auth-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.unilib-auth-role-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.unilib-auth-role-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.unilib-auth-btn-full {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.unilib-auth-switch-link {
+  text-align: center;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.unilib-auth-link-highlight {
+  color: var(--color-primary-600);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.unilib-profile-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.unilib-profile-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.unilib-profile-id-mono {
+  font-family: var(--font-mono);
+}
+
+.unilib-profile-status-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.unilib-profile-status-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-text-main);
+}
+
+.unilib-profile-status-tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-primary-600);
+}
+
+.unilib-avatar-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--color-bg-card-subtle);
+  border-radius: var(--radius-md);
+}
+
+.unilib-avatar-preview-img {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+}
+
+.unilib-avatar-preview-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.unilib-avatar-preview-desc {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.unilib-modal-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.unilib-auth-guard-loading {
+  width: 100%;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unilib-auth-guard-content {
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.unilib-auth-guard-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary-600);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+.unilib-auth-guard-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+

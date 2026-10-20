@@ -1,6 +1,4 @@
-/* ==========================================================================
-   BookCard Component Styles
-   ========================================================================== */
+
 
 .unilib-book-card {
   position: relative;
@@ -9,9 +7,12 @@
   background-color: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+.unilib-book-card:has(.unilib-tracker-menu) {
+  z-index: 25;
 }
 
 .unilib-book-card:hover {
@@ -26,6 +27,8 @@
   aspect-ratio: 3 / 4;
   background-color: var(--color-bg-card-subtle);
   overflow: hidden;
+  border-top-left-radius: calc(var(--radius-lg) - 1px);
+  border-top-right-radius: calc(var(--radius-lg) - 1px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,7 +62,7 @@
   right: 0.75rem;
   padding: 0.5rem;
   border-radius: var(--radius-md);
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: var(--color-overlay-btn-bg);
   backdrop-filter: blur(4px);
   color: var(--color-text-muted);
   display: flex;
@@ -68,13 +71,9 @@
   transition: all var(--transition-fast);
 }
 
-.dark .unilib-book-card__wishlist-btn {
-  background-color: rgba(15, 23, 42, 0.85);
-}
-
 .unilib-book-card__wishlist-btn:hover {
   color: #ef4444;
-  background-color: #ffffff;
+  background-color: var(--color-overlay-btn-hover-bg);
 }
 
 .unilib-book-card__wishlist-btn--active {
@@ -170,9 +169,61 @@
 
 .unilib-book-card__footer {
   padding-top: 0.75rem;
+  margin-top: auto;
   border-top: 1px solid var(--color-border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.unilib-book-card__footer .unilib-tracker-dropdown {
+  flex: 1 1 7.5rem;
+  min-width: 0;
+}
+
+.unilib-book-card__footer .unilib-tracker-btn {
+  width: 100%;
+}
+
+.unilib-book-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1 1 auto;
+}
+
+.unilib-book-card__actions > button {
+  width: 100%;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.unilib-book-card .unilib-tracker-menu {
+  bottom: calc(100% + 0.35rem);
+  top: auto;
+  left: 0;
+  right: auto;
+}
+
+.unilib-book-card__cover-fallback-icon {
+  opacity: 0.6;
+  margin-bottom: 0.5rem;
+}
+
+.unilib-book-card__cover-fallback-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.unilib-book-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.unilib-book-card__meta-item--mono {
+  font-family: monospace;
 }

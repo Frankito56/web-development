@@ -1,7 +1,4 @@
-/**
- * UniLib - useLocalStorage Hook
- * Type-safe state synchronized with localStorage.
- */
+
 
 import { useState, useEffect } from 'react';
 import { StorageService } from '@/services/storageService';

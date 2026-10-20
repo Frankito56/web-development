@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Input Component Styles
-   ========================================================================== */
+
 
 .unilib-input-group {
   display: flex;
@@ -61,7 +59,7 @@
 .unilib-input:focus {
   outline: none;
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(37, 68, 235, 0.15);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .unilib-input--error {

@@ -2,7 +2,7 @@ import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { IHasher } from '../services/IHasher';
 import { ITokenService } from '../services/ITokenService';
 import { RegisterUserDTO, LoginDTO, AuthResponseDTO } from '../dtos';
-import { ConflictError, InvalidCredentialsError, NotFoundError } from '../../domain/errors/DomainErrors';
+import { ConflictError, InvalidCredentialsError, NotFoundError, ForbiddenError } from '../../domain/errors/DomainErrors';
 import { UserPublic } from '../../domain/entities/UserEntity';
 
 export class RegisterUserUseCase {
@@ -13,6 +13,10 @@ export class RegisterUserUseCase {
   ) {}
 
   async execute(dto: RegisterUserDTO): Promise<AuthResponseDTO> {
+    if (dto.role === 'LIBRARIAN') {
+      throw new ForbiddenError('Librarian accounts cannot be registered publicly.');
+    }
+
     const existingEmail = await this.userRepo.findByEmail(dto.email);
     if (existingEmail) {
       throw new ConflictError('An account with this email already exists.');

@@ -1,7 +1,4 @@
-/**
- * UniLib - ReadingTrackerPage Component
- * Reading progress tracker supporting Want to Read, Currently Reading, and Completed works.
- */
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -63,7 +60,7 @@ export const ReadingTrackerPage: React.FC = () => {
 
   if (!user) {
     return (
-      <div style={{ padding: '3rem 0', textAlign: 'center' }}>
+      <div className="unilib-tracker-empty-wrap">
         <EmptyState
           icon={<BookOpen size={32} />}
           title="Sign in to track reading goals"
@@ -86,7 +83,7 @@ export const ReadingTrackerPage: React.FC = () => {
 
   return (
     <div className="unilib-tracker-page-container animate-fade-in">
-      {/* Header */}
+      {}
       <div>
         <h1 className="unilib-tracker-title">Academic Reading Tracker</h1>
         <p className="unilib-tracker-subtitle">
@@ -94,17 +91,17 @@ export const ReadingTrackerPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Stats Summary */}
+      {}
       <div className="unilib-tracker-stats-grid">
         <button
           onClick={() => setActiveFilter('READING')}
           className={`unilib-tracker-stat-btn ${activeFilter === 'READING' ? 'unilib-tracker-stat-btn--active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#f59e0b', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Currently Reading</span>
+          <div className="unilib-tracker-stat-header unilib-tracker-stat-header--reading">
+            <span className="unilib-tracker-stat-label">Currently Reading</span>
             <BookOpen size={16} />
           </div>
-          <span style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'monospace' }}>
+          <span className="unilib-tracker-stat-value">
             {readingNow.length}
           </span>
         </button>
@@ -113,11 +110,11 @@ export const ReadingTrackerPage: React.FC = () => {
           onClick={() => setActiveFilter('WANT_TO_READ')}
           className={`unilib-tracker-stat-btn ${activeFilter === 'WANT_TO_READ' ? 'unilib-tracker-stat-btn--active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#6366f1', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Want to Read</span>
+          <div className="unilib-tracker-stat-header unilib-tracker-stat-header--want">
+            <span className="unilib-tracker-stat-label">Want to Read</span>
             <Bookmark size={16} />
           </div>
-          <span style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'monospace' }}>
+          <span className="unilib-tracker-stat-value">
             {wantToRead.length}
           </span>
         </button>
@@ -126,31 +123,23 @@ export const ReadingTrackerPage: React.FC = () => {
           onClick={() => setActiveFilter('COMPLETED')}
           className={`unilib-tracker-stat-btn ${activeFilter === 'COMPLETED' ? 'unilib-tracker-stat-btn--active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#10b981', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Completed Works</span>
+          <div className="unilib-tracker-stat-header unilib-tracker-stat-header--completed">
+            <span className="unilib-tracker-stat-label">Completed Works</span>
             <CheckCircle2 size={16} />
           </div>
-          <span style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'monospace' }}>
+          <span className="unilib-tracker-stat-value">
             {completed.length}
           </span>
         </button>
       </div>
 
-      {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+      {}
+      <div className="unilib-tracker-filter-bar">
         {(['ALL', 'READING', 'WANT_TO_READ', 'COMPLETED'] as const).map((filter) => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            style={{
-              padding: '0.4rem 0.85rem',
-              borderRadius: '8px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              backgroundColor: activeFilter === filter ? 'var(--color-primary-600)' : 'var(--color-bg-card-subtle)',
-              color: activeFilter === filter ? '#ffffff' : 'var(--color-text-main)',
-              transition: 'all 0.15s ease',
-            }}
+            className={`unilib-tracker-filter-btn ${activeFilter === filter ? 'unilib-tracker-filter-btn--active' : ''}`}
           >
             {filter === 'ALL'
               ? 'All Books'
@@ -163,7 +152,7 @@ export const ReadingTrackerPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Items List */}
+      {}
       {displayedItems.length === 0 ? (
         <EmptyState
           icon={<BookOpen size={32} />}
@@ -184,40 +173,28 @@ export const ReadingTrackerPage: React.FC = () => {
                     className="unilib-tracker-card__cover"
                   />
                 ) : (
-                  <div className="unilib-tracker-card__cover" style={{ backgroundColor: 'var(--color-bg-card-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="unilib-tracker-card__cover unilib-tracker-card__cover-placeholder">
                     <BookOpen size={24} color="var(--color-text-subtle)" />
                   </div>
                 )}
 
                 <div className="unilib-tracker-card__content">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div className="unilib-tracker-card__top-row">
                     <span
-                      style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        padding: '0.15rem 0.5rem',
-                        borderRadius: 'var(--radius-full)',
-                        backgroundColor:
-                          item.status === 'COMPLETED'
-                            ? 'var(--color-success-bg)'
-                            : item.status === 'READING'
-                            ? 'var(--color-warning-bg)'
-                            : 'rgba(99, 102, 241, 0.12)',
-                        color:
-                          item.status === 'COMPLETED'
-                            ? 'var(--color-success-text)'
-                            : item.status === 'READING'
-                            ? 'var(--color-warning-text)'
-                            : '#6366f1',
-                      }}
+                      className={`unilib-tracker-badge ${
+                        item.status === 'COMPLETED'
+                          ? 'unilib-tracker-badge--completed'
+                          : item.status === 'READING'
+                          ? 'unilib-tracker-badge--reading'
+                          : 'unilib-tracker-badge--want'
+                      }`}
                     >
                       {item.status.replace(/_/g, ' ')}
                     </span>
                     <button
                       onClick={() => handleRemove(item.bookId)}
                       aria-label="Remove from tracker"
-                      style={{ color: 'var(--color-text-subtle)', padding: '0.2rem', cursor: 'pointer' }}
+                      className="unilib-tracker-card__trash-btn"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -225,28 +202,28 @@ export const ReadingTrackerPage: React.FC = () => {
 
                   <Link
                     to={`/books/${item.bookId}`}
-                    style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-main)', marginTop: '0.25rem', display: 'block' }}
+                    className="unilib-tracker-card__title"
                   >
                     {item.bookTitle}
                   </Link>
 
-                  <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  <p className="unilib-tracker-card__author">
                     {item.bookAuthors.join(', ')}
                   </p>
 
                   {item.notes && (
-                    <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--color-text-muted)', backgroundColor: 'var(--color-bg-card-subtle)', padding: '0.5rem', borderRadius: '6px', marginTop: '0.25rem' }}>
+                    <p className="unilib-tracker-card__notes">
                       "{item.notes}"
                     </p>
                   )}
                 </div>
               </div>
 
-              {/* Progress Slider */}
+              {}
               <div className="unilib-tracker-card__slider-wrap">
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                  <span style={{ color: 'var(--color-text-muted)' }}>Progress</span>
-                  <strong style={{ color: 'var(--color-text-main)' }}>{item.progressPercentage}%</strong>
+                <div className="unilib-tracker-card__progress-info">
+                  <span className="unilib-tracker-card__progress-label">Progress</span>
+                  <strong className="unilib-tracker-card__progress-value">{item.progressPercentage}%</strong>
                 </div>
 
                 <input

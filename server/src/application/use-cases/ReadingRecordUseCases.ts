@@ -38,7 +38,7 @@ export class UpsertReadingRecordUseCase {
           coverUrl: remote.coverUrl,
           description: remote.description,
           subjects: remote.subjects,
-          totalCopies: 1,
+          totalCopies: 8,
           shelfLocation: 'Floor 1 - Main Desk',
         });
       }

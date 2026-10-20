@@ -1,6 +1,4 @@
-/**
- * UniLib - React Error Boundary
- */
+
 
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertCircle, RotateCcw } from 'lucide-react';

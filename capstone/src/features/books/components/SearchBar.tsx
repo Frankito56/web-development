@@ -1,7 +1,4 @@
-/**
- * UniLib - SearchBar Component
- * Search input with live debouncing and accessibility attributes
- */
+
 
 import React, { useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
@@ -24,7 +21,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Keyboard shortcut: pressing '/' focuses the search bar
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '/' && document.activeElement !== inputRef.current) {
@@ -38,7 +35,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   }, []);
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className="unilib-searchbar-wrapper">
       <div className="unilib-searchbar-container">
         <span className="unilib-searchbar__icon">
           <Search size={16} />

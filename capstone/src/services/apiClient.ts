@@ -41,8 +41,23 @@ export interface ApiLoan {
   dueDate: string;
   returnDate?: string;
   renewCount: number;
-  status: 'ACTIVE' | 'RETURNED' | 'OVERDUE';
+  status: 'PENDING_PICKUP' | 'ACTIVE' | 'DELIVERED' | 'RETURNED' | 'OVERDUE';
   notes?: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    studentOrEmployeeId?: string;
+    department?: string;
+  };
+  book?: {
+    id: string;
+    title: string;
+    authors: string | string[];
+    coverUrl?: string;
+    openLibraryKey?: string;
+  };
 }
 
 export interface ApiReservation {
@@ -52,6 +67,21 @@ export interface ApiReservation {
   reservedAt: string;
   status: 'WAITING' | 'READY_FOR_PICKUP' | 'FULFILLED' | 'CANCELLED';
   priorityOrder: number;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    studentOrEmployeeId?: string;
+    department?: string;
+  };
+  book?: {
+    id: string;
+    title: string;
+    authors: string | string[];
+    coverUrl?: string;
+    openLibraryKey?: string;
+  };
 }
 
 export interface ApiReadingRecord {
@@ -171,7 +201,7 @@ class ApiClient {
     getById: async (id: string): Promise<ApiBook> => {
       return this.request<ApiBook>(`/books/${id}`);
     },
-    import: async (openLibraryKey: string, totalCopies = 2): Promise<ApiBook> => {
+    import: async (openLibraryKey: string, totalCopies = 8): Promise<ApiBook> => {
       return this.request<ApiBook>('/books/import', {
         method: 'POST',
         body: JSON.stringify({ openLibraryKey, totalCopies }),
@@ -199,6 +229,24 @@ class ApiClient {
         method: 'PATCH',
       });
     },
+    getCirculationOverview: async (): Promise<{
+      loans: ApiLoan[];
+      reservations: ApiReservation[];
+      overdueLoans: ApiLoan[];
+    }> => {
+      return this.request<{ loans: ApiLoan[]; reservations: ApiReservation[]; overdueLoans: ApiLoan[] }>('/loans/circulation/overview');
+    },
+    getCirculation: async (params?: { status?: string; overdueOnly?: boolean }): Promise<ApiLoan[]> => {
+      const qs = params
+        ? '?' + new URLSearchParams(Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))).toString()
+        : '';
+      return this.request<ApiLoan[]>(`/loans/circulation${qs}`);
+    },
+    deliverLoan: async (loanId: string): Promise<ApiLoan> => {
+      return this.request<ApiLoan>(`/loans/${loanId}/deliver`, {
+        method: 'PATCH',
+      });
+    },
   };
 
   reservations = {
@@ -215,6 +263,12 @@ class ApiClient {
       return this.request<ApiReservation>(`/reservations/${id}`, {
         method: 'DELETE',
       });
+    },
+    getQueue: async (params?: { status?: string }): Promise<ApiReservation[]> => {
+      const qs = params
+        ? '?' + new URLSearchParams(Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))).toString()
+        : '';
+      return this.request<ApiReservation[]>(`/reservations/queue${qs}`);
     },
   };
 

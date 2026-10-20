@@ -1,12 +1,10 @@
-/**
- * UniLib - Open Library API Service
- * Fetches real-time academic catalog data with resilience, caching & fallback to local repository.
- */
+
 
 import { APP_CONFIG } from '@/config';
 import { Book } from '@/types';
 import { StorageService } from './storageService';
 import { sanitizeInput } from '@/utils/sanitizer';
+import { apiClient, ApiBook } from './apiClient';
 
 interface OpenLibraryDoc {
   key: string;
@@ -28,15 +26,33 @@ interface OpenLibrarySearchResponse {
   docs: OpenLibraryDoc[];
 }
 
+function findMatchingBackendBook(book: { id: string; title: string }, backendBooks: ApiBook[]): ApiBook | undefined {
+  const cleanId = book.id.replace(/^\/?works\//, '');
+  return backendBooks.find((bb) => {
+    const cleanKey = bb.openLibraryKey ? bb.openLibraryKey.replace(/^\/?works\//, '') : '';
+    return (
+      bb.id === book.id ||
+      (cleanKey && cleanKey === cleanId) ||
+      (bb.title && book.title && bb.title.toLowerCase().trim() === book.title.toLowerCase().trim())
+    );
+  });
+}
+
 export const OpenLibraryService = {
-  /**
-   * Fetches books based on query and/or subject filter
-   */
   async searchBooks(query: string = '', category: string = '', page: number = 1): Promise<{ books: Book[]; total: number }> {
     const cleanQuery = sanitizeInput(query);
     const localBooks = StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []);
 
-    // If query is empty and category is 'all' or empty, prioritize local catalog + popular academic books
+    let backendBooks: ApiBook[] = [];
+    try {
+      const backendRes = await apiClient.books.getAll({ limit: 100 });
+      if (backendRes && Array.isArray(backendRes.books)) {
+        backendBooks = backendRes.books;
+      }
+    } catch {
+      // Backend not reached or offline; fall back gracefully
+    }
+
     let searchQuery = cleanQuery;
     if (!searchQuery && category && category !== 'all') {
       searchQuery = category;
@@ -54,7 +70,7 @@ export const OpenLibraryService = {
       url.searchParams.set('fields', 'key,title,author_name,cover_i,first_publish_year,subject,isbn,ratings_average,ratings_count,number_of_pages_median,publisher');
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s network timeout
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
       const response = await fetch(url.toString(), {
         signal: controller.signal,
@@ -69,21 +85,17 @@ export const OpenLibraryService = {
       }
 
       const data: OpenLibrarySearchResponse = await response.json();
-      
+
       const mappedBooks: Book[] = data.docs.map((doc) => {
         const id = doc.key ? doc.key.replace('/works/', '') : `ol-${Math.random().toString(36).substring(2, 9)}`;
-        
-        // Check if book exists in local storage for persisted loan state
+
         const existing = localBooks.find((b) => b.id === id);
-        if (existing) {
-          return existing;
-        }
 
         const coverUrl = doc.cover_i
           ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
           : undefined;
 
-        const newBook: Book = {
+        const newBook: Book = existing ? { ...existing } : {
           id,
           title: doc.title || 'Untitled Academic Work',
           authors: doc.author_name || ['Unknown Author'],
@@ -97,18 +109,72 @@ export const OpenLibraryService = {
           averageRating: doc.ratings_average ? Number(doc.ratings_average.toFixed(1)) : 4.5,
           ratingsCount: doc.ratings_count || 120,
           availabilityStatus: 'AVAILABLE',
-          totalCopies: 3,
-          availableCopies: 3,
+          totalCopies: 8,
+          availableCopies: 8,
           locationShelf: `LIB-${String(id).slice(-3).toUpperCase()}`,
         };
+
+        const backendMatch = findMatchingBackendBook(newBook, backendBooks);
+        if (backendMatch) {
+          newBook.totalCopies = backendMatch.totalCopies;
+          newBook.availableCopies = backendMatch.availableCopies;
+          newBook.availabilityStatus = backendMatch.availableCopies > 0 ? 'AVAILABLE' : 'ON_LOAN';
+          if (backendMatch.shelfLocation) {
+            newBook.locationShelf = backendMatch.shelfLocation;
+          }
+        }
 
         return newBook;
       });
 
-      // Merge and save any newly discovered books to local database
+      if (page === 1 && backendBooks.length > 0) {
+        backendBooks.forEach((bb) => {
+          const cleanKey = bb.openLibraryKey ? bb.openLibraryKey.replace(/^\/?works\//, '') : '';
+          const alreadyExists = mappedBooks.some((mb) => {
+            const cleanMbId = mb.id.replace(/^\/?works\//, '');
+            return (
+              mb.id === bb.id ||
+              (cleanKey && cleanMbId === cleanKey) ||
+              mb.title.toLowerCase().trim() === bb.title.toLowerCase().trim()
+            );
+          });
+
+          if (!alreadyExists) {
+            const lowerQuery = cleanQuery.toLowerCase();
+            const matchesQuery = !cleanQuery ||
+              bb.title.toLowerCase().includes(lowerQuery) ||
+              bb.authors.some((a) => a.toLowerCase().includes(lowerQuery)) ||
+              bb.subjects.some((s) => s.toLowerCase().includes(lowerQuery));
+
+            const matchesCategory = !category || category === 'all' ||
+              bb.subjects.some((s) => s.toLowerCase().includes(category.toLowerCase()));
+
+            if (matchesQuery && matchesCategory) {
+              mappedBooks.unshift({
+                id: cleanKey || bb.id,
+                title: bb.title,
+                authors: bb.authors,
+                coverUrl: bb.coverUrl,
+                firstPublishYear: bb.publishYear,
+                subjects: bb.subjects,
+                description: bb.description || 'Academic catalog resource.',
+                isbn: bb.isbn,
+                availabilityStatus: bb.availableCopies > 0 ? 'AVAILABLE' : 'ON_LOAN',
+                totalCopies: bb.totalCopies,
+                availableCopies: bb.availableCopies,
+                locationShelf: bb.shelfLocation,
+              });
+            }
+          }
+        });
+      }
+
       const mergedLocal = [...localBooks];
       mappedBooks.forEach((mb) => {
-        if (!mergedLocal.some((lb) => lb.id === mb.id)) {
+        const idx = mergedLocal.findIndex((lb) => lb.id === mb.id);
+        if (idx >= 0) {
+          mergedLocal[idx] = mb;
+        } else {
           mergedLocal.push(mb);
         }
       });
@@ -116,12 +182,11 @@ export const OpenLibraryService = {
 
       return {
         books: mappedBooks,
-        total: Math.min(data.numFound, 120), // cap to reasonable academic pagination range
+        total: Math.max(data.numFound, mappedBooks.length),
       };
     } catch (error) {
       console.warn('Network fetch from Open Library failed or timed out. Falling back to local catalog:', error);
-      
-      // Filter local books in offline/fallback mode
+
       let filtered = [...localBooks];
       if (cleanQuery) {
         const lowerQ = cleanQuery.toLowerCase();
@@ -146,10 +211,35 @@ export const OpenLibraryService = {
     }
   },
 
-  /**
-   * Fetches specific book details by ID
-   */
   async getBookById(id: string): Promise<Book | null> {
+    try {
+      const backendBook = await apiClient.books.getById(id);
+      if (backendBook) {
+        const cleanKey = backendBook.openLibraryKey ? backendBook.openLibraryKey.replace(/^\/?works\//, '') : '';
+        const mapped: Book = {
+          id: cleanKey || backendBook.id,
+          title: backendBook.title,
+          authors: backendBook.authors,
+          coverUrl: backendBook.coverUrl,
+          firstPublishYear: backendBook.publishYear,
+          subjects: backendBook.subjects,
+          description: backendBook.description || 'Academic title available in university library catalog.',
+          isbn: backendBook.isbn,
+          availabilityStatus: backendBook.availableCopies > 0 ? 'AVAILABLE' : 'ON_LOAN',
+          totalCopies: backendBook.totalCopies,
+          availableCopies: backendBook.availableCopies,
+          locationShelf: backendBook.shelfLocation || `LIB-${String(id).slice(-4).toUpperCase()}`,
+        };
+
+        const localBooks = StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []);
+        const filtered = localBooks.filter((b) => b.id !== mapped.id && b.id !== id && b.id !== backendBook.id);
+        StorageService.setItem(StorageService.KEYS.BOOKS, [...filtered, mapped]);
+        return mapped;
+      }
+    } catch {
+      // If not in backend or offline, check local storage or Open Library
+    }
+
     const localBooks = StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []);
     const existing = localBooks.find((b) => b.id === id);
     if (existing) {
@@ -182,8 +272,8 @@ export const OpenLibraryService = {
         subjects: Array.isArray(data.subjects) ? data.subjects.slice(0, 6) : ['Academics'],
         description,
         availabilityStatus: 'AVAILABLE',
-        totalCopies: 3,
-        availableCopies: 3,
+        totalCopies: 8,
+        availableCopies: 8,
         locationShelf: `LIB-${id.slice(-4).toUpperCase()}`,
       };
 

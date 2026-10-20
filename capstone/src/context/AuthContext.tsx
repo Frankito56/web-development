@@ -26,8 +26,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(() => {
+    const token = apiClient.getToken();
+    if (!token) return null;
+    try {
+      const saved = localStorage.getItem('unilib_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    const token = apiClient.getToken();
+    const saved = localStorage.getItem('unilib_user');
+    return !!token && !saved;
+  });
+
+  const persistUser = (userData: User | null) => {
+    setUser(userData);
+    if (userData) {
+      localStorage.setItem('unilib_user', JSON.stringify(userData));
+    } else {
+      localStorage.removeItem('unilib_user');
+    }
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -39,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         const profile = await apiClient.auth.getProfile();
-        setUser({
+        persistUser({
           id: profile.id,
           name: profile.name,
           email: profile.email,
@@ -52,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       } catch {
         apiClient.auth.logout();
-        setUser(null);
+        persistUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -64,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const res = await apiClient.auth.login(email, password);
-      setUser({
+      persistUser({
         id: res.user.id,
         name: res.user.name,
         email: res.user.email,
@@ -84,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: RegisterData): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await apiClient.auth.register(userData);
-      setUser({
+      persistUser({
         id: res.user.id,
         name: res.user.name,
         email: res.user.email,
@@ -104,16 +127,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (data: { name?: string; department?: string; avatarUrl?: string }): Promise<boolean> => {
     try {
       const updated = await apiClient.auth.updateProfile(data);
-      setUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              name: updated.name,
-              department: updated.department,
-              avatarUrl: updated.avatarUrl || '/placeholder-avatar.svg',
-            }
-          : null
-      );
+      const updatedUser: User | null = user
+        ? {
+            ...user,
+            name: updated.name,
+            department: updated.department,
+            avatarUrl: updated.avatarUrl || '/placeholder-avatar.svg',
+          }
+        : null;
+      persistUser(updatedUser);
       return true;
     } catch {
       return false;
@@ -122,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     apiClient.auth.logout();
-    setUser(null);
+    persistUser(null);
   };
 
   return (

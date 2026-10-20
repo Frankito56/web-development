@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Badge Component Styles
-   ========================================================================== */
+
 
 .unilib-badge {
   display: inline-flex;
@@ -22,7 +20,6 @@
   flex-shrink: 0;
 }
 
-/* Variants */
 .unilib-badge--available,
 .unilib-badge--safe,
 .unilib-badge--success {
@@ -48,15 +45,12 @@
 }
 
 .unilib-badge--reserved {
-  background-color: rgba(99, 102, 241, 0.12);
-  color: #4f46e5;
-  border-color: rgba(99, 102, 241, 0.3);
-}
-.dark .unilib-badge--reserved {
-  color: #a5b4fc;
+  background-color: var(--color-reserved-bg);
+  color: var(--color-reserved-text);
+  border-color: var(--color-reserved-border);
 }
 .unilib-badge--reserved .unilib-badge__dot {
-  background-color: #6366f1;
+  background-color: var(--color-reserved-dot);
 }
 
 .unilib-badge--danger {

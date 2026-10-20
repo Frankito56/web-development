@@ -1,6 +1,4 @@
-/**
- * UniLib - Accessible Input Component
- */
+
 
 import React from 'react';
 import './Input.css';

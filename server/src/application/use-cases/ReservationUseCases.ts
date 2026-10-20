@@ -47,7 +47,7 @@ export class CreateReservationUseCase {
           coverUrl: remote.coverUrl,
           description: remote.description,
           subjects: remote.subjects,
-          totalCopies: 1,
+          totalCopies: 8,
           shelfLocation: 'Floor 1 - Main Desk',
         });
       }
@@ -69,11 +69,13 @@ export class CreateReservationUseCase {
 
     const queueLength = await this.reservationRepo.countActiveByBookId(book.id);
 
-    return this.reservationRepo.create({
+    const created = await this.reservationRepo.create({
       bookId: book.id,
       userId,
       priorityOrder: queueLength + 1,
     });
+    created.book = book;
+    return created;
   }
 }
 
@@ -121,3 +123,12 @@ export class FulfillReservationUseCase {
     return loan;
   }
 }
+
+export class GetReservationQueueUseCase {
+  constructor(private readonly reservationRepo: IReservationRepository) {}
+
+  async execute(filters?: { bookId?: string; status?: string }): Promise<ReservationEntity[]> {
+    return this.reservationRepo.findAllQueue(filters);
+  }
+}
+

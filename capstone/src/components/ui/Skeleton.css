@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Skeleton Loading Component Styles
-   ========================================================================== */
+
 
 .unilib-skeleton {
   background-color: var(--color-border);
@@ -54,3 +52,50 @@
   flex-direction: column;
   gap: 0.75rem;
 }
+
+.unilib-book-skeleton__chip-sm {
+  width: 4.5rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+}
+
+.unilib-book-skeleton__chip-md {
+  width: 5rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+}
+
+.unilib-book-skeleton__title {
+  width: 80%;
+  height: 1.25rem;
+  margin-top: 0.25rem;
+}
+
+.unilib-book-skeleton__subtitle {
+  width: 55%;
+  height: 0.9rem;
+}
+
+.unilib-book-skeleton__footer-stat {
+  width: 5rem;
+  height: 1rem;
+}
+
+.unilib-book-skeleton__footer-btn {
+  width: 4.5rem;
+  height: 2rem;
+  border-radius: 8px;
+}
+
+.unilib-table-skeleton__header {
+  width: 100%;
+  height: 2.5rem;
+  border-radius: 8px;
+}
+
+.unilib-table-skeleton__row {
+  width: 100%;
+  height: 4rem;
+  border-radius: 8px;
+}
+

@@ -13,6 +13,10 @@ export function createReservationRoutes(
 
   router.use(authMiddleware);
 
+  // Librarian queue route
+  router.get('/queue', requireRole('LIBRARIAN') as any, asyncHandler(controller.getQueue as any));
+
+  // Patron routes
   router.get('/my', asyncHandler(controller.getMyReservations as any));
 
   router.post(

@@ -1,12 +1,10 @@
-/* ==========================================================================
-   Toast Notification Styles
-   ========================================================================== */
+
 
 .unilib-toast-container {
   position: fixed;
   bottom: 1.25rem;
   right: 1.25rem;
-  z-index: 60;
+  z-index: 1100;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -54,6 +52,10 @@
 .unilib-toast--INFO {
   border-color: var(--color-info-border);
   background-color: var(--color-bg-card);
+}
+
+.unilib-toast__icon {
+  flex-shrink: 0;
 }
 
 .unilib-toast__body {

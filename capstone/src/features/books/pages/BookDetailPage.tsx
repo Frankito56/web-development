@@ -1,7 +1,4 @@
-/**
- * UniLib - BookDetailPage Component
- * Detailed view for an individual book with metadata, availability status, reading tracker, and loan actions.
- */
+
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -44,30 +41,45 @@ export const BookDetailPage: React.FC = () => {
     if (!id) return;
     setIsLoading(true);
 
+    if (user?.id) {
+      WishlistService.fetchUserWishlist(user.id).catch(() => {});
+      LoanService.fetchUserReservations(user.id).catch(() => {});
+    }
+
     OpenLibraryService.getBookById(id)
       .then((data) => {
         setBook(data);
         if (data && user) {
-          setInWishlist(WishlistService.isInWishlist(user.id, data.id));
+          setInWishlist(WishlistService.isInWishlist(user.id, data.id, data.title));
         }
       })
       .finally(() => setIsLoading(false));
   }, [id, user]);
 
-  // Sync with storage for instant availability updates
+  const [, setStorageTick] = useState(0);
+
   useEffect(() => {
     const handleStorageChange = () => {
+      setStorageTick((t) => t + 1);
       if (!id) return;
+      const cleanId = id.replace(/^\/?works\//, '');
       const localBooks = StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []);
-      const matched = localBooks.find((b) => b.id === id);
+      const matched = localBooks.find((b) => {
+        const cleanBId = b.id.replace(/^\/?works\//, '');
+        return b.id === id || cleanBId === cleanId;
+      });
       if (matched) {
         setBook(matched);
+      }
+      const targetBook = matched || book;
+      if (targetBook && user) {
+        setInWishlist(WishlistService.isInWishlist(user.id, targetBook.id, targetBook.title));
       }
     };
 
     const unsubscribe = StorageService.subscribe(handleStorageChange);
     return () => unsubscribe();
-  }, [id]);
+  }, [id, book, user]);
 
   const handleToggleWishlist = () => {
     if (!user || !book) {
@@ -76,7 +88,7 @@ export const BookDetailPage: React.FC = () => {
     }
 
     if (inWishlist) {
-      WishlistService.removeFromWishlist(user.id, book.id);
+      WishlistService.removeFromWishlist(user.id, book.id, book.title);
       setInWishlist(false);
       showToast('Wishlist', `Removed "${book.title}" from wishlist.`, 'INFO');
     } else {
@@ -119,13 +131,13 @@ export const BookDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="unilib-detail-container">
-        <Skeleton style={{ width: '8rem', height: '1.5rem' }} />
+        <Skeleton className="unilib-detail-skeleton-back" />
         <div className="unilib-detail-layout">
-          <Skeleton style={{ height: '24rem', borderRadius: '16px' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <Skeleton style={{ width: '75%', height: '2.5rem' }} />
-            <Skeleton style={{ width: '50%', height: '1.5rem' }} />
-            <Skeleton style={{ width: '100%', height: '8rem' }} />
+          <Skeleton className="unilib-detail-skeleton-cover" />
+          <div className="unilib-detail-skeleton-content">
+            <Skeleton className="unilib-detail-skeleton-title" />
+            <Skeleton className="unilib-detail-skeleton-subtitle" />
+            <Skeleton className="unilib-detail-skeleton-desc" />
           </div>
         </div>
       </div>
@@ -134,9 +146,9 @@ export const BookDetailPage: React.FC = () => {
 
   if (!book) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-        <BookOpen size={48} color="var(--color-text-subtle)" style={{ margin: '0 auto 1rem auto' }} />
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>
+      <div className="unilib-detail-notfound">
+        <BookOpen size={48} color="var(--color-text-subtle)" className="unilib-detail-notfound-icon" />
+        <h2 className="unilib-detail-notfound-title">
           Book record not found in university catalog
         </h2>
         <Button variant="outline" size="sm" onClick={() => navigate('/books')}>
@@ -150,10 +162,12 @@ export const BookDetailPage: React.FC = () => {
   const isOnLoan = book.availabilityStatus === 'ON_LOAN' || book.availableCopies === 0;
   const loanDays = user ? ROLE_LIMITS[user.role]?.maxLoanDays || 14 : 14;
   const dueDate = calculateDueDate(new Date(), loanDays);
+  const alreadyBorrowed = user ? LoanService.isBookBorrowedByUser(user.id, book.id) : false;
+  const alreadyReserved = user ? LoanService.isBookReservedByUser(user.id, book.id, book.title) : false;
 
   return (
     <div className="unilib-detail-container animate-fade-in">
-      {/* Breadcrumb back navigation */}
+      {/* Breadcrumbs Navigation */}
       <nav aria-label="Breadcrumb">
         <Link to="/books" className="unilib-back-link">
           <ArrowLeft size={16} />
@@ -161,9 +175,9 @@ export const BookDetailPage: React.FC = () => {
         </Link>
       </nav>
 
-      {/* Main Book Detail Layout */}
+      {/* Main Grid */}
       <div className="unilib-detail-layout">
-        {/* Cover Column */}
+        {/* Left Column: Visual Asset & Actions */}
         <div className="unilib-detail-left">
           <div className="unilib-detail-cover-card">
             {book.coverUrl ? (
@@ -173,15 +187,21 @@ export const BookDetailPage: React.FC = () => {
                 className="unilib-detail-cover-img"
               />
             ) : (
-              <div style={{ textAlign: 'center', color: 'var(--color-text-subtle)', padding: '2rem' }}>
-                <BookOpen size={64} style={{ opacity: 0.6, marginBottom: '0.5rem' }} />
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>{book.title}</div>
+              <div className="unilib-detail-cover-fallback">
+                <BookOpen size={64} className="unilib-detail-cover-fallback-icon" />
+                <div className="unilib-detail-cover-fallback-title">{book.title}</div>
               </div>
             )}
 
-            {/* Availability Floating Badge */}
-            <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
-              {isAvailable ? (
+            {/* Availability Badge */}
+            <div className="unilib-detail-badge-pos">
+              {alreadyReserved ? (
+                <Badge variant="reserved">Reserved by You</Badge>
+              ) : alreadyBorrowed ? (
+                <Badge variant="on_loan">Checked Out by You</Badge>
+              ) : book.availabilityStatus === 'RESERVED' ? (
+                <Badge variant="reserved">Reserved for Queue</Badge>
+              ) : isAvailable ? (
                 <Badge variant="available">Available ({book.availableCopies} in stock)</Badge>
               ) : isOnLoan ? (
                 <Badge variant="on_loan">All Copies On Loan</Badge>
@@ -191,20 +211,20 @@ export const BookDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Actions Card */}
+          {}
           <div className="unilib-detail-quick-actions">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Reading Status</span>
+            <div className="unilib-detail-qa-row">
+              <span className="unilib-detail-qa-label">Reading Status</span>
               <ReadingTrackerDropdown book={book} />
             </div>
 
-            <div style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--color-border-subtle)' }}>
+            <div className="unilib-detail-qa-wishlist-wrap">
               <Button
                 variant={inWishlist ? 'danger' : 'outline'}
                 size="sm"
                 leftIcon={<Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />}
                 onClick={handleToggleWishlist}
-                style={{ width: '100%' }}
+                className="unilib-detail-wishlist-btn"
               >
                 {inWishlist ? 'Saved in Wishlist' : 'Add to Wishlist'}
               </Button>
@@ -212,7 +232,7 @@ export const BookDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Info Column */}
+        {}
         <div className="unilib-detail-right">
           <div>
             <div className="unilib-subjects-list">
@@ -225,16 +245,16 @@ export const BookDetailPage: React.FC = () => {
 
             <h1 className="unilib-detail-title">{book.title}</h1>
 
-            <p className="unilib-detail-authors" style={{ marginTop: '0.5rem' }}>
+            <p className="unilib-detail-authors unilib-detail-authors--spaced">
               By <strong>{book.authors.join(', ')}</strong>
             </p>
           </div>
 
-          {/* Rating & Availability Card */}
+          {}
           <div className="unilib-meta-cards-row">
             <div>
               <span className="unilib-meta-card-label">Campus Shelf</span>
-              <span className="unilib-meta-card-value" style={{ fontFamily: 'monospace' }}>
+              <span className="unilib-meta-card-value unilib-meta-card-value--mono">
                 {book.locationShelf || 'Circulation Desk'}
               </span>
             </div>
@@ -246,16 +266,16 @@ export const BookDetailPage: React.FC = () => {
             </div>
             <div>
               <span className="unilib-meta-card-label">Rating Score</span>
-              <span className="unilib-meta-card-value" style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <span className="unilib-meta-card-value unilib-meta-card-value--rating">
                 <Star size={14} fill="currentColor" />
                 {book.averageRating || '4.5'} / 5.0
               </span>
             </div>
           </div>
 
-          {/* Description */}
+          {}
           <div>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+            <h3 className="unilib-detail-section-title">
               Overview & Abstract
             </h3>
             <p className="unilib-overview-text">
@@ -263,7 +283,7 @@ export const BookDetailPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Publishing Metadata Details */}
+          {}
           <div className="unilib-bibliographic-grid">
             <div>
               <span className="unilib-meta-card-label">Publisher</span>
@@ -271,7 +291,7 @@ export const BookDetailPage: React.FC = () => {
             </div>
             <div>
               <span className="unilib-meta-card-label">ISBN</span>
-              <span style={{ fontFamily: 'monospace' }}>{book.isbn || 'N/A'}</span>
+              <span className="unilib-detail-isbn">{book.isbn || 'N/A'}</span>
             </div>
             <div>
               <span className="unilib-meta-card-label">Length</span>
@@ -279,31 +299,55 @@ export const BookDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Primary Action Button */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', paddingTop: '1rem' }}>
-            {isAvailable ? (
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => setIsBorrowModalOpen(true)}
-              >
-                Borrow Book Now ({loanDays} Days)
-              </Button>
+          {}
+          <div className="unilib-detail-actions-row">
+            {alreadyBorrowed ? (
+              <>
+                <Button variant="outline" size="lg" disabled>
+                  Already Checked Out ✓
+                </Button>
+                <p className="unilib-detail-action-note">
+                  You currently have this book. Manage it in{' '}
+                  <a href="/my-loans" className="unilib-detail-action-link">My Loans</a>.
+                </p>
+              </>
+            ) : alreadyReserved ? (
+              <>
+                <Button variant="outline" size="lg" disabled>
+                  Reservation Pending ✓
+                </Button>
+                <p className="unilib-detail-action-note">
+                  You're in the queue for this book. Track it in{' '}
+                  <a href="/my-loans" className="unilib-detail-action-link">My Loans</a>.
+                </p>
+              </>
+            ) : isAvailable ? (
+              <>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => setIsBorrowModalOpen(true)}
+                >
+                  Borrow Book Now ({loanDays} Days)
+                </Button>
+                <p className="unilib-detail-action-note">
+                  {`Free checkout for enrolled patrons. Due on ${formatDate(dueDate)}.`}
+                </p>
+              </>
             ) : (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setIsReserveModalOpen(true)}
-              >
-                Reserve Next Available Copy
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setIsReserveModalOpen(true)}
+                >
+                  Reserve Next Available Copy
+                </Button>
+                <p className="unilib-detail-action-note">
+                  All copies checked out. Reservation queue notifies you immediately upon return.
+                </p>
+              </>
             )}
-
-            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', margin: 0 }}>
-              {isAvailable
-                ? `Free checkout for enrolled patrons. Due on ${formatDate(dueDate)}.`
-                : 'All copies checked out. Reservation queue notifies you immediately upon return.'}
-            </p>
           </div>
         </div>
       </div>
@@ -315,23 +359,23 @@ export const BookDetailPage: React.FC = () => {
         title="Confirm Book Checkout"
         description="Verify borrowing details for this academic title."
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.8rem' }}>
-          <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-bg-card-subtle)', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Title:</span>
+        <div className="unilib-detail-modal-body">
+          <div className="unilib-detail-modal-box">
+            <div className="unilib-detail-modal-row">
+              <span className="unilib-detail-modal-row-label">Title:</span>
               <strong>{book.title}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Duration:</span>
+            <div className="unilib-detail-modal-row">
+              <span className="unilib-detail-modal-row-label">Duration:</span>
               <strong>{loanDays} Days</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>Scheduled Due Date:</span>
-              <strong style={{ color: 'var(--color-primary-600)' }}>{formatDate(dueDate)}</strong>
+            <div className="unilib-detail-modal-row">
+              <span className="unilib-detail-modal-row-label">Scheduled Due Date:</span>
+              <strong className="unilib-detail-modal-due">{formatDate(dueDate)}</strong>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
+          <div className="unilib-detail-modal-footer">
             <Button variant="ghost" size="sm" onClick={() => setIsBorrowModalOpen(false)}>
               Cancel
             </Button>
@@ -349,12 +393,12 @@ export const BookDetailPage: React.FC = () => {
         title="Place Reservation Queue"
         description="Queue for the next physical copy returned."
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', lineHeight: 1.5, margin: 0 }}>
+        <div className="unilib-detail-skeleton-content">
+          <p className="unilib-detail-reserve-note">
             When another patron returns "{book.title}", the library circulation desk will hold the copy under your name for 3 days.
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
+          <div className="unilib-detail-modal-footer">
             <Button variant="ghost" size="sm" onClick={() => setIsReserveModalOpen(false)}>
               Cancel
             </Button>

@@ -172,12 +172,12 @@ BookModel.init(
     totalCopies: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1,
+      defaultValue: 8,
     },
     availableCopies: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1,
+      defaultValue: 8,
     },
     shelfLocation: {
       type: DataTypes.STRING,

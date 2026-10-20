@@ -1,16 +1,11 @@
-/**
- * UniLib - Application Root & Routing Configuration
- * Configures React Router v6 with code-splitting via React.lazy() and <Suspense>
- */
-
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LayoutWrapper } from '@/components/layout/LayoutWrapper';
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary';
 import { AuthGuard } from '@/features/auth/components/AuthGuard';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useAuth } from '@/context/AuthContext';
 
-// Code Splitting with React.lazy
 const BookCatalogPage = lazy(() =>
   import('@/features/books/pages/BookCatalogPage').then((m) => ({ default: m.BookCatalogPage }))
 );
@@ -37,21 +32,33 @@ const RegisterPage = lazy(() =>
 const ProfilePage = lazy(() =>
   import('@/features/auth/pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
+const CirculationPage = lazy(() =>
+  import('@/features/librarian/pages/CirculationPage').then((m) => ({ default: m.CirculationPage }))
+);
 
 const PageLoadingFallback: React.FC = () => (
-  <div style={{ width: '100%', padding: '4rem 0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Skeleton style={{ width: '12rem', height: '2rem', borderRadius: 'var(--radius-md)' }} />
-      <Skeleton style={{ width: '6rem', height: '2rem', borderRadius: 'var(--radius-md)' }} />
+  <div className="unilib-page-fallback">
+    <div className="unilib-page-fallback__header">
+      <Skeleton className="unilib-page-fallback__title" />
+      <Skeleton className="unilib-page-fallback__action" />
     </div>
-    <Skeleton style={{ width: '100%', height: '8rem', borderRadius: 'var(--radius-lg)' }} />
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
+    <Skeleton className="unilib-page-fallback__banner" />
+    <div className="unilib-page-fallback__grid">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} style={{ height: '16rem', borderRadius: 'var(--radius-lg)' }} />
+        <Skeleton key={i} className="unilib-page-fallback__card" />
       ))}
     </div>
   </div>
 );
+
+/** Redirects librarians away from student-only routes */
+const LibrarianRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  if (user?.role === 'LIBRARIAN') {
+    return <Navigate to="/circulation" replace />;
+  }
+  return <>{children}</>;
+};
 
 export const App: React.FC = () => {
   return (
@@ -64,12 +71,14 @@ export const App: React.FC = () => {
               <Route path="books" element={<BookCatalogPage />} />
               <Route path="books/:id" element={<BookDetailPage />} />
 
-              {/* Protected Routes */}
+              {/* Student / Professor routes — librarians are redirected away */}
               <Route
                 path="my-loans"
                 element={
                   <AuthGuard>
-                    <MyLoansPage />
+                    <LibrarianRedirect>
+                      <MyLoansPage />
+                    </LibrarianRedirect>
                   </AuthGuard>
                 }
               />
@@ -77,7 +86,9 @@ export const App: React.FC = () => {
                 path="reading-tracker"
                 element={
                   <AuthGuard>
-                    <ReadingTrackerPage />
+                    <LibrarianRedirect>
+                      <ReadingTrackerPage />
+                    </LibrarianRedirect>
                   </AuthGuard>
                 }
               />
@@ -85,7 +96,9 @@ export const App: React.FC = () => {
                 path="wishlist"
                 element={
                   <AuthGuard>
-                    <WishlistPage />
+                    <LibrarianRedirect>
+                      <WishlistPage />
+                    </LibrarianRedirect>
                   </AuthGuard>
                 }
               />
@@ -98,7 +111,17 @@ export const App: React.FC = () => {
                 }
               />
 
-              {/* Auth Routes */}
+              {/* Librarian-only route */}
+              <Route
+                path="circulation"
+                element={
+                  <AuthGuard requiredRole="LIBRARIAN">
+                    <CirculationPage />
+                  </AuthGuard>
+                }
+              />
+
+              {/* Auth */}
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
 

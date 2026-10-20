@@ -1,6 +1,8 @@
-/* ==========================================================================
-   SearchBar Component Styles
-   ========================================================================== */
+
+
+.unilib-searchbar-wrapper {
+  width: 100%;
+}
 
 .unilib-searchbar-container {
   width: 100%;
@@ -33,7 +35,7 @@
 .unilib-searchbar__input:focus {
   outline: none;
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(37, 68, 235, 0.15);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .unilib-searchbar__input::placeholder {

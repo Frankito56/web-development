@@ -1,7 +1,4 @@
-/**
- * UniLib - ReservationsList Component
- * Displays books queued for reservation, queue position, pickup deadline, and cancel option.
- */
+
 
 import React, { useState } from 'react';
 import { Reservation } from '@/types';
@@ -39,11 +36,9 @@ export const ReservationsList: React.FC<{
         return (
           <article
             key={res.id}
-            className="unilib-loan-card"
-            style={{
-              backgroundColor: isReady ? 'var(--color-warning-bg)' : undefined,
-              borderColor: isReady ? 'var(--color-warning-border)' : undefined,
-            }}
+            className={`unilib-loan-card unilib-reservation-card ${
+              isReady ? 'unilib-reservation-card--ready' : ''
+            }`}
           >
             <div className="unilib-loan-card__main">
               {res.bookCoverUrl ? (
@@ -53,7 +48,7 @@ export const ReservationsList: React.FC<{
                   className="unilib-loan-card__cover"
                 />
               ) : (
-                <div className="unilib-loan-card__cover" style={{ backgroundColor: 'var(--color-bg-card-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="unilib-loan-card__cover unilib-loan-card__cover-placeholder">
                   <BookOpen size={24} color="var(--color-text-subtle)" />
                 </div>
               )}
@@ -70,30 +65,39 @@ export const ReservationsList: React.FC<{
                 </p>
 
                 {isReady ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-warning-text)', paddingTop: '0.35rem' }}>
+                  <div className="unilib-reservation-ready-msg">
                     <AlertCircle size={14} color="var(--color-warning)" />
                     <span>Ready for pickup! Desk deadline: {formatDate(res.pickupDeadline || '')}</span>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', paddingTop: '0.35rem' }}>
+                  <div className="unilib-reservation-queue-msg">
                     <Clock size={14} />
-                    <span>Queue Position: <strong style={{ color: 'var(--color-primary-600)' }}>#{res.queuePosition}</strong> in line</span>
+                    <span>Queue Position: <strong className="unilib-reservation-queue-num">#{res.queuePosition}</strong> in line</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <div className="unilib-reservation-actions-col">
+              {}
+              <span
+                className={`unilib-history-status-pill ${
+                  isReady ? 'unilib-history-status-pill--active' : 'unilib-history-status-pill--active'
+                }`}
+              >
+                {isReady ? '🔔 Ready for Pickup' : '⏳ Reserved'}
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
                 isLoading={cancellingId === res.id}
                 onClick={() => handleCancel(res)}
-                style={{ color: 'var(--color-danger)' }}
+                className="unilib-reservation-cancel-btn"
               >
                 Cancel Queue
               </Button>
             </div>
+
           </article>
         );
       })}

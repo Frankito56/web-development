@@ -1,25 +1,27 @@
-/* ==========================================================================
-   ReadingTrackerDropdown Component Styles
-   ========================================================================== */
+
 
 .unilib-tracker-dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
   text-align: left;
 }
 
 .unilib-tracker-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.65rem;
+  padding: 0.4rem 0.65rem;
   border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
   border: 1px solid var(--color-border);
   background-color: var(--color-bg-card);
   color: var(--color-text-main);
+  cursor: pointer;
   transition: all var(--transition-fast);
+  box-sizing: border-box;
 }
 
 .unilib-tracker-btn:hover {
@@ -29,14 +31,14 @@
 .unilib-tracker-menu {
   position: absolute;
   right: 0;
-  margin-top: 0.25rem;
-  width: 12rem;
+  top: calc(100% + 0.35rem);
+  width: 12.5rem;
   border-radius: var(--radius-md);
   background-color: var(--color-bg-card);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-lg);
   padding: 0.35rem;
-  z-index: 30;
+  z-index: 50;
   animation: fadeIn 0.15s ease-out forwards;
 }
 
@@ -62,4 +64,16 @@
 }
 .unilib-tracker-option--remove:hover {
   background-color: var(--color-danger-bg);
+}
+
+.unilib-tracker-option__content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.unilib-tracker-menu__divider {
+  padding-top: 0.25rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--color-border-subtle);
 }

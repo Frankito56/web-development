@@ -1,6 +1,4 @@
-/**
- * UniLib - Accessible Button Component
- */
+
 
 import React from 'react';
 import './Button.css';

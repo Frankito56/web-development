@@ -1,7 +1,4 @@
-/**
- * UniLib - Theme Context (Dark / Light Mode)
- * Persists theme in localStorage and synchronizes html.dark class
- */
+
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { StorageService } from '@/services/storageService';

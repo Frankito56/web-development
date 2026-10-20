@@ -1,5 +1,6 @@
 import { ILoanRepository } from '../../domain/repositories/ILoanRepository';
 import { IBookRepository } from '../../domain/repositories/IBookRepository';
+import { IReservationRepository } from '../../domain/repositories/IReservationRepository';
 import { IOpenLibraryFetcher } from './BookUseCases';
 import { LoanEntity } from '../../domain/entities/LoanEntity';
 import {
@@ -47,7 +48,7 @@ export class BorrowBookUseCase {
           coverUrl: remote.coverUrl,
           description: remote.description,
           subjects: remote.subjects,
-          totalCopies: 2,
+          totalCopies: 8,
           shelfLocation: 'Floor 1 - Main Desk',
         });
       }
@@ -69,8 +70,18 @@ export class BorrowBookUseCase {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + LOAN_DAYS);
 
-    const loan = await this.loanRepo.create({ bookId: book.id, userId, dueDate });
+    const loan = await this.loanRepo.create({
+      bookId: book.id,
+      userId,
+      dueDate,
+      status: 'PENDING_PICKUP',
+    });
     await this.bookRepo.decrementAvailable(book.id);
+
+    const updatedBook = await this.bookRepo.findById(book.id);
+    if (updatedBook) {
+      loan.book = updatedBook;
+    }
 
     return loan;
   }
@@ -80,6 +91,7 @@ export class ReturnBookUseCase {
   constructor(
     private readonly loanRepo: ILoanRepository,
     private readonly bookRepo: IBookRepository,
+    private readonly reservationRepo?: IReservationRepository,
   ) {}
 
   async execute(loanId: string, userId?: string, userRole?: string): Promise<LoanEntity> {
@@ -90,12 +102,53 @@ export class ReturnBookUseCase {
     if (userId && userRole !== 'LIBRARIAN' && loan.userId !== userId) {
       throw new ForbiddenError('You can only return your own loans.');
     }
-    if (loan.status !== 'ACTIVE' && loan.status !== 'OVERDUE') {
+    if (loan.status !== 'ACTIVE' && loan.status !== 'OVERDUE' && loan.status !== 'DELIVERED') {
       throw new LoanNotActiveError();
     }
 
     const returned = await this.loanRepo.returnBook(loanId, new Date());
+
+    if (this.reservationRepo) {
+      const activeReservations = await this.reservationRepo.findActiveByBookId(loan.bookId);
+      if (activeReservations.length > 0) {
+        const nextReservation = activeReservations[0];
+        const nextDueDate = new Date();
+        nextDueDate.setDate(nextDueDate.getDate() + LOAN_DAYS);
+
+        // Turn the first reservation into a loan pending pickup for that patron
+        await this.loanRepo.create({
+          bookId: nextReservation.bookId,
+          userId: nextReservation.userId,
+          dueDate: nextDueDate,
+          status: 'PENDING_PICKUP',
+        });
+
+        // Mark the reservation as fulfilled
+        await this.reservationRepo.updateStatus(nextReservation.id, 'FULFILLED');
+
+        // Shift priority order for remaining reservations in line
+        for (let i = 1; i < activeReservations.length; i++) {
+          if (this.reservationRepo.updatePriority) {
+            await this.reservationRepo.updatePriority(activeReservations[i].id, i);
+          }
+        }
+
+        // Available copies does not increase because the copy is immediately issued to the waiting reservation
+        const updatedBook = await this.bookRepo.findById(loan.bookId);
+        if (updatedBook) {
+          returned.book = updatedBook;
+        }
+
+        return returned;
+      }
+    }
+
     await this.bookRepo.incrementAvailable(loan.bookId);
+
+    const updatedBook = await this.bookRepo.findById(loan.bookId);
+    if (updatedBook) {
+      returned.book = updatedBook;
+    }
 
     return returned;
   }
@@ -104,15 +157,15 @@ export class ReturnBookUseCase {
 export class RenewLoanUseCase {
   constructor(private readonly loanRepo: ILoanRepository) {}
 
-  async execute(loanId: string, userId: string): Promise<LoanEntity> {
+  async execute(loanId: string, userId: string, userRole?: string): Promise<LoanEntity> {
     const loan = await this.loanRepo.findById(loanId);
     if (!loan) {
       throw new NotFoundError('Loan');
     }
-    if (loan.userId !== userId) {
+    if (userId && userRole !== 'LIBRARIAN' && loan.userId !== userId) {
       throw new NotFoundError('Loan');
     }
-    if (loan.status !== 'ACTIVE') {
+    if (loan.status !== 'ACTIVE' && loan.status !== 'DELIVERED') {
       throw new LoanNotActiveError();
     }
     if (loan.renewCount >= MAX_RENEWALS) {
@@ -123,5 +176,40 @@ export class RenewLoanUseCase {
     newDueDate.setDate(newDueDate.getDate() + LOAN_DAYS);
 
     return this.loanRepo.renew(loanId, newDueDate);
+  }
+}
+
+export class GetCirculationLoansUseCase {
+  constructor(private readonly loanRepo: ILoanRepository) {}
+
+  async execute(filters?: { status?: string; overdueOnly?: boolean; userId?: string }): Promise<LoanEntity[]> {
+    return this.loanRepo.findCirculation(filters);
+  }
+}
+
+export class GetOverdueLoansUseCase {
+  constructor(private readonly loanRepo: ILoanRepository) {}
+
+  async execute(): Promise<LoanEntity[]> {
+    return this.loanRepo.findOverdue();
+  }
+}
+
+export class DeliverLoanUseCase {
+  constructor(private readonly loanRepo: ILoanRepository) {}
+
+  async execute(loanId: string): Promise<LoanEntity> {
+    const loan = await this.loanRepo.findById(loanId);
+    if (!loan) {
+      throw new NotFoundError('Loan');
+    }
+    if (loan.status !== 'PENDING_PICKUP' && loan.status !== 'ACTIVE') {
+      throw new LoanNotActiveError();
+    }
+
+    const newDueDate = new Date();
+    newDueDate.setDate(newDueDate.getDate() + LOAN_DAYS);
+
+    return this.loanRepo.deliver(loanId, newDueDate);
   }
 }

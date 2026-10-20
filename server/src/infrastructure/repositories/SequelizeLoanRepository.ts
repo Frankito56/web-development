@@ -6,7 +6,7 @@ import {
 import { LoanEntity } from '../../domain/entities/LoanEntity';
 import { BookEntity } from '../../domain/entities/BookEntity';
 import { LoanStatus, AvailabilityStatus } from '../../domain/types';
-import { LoanModel, BookModel } from '../database/models';
+import { LoanModel, BookModel, UserModel } from '../database/models';
 
 export class SequelizeLoanRepository implements ILoanRepository {
   private bookToEntity(record: BookModel): BookEntity {
@@ -55,11 +55,29 @@ export class SequelizeLoanRepository implements ILoanRepository {
       status: record.status as LoanStatus,
       notes: record.notes ?? undefined,
       book: record.book ? this.bookToEntity(record.book as BookModel) : undefined,
+      user: record.user
+        ? {
+            id: record.user.id,
+            email: record.user.email,
+            name: record.user.name,
+            role: record.user.role as any,
+            studentOrEmployeeId: record.user.studentOrEmployeeId,
+            department: record.user.department,
+            avatarUrl: record.user.avatarUrl ?? undefined,
+            createdAt: record.user.createdAt,
+            updatedAt: record.user.updatedAt,
+          }
+        : undefined,
     };
   }
 
   async findById(id: string): Promise<LoanEntity | null> {
-    const record = await LoanModel.findByPk(id);
+    const record = await LoanModel.findByPk(id, {
+      include: [
+        { model: BookModel, as: 'book' },
+        { model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'role', 'studentOrEmployeeId', 'department'] },
+      ],
+    });
     return record ? this.toEntity(record) : null;
   }
 
@@ -76,8 +94,12 @@ export class SequelizeLoanRepository implements ILoanRepository {
     const records = await LoanModel.findAll({
       where: {
         bookId,
-        status: { [Op.in]: ['ACTIVE', 'OVERDUE'] },
+        status: { [Op.in]: ['ACTIVE', 'OVERDUE', 'PENDING_PICKUP', 'DELIVERED'] },
       },
+      include: [
+        { model: BookModel, as: 'book' },
+        { model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'role', 'studentOrEmployeeId', 'department'] },
+      ],
     });
     return records.map((r) => this.toEntity(r));
   }
@@ -87,8 +109,9 @@ export class SequelizeLoanRepository implements ILoanRepository {
       where: {
         userId,
         bookId,
-        status: { [Op.in]: ['ACTIVE', 'OVERDUE'] },
+        status: { [Op.in]: ['ACTIVE', 'OVERDUE', 'PENDING_PICKUP', 'DELIVERED'] },
       },
+      include: [{ model: BookModel, as: 'book' }],
     });
     return record ? this.toEntity(record) : null;
   }
@@ -97,9 +120,38 @@ export class SequelizeLoanRepository implements ILoanRepository {
     const now = new Date();
     const records = await LoanModel.findAll({
       where: {
-        status: 'ACTIVE',
+        status: { [Op.in]: ['ACTIVE', 'DELIVERED', 'OVERDUE'] },
         dueDate: { [Op.lt]: now },
       },
+      include: [
+        { model: BookModel, as: 'book' },
+        { model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'role', 'studentOrEmployeeId', 'department'] },
+      ],
+      order: [['dueDate', 'ASC']],
+    });
+    return records.map((r) => this.toEntity(r));
+  }
+
+  async findCirculation(filters?: { status?: string; overdueOnly?: boolean; userId?: string }): Promise<LoanEntity[]> {
+    const whereClause: any = {};
+    if (filters?.userId) {
+      whereClause.userId = filters.userId;
+    }
+    if (filters?.status) {
+      whereClause.status = filters.status;
+    }
+    if (filters?.overdueOnly) {
+      whereClause.status = { [Op.in]: ['ACTIVE', 'DELIVERED', 'OVERDUE', 'PENDING_PICKUP'] };
+      whereClause.dueDate = { [Op.lt]: new Date() };
+    }
+
+    const records = await LoanModel.findAll({
+      where: whereClause,
+      include: [
+        { model: BookModel, as: 'book' },
+        { model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'role', 'studentOrEmployeeId', 'department'] },
+      ],
+      order: [['createdAt', 'DESC']],
     });
     return records.map((r) => this.toEntity(r));
   }
@@ -110,9 +162,25 @@ export class SequelizeLoanRepository implements ILoanRepository {
       userId: input.userId,
       dueDate: input.dueDate,
       notes: input.notes,
-      status: 'ACTIVE',
+      status: input.status || 'PENDING_PICKUP',
     });
-    return this.toEntity(created);
+    const loaded = await this.findById(created.id);
+    return loaded || this.toEntity(created);
+  }
+
+  async deliver(loanId: string, newDueDate: Date): Promise<LoanEntity> {
+    const loan = await LoanModel.findByPk(loanId);
+    if (!loan) {
+      throw new Error(`Loan with id ${loanId} not found`);
+    }
+
+    loan.status = 'DELIVERED';
+    loan.borrowDate = new Date();
+    loan.dueDate = newDueDate;
+    await loan.save();
+
+    const loaded = await this.findById(loanId);
+    return loaded || this.toEntity(loan);
   }
 
   async returnBook(loanId: string, returnDate: Date): Promise<LoanEntity> {
@@ -125,7 +193,8 @@ export class SequelizeLoanRepository implements ILoanRepository {
     loan.status = 'RETURNED';
     await loan.save();
 
-    return this.toEntity(loan);
+    const loaded = await this.findById(loanId);
+    return loaded || this.toEntity(loan);
   }
 
   async renew(loanId: string, newDueDate: Date): Promise<LoanEntity> {
@@ -138,6 +207,7 @@ export class SequelizeLoanRepository implements ILoanRepository {
     loan.renewCount += 1;
     await loan.save();
 
-    return this.toEntity(loan);
+    const loaded = await this.findById(loanId);
+    return loaded || this.toEntity(loan);
   }
 }

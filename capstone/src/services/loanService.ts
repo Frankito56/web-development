@@ -11,6 +11,7 @@ export const LoanService = {
       const mapped: Loan[] = serverLoans.map((sl) => ({
         id: sl.id,
         bookId: sl.bookId,
+        openLibraryKey: (sl as any).book?.openLibraryKey || undefined,
         bookTitle: (sl as any).book?.title || 'Library Book',
         bookCoverUrl: (sl as any).book?.coverUrl || undefined,
         bookAuthors: Array.isArray((sl as any).book?.authors)
@@ -36,14 +37,14 @@ export const LoanService = {
 
       StorageService.setItem(StorageService.KEYS.LOANS, mapped);
       return {
-        active: mapped.filter((l) => l.status === 'ACTIVE' || l.status === 'OVERDUE'),
+        active: mapped.filter((l) => l.status !== 'RETURNED'),
         history: mapped.filter((l) => l.status === 'RETURNED'),
       };
     } catch {
       const cached = StorageService.getItem<Loan[]>(StorageService.KEYS.LOANS, []);
       const userCached = cached.filter((l) => l.userId === userId);
       return {
-        active: userCached.filter((l) => l.status === 'ACTIVE' || l.status === 'OVERDUE'),
+        active: userCached.filter((l) => l.status !== 'RETURNED'),
         history: userCached.filter((l) => l.status === 'RETURNED'),
       };
     }
@@ -51,12 +52,46 @@ export const LoanService = {
 
   getActiveLoans(userId: string): Loan[] {
     const loans = StorageService.getItem<Loan[]>(StorageService.KEYS.LOANS, []);
-    return loans.filter((l) => l.userId === userId && (l.status === 'ACTIVE' || l.status === 'OVERDUE'));
+    return loans.filter((l) => l.userId === userId && l.status !== 'RETURNED');
   },
 
   getLoanHistory(userId: string): Loan[] {
     const loans = StorageService.getItem<Loan[]>(StorageService.KEYS.LOANS, []);
     return loans.filter((l) => l.userId === userId && l.status === 'RETURNED');
+  },
+
+
+  isBookBorrowedByUser(userId: string, bookIdentifier: string, bookTitle?: string): boolean {
+    const cleanId = bookIdentifier.replace(/^\/?works\//, '');
+    const loans = StorageService.getItem<Loan[]>(StorageService.KEYS.LOANS, []);
+    return loans.some((l) => {
+      if (l.userId !== userId) return false;
+      if (l.status === 'RETURNED') return false;
+      const loanOpenLibKey = l.openLibraryKey ? l.openLibraryKey.replace(/^\/?works\//, '') : undefined;
+      return (
+        l.bookId === bookIdentifier ||
+        l.bookId === cleanId ||
+        (loanOpenLibKey && (loanOpenLibKey === cleanId || loanOpenLibKey === bookIdentifier)) ||
+        (bookTitle && l.bookTitle && l.bookTitle.toLowerCase().trim() === bookTitle.toLowerCase().trim())
+      );
+    });
+  },
+
+
+  isBookReservedByUser(userId: string, bookIdentifier: string, bookTitle?: string): boolean {
+    const cleanId = bookIdentifier.replace(/^\/?works\//, '');
+    const reservations = StorageService.getItem<Reservation[]>(StorageService.KEYS.RESERVATIONS, []);
+    return reservations.some((r) => {
+      if (r.userId !== userId) return false;
+      if (r.status === 'CANCELLED' || r.status === 'FULFILLED') return false;
+      const resOpenLibKey = r.openLibraryKey ? r.openLibraryKey.replace(/^\/?works\//, '') : undefined;
+      return (
+        r.bookId === bookIdentifier ||
+        r.bookId === cleanId ||
+        (resOpenLibKey && (resOpenLibKey === cleanId || resOpenLibKey === bookIdentifier)) ||
+        (bookTitle && r.bookTitle && r.bookTitle.toLowerCase().trim() === bookTitle.toLowerCase().trim())
+      );
+    });
   },
 
   async fetchUserReservations(userId: string): Promise<Reservation[]> {
@@ -65,6 +100,7 @@ export const LoanService = {
       const mapped: Reservation[] = serverRes.map((sr) => ({
         id: sr.id,
         bookId: sr.bookId,
+        openLibraryKey: (sr as any).book?.openLibraryKey || undefined,
         bookTitle: (sr as any).book?.title || 'Reserved Book',
         bookCoverUrl: (sr as any).book?.coverUrl || undefined,
         userId: sr.userId,
@@ -97,7 +133,8 @@ export const LoanService = {
 
       const newLoan: Loan = {
         id: apiLoan.id,
-        bookId: book.id,
+        bookId: (apiLoan as any).bookId || book.id,
+        openLibraryKey: book.id,
         bookTitle: book.title,
         bookCoverUrl: book.coverUrl,
         bookAuthors: book.authors,
@@ -106,24 +143,43 @@ export const LoanService = {
         userRole: user.role,
         borrowDate: new Date().toISOString(),
         dueDate,
-        status: 'ACTIVE',
+        status: (apiLoan.status as any) || 'PENDING_PICKUP',
         renewCount: 0,
       };
 
       const existingLoans = StorageService.getItem<Loan[]>(StorageService.KEYS.LOANS, []);
       StorageService.setItem(StorageService.KEYS.LOANS, [newLoan, ...existingLoans]);
 
+      const localBooks = StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []);
+      const cleanBookId = book.id.replace(/^\/?works\//, '');
+      const newAvailableCopies = (apiLoan as any).book?.availableCopies !== undefined
+        ? (apiLoan as any).book.availableCopies
+        : Math.max(0, book.availableCopies - 1);
+
+      const updatedBooks = localBooks.map((b) => {
+        const cleanBId = b.id.replace(/^\/?works\//, '');
+        if (b.id === book.id || cleanBId === cleanBookId || b.title === book.title) {
+          return {
+            ...b,
+            availableCopies: newAvailableCopies,
+            availabilityStatus: newAvailableCopies > 0 ? ('AVAILABLE' as const) : ('ON_LOAN' as const),
+          };
+        }
+        return b;
+      });
+      StorageService.setItem(StorageService.KEYS.BOOKS, updatedBooks);
+
       this.addNotification({
         userId: user.id,
-        title: 'Book Borrowed Successfully',
-        message: `You borrowed "${book.title}". Due date: ${new Date(dueDate).toLocaleDateString()}.`,
+        title: 'Book Requested Successfully',
+        message: `You requested "${book.title}". It is ready for pickup at the Circulation Desk.`,
         type: 'SUCCESS',
         link: '/my-loans',
       });
 
       return {
         success: true,
-        message: `Successfully borrowed "${book.title}". Due date: ${new Date(dueDate).toLocaleDateString()}.`,
+        message: `Successfully requested "${book.title}". Please pick it up at the Circulation Desk.`,
         loan: newLoan,
       };
     } catch (err: any) {
@@ -135,16 +191,38 @@ export const LoanService = {
   },
 
   async returnBook(loanId: string): Promise<{ success: boolean; message: string }> {
+    let returnedLoan: any = null;
     try {
-      await apiClient.loans.returnLoan(loanId);
+      returnedLoan = await apiClient.loans.returnLoan(loanId);
     } catch {
     }
 
     const loans = StorageService.getItem<Loan[]>(StorageService.KEYS.LOANS, []);
+    const targetedLoan = loans.find((l) => l.id === loanId);
     const updated = loans.map((l) =>
       l.id === loanId ? { ...l, status: 'RETURNED' as const, returnDate: new Date().toISOString() } : l
     );
     StorageService.setItem(StorageService.KEYS.LOANS, updated);
+
+    if (targetedLoan) {
+      const localBooks = StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []);
+      const cleanTargetId = targetedLoan.bookId.replace(/^\/?works\//, '');
+      const updatedBooks = localBooks.map((b) => {
+        const cleanBId = b.id.replace(/^\/?works\//, '');
+        if (b.id === targetedLoan.bookId || cleanBId === cleanTargetId || b.title === targetedLoan.bookTitle) {
+          const newAvail = returnedLoan?.book?.availableCopies !== undefined
+            ? returnedLoan.book.availableCopies
+            : Math.min(b.totalCopies, b.availableCopies + 1);
+          return {
+            ...b,
+            availableCopies: newAvail,
+            availabilityStatus: 'AVAILABLE' as const,
+          };
+        }
+        return b;
+      });
+      StorageService.setItem(StorageService.KEYS.BOOKS, updatedBooks);
+    }
 
     return {
       success: true,
@@ -181,7 +259,8 @@ export const LoanService = {
 
       const newReservation: Reservation = {
         id: apiRes.id,
-        bookId: book.id,
+        bookId: (apiRes as any).bookId || book.id,
+        openLibraryKey: book.id,
         bookTitle: book.title,
         bookCoverUrl: book.coverUrl,
         userId: user.id,

@@ -1,7 +1,4 @@
-/**
- * UniLib - usePagination Hook
- * Calculates page slices, bounds, and provides navigation helpers.
- */
+
 
 import { useState, useMemo } from 'react';
 
@@ -18,7 +15,7 @@ export function usePagination({ totalItems, initialPage = 1, pageSize = 12 }: Us
     return Math.max(1, Math.ceil(totalItems / pageSize));
   }, [totalItems, pageSize]);
 
-  // Ensure current page stays within valid boundaries
+
   const validPage = Math.min(Math.max(1, currentPage), totalPages);
 
   const startIndex = (validPage - 1) * pageSize;

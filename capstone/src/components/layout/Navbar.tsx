@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
@@ -13,6 +13,7 @@ import {
   Sparkles,
   CheckCheck,
   Trash2,
+  ClipboardList,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -30,19 +31,38 @@ export const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.unilib-dropdown-menu') && !target.closest('.unilib-icon-btn') && !target.closest('.unilib-profile-btn')) {
+        setIsNotifOpen(false);
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const activeLoansCount = user ? LoanService.getActiveLoans(user.id).length : 0;
 
-  const navLinks = [
-    { to: '/books', label: 'Catalog', icon: <BookOpen size={16} /> },
-    {
-      to: '/my-loans',
-      label: 'My Loans',
-      icon: <BookMarked size={16} />,
-      badge: activeLoansCount > 0 ? activeLoansCount : undefined,
-    },
-    { to: '/reading-tracker', label: 'Reading Tracker', icon: <Sparkles size={16} /> },
-    { to: '/wishlist', label: 'Wishlist', icon: <Heart size={16} /> },
-  ];
+  const isLibrarian = user?.role === 'LIBRARIAN';
+
+  const navLinks = isLibrarian
+    ? [
+        { to: '/books', label: 'Catalog', icon: <BookOpen size={16} /> },
+        { to: '/circulation', label: 'Circulation Desk', icon: <ClipboardList size={16} /> },
+      ]
+    : [
+        { to: '/books', label: 'Catalog', icon: <BookOpen size={16} /> },
+        {
+          to: '/my-loans',
+          label: 'My Loans',
+          icon: <BookMarked size={16} />,
+          badge: activeLoansCount > 0 ? activeLoansCount : undefined,
+        },
+        { to: '/reading-tracker', label: 'Reading Tracker', icon: <Sparkles size={16} /> },
+        { to: '/wishlist', label: 'Wishlist', icon: <Heart size={16} /> },
+      ];
 
   return (
     <header className="unilib-navbar-header">
@@ -87,9 +107,13 @@ export const Navbar: React.FC = () => {
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
-          <div style={{ position: 'relative' }}>
+          <div className="unilib-dropdown-anchor">
             <button
-              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              onClick={() => {
+                setIsNotifOpen((prev) => !prev);
+                setIsProfileOpen(false);
+                setIsMobileMenuOpen(false);
+              }}
               aria-label="View notifications"
               aria-expanded={isNotifOpen}
               className="unilib-icon-btn"
@@ -104,21 +128,20 @@ export const Navbar: React.FC = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="unilib-dropdown-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Notifications</span>
+                  <div className="unilib-notif-title-row">
+                    <span className="unilib-notif-title">Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="unilib-nav-link__badge" style={{ backgroundColor: 'var(--color-danger)' }}>
+                      <span className="unilib-nav-link__badge unilib-nav-link__badge--danger">
                         {unreadCount} new
                       </span>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <div className="unilib-notif-actions">
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
                         title="Mark all as read"
-                        className="unilib-icon-btn"
-                        style={{ padding: '0.25rem' }}
+                        className="unilib-icon-btn unilib-icon-btn--sm"
                       >
                         <CheckCheck size={16} />
                       </button>
@@ -127,8 +150,7 @@ export const Navbar: React.FC = () => {
                       <button
                         onClick={clearNotifications}
                         title="Clear all"
-                        className="unilib-icon-btn"
-                        style={{ padding: '0.25rem' }}
+                        className="unilib-icon-btn unilib-icon-btn--sm"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -138,7 +160,7 @@ export const Navbar: React.FC = () => {
 
                 <div className="unilib-dropdown-list">
                   {notifications.length === 0 ? (
-                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', textAlign: 'center', padding: '1.5rem 0' }}>
+                    <p className="unilib-notif-empty">
                       No notifications yet
                     </p>
                   ) : (
@@ -154,13 +176,13 @@ export const Navbar: React.FC = () => {
                         }}
                         className={`unilib-notification-item ${!n.read ? 'unilib-notification-item--unread' : ''}`}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
-                          <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>{n.title}</span>
-                          <span style={{ fontSize: '0.65rem', color: 'var(--color-text-subtle)' }}>
+                        <div className="unilib-notif-item-header">
+                          <span className="unilib-notif-item-title">{n.title}</span>
+                          <span className="unilib-notif-item-time">
                             {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>
+                        <p className="unilib-notif-item-msg">
                           {n.message}
                         </p>
                       </div>
@@ -172,45 +194,48 @@ export const Navbar: React.FC = () => {
           </div>
 
           {isAuthenticated && user ? (
-            <div style={{ position: 'relative' }}>
+            <div className="unilib-dropdown-anchor">
               <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                onClick={() => {
+                  setIsProfileOpen((prev) => !prev);
+                  setIsNotifOpen(false);
+                  setIsMobileMenuOpen(false);
+                }}
                 aria-expanded={isProfileOpen}
                 className="unilib-profile-btn"
               >
                 <img
                   src={user.avatarUrl || '/placeholder-avatar.svg'}
                   alt={user.name}
-                  className="unilib-profile-avatar"
+                  className="unilib-navbar-avatar"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = '/placeholder-avatar.svg';
                   }}
                 />
-                <div style={{ display: 'none' }} className="user-text-md">
-                  <p style={{ fontSize: '0.8rem', fontWeight: 700, margin: 0 }}>{user.name}</p>
-                  <p style={{ fontSize: '0.65rem', color: 'var(--color-primary-600)', margin: 0 }}>{user.role}</p>
+                <div className="unilib-profile-btn__info">
+                  <p className="unilib-profile-btn__name">{user.name}</p>
+                  <p className="unilib-profile-btn__role">{user.role}</p>
                 </div>
               </button>
 
               {isProfileOpen && (
                 <div
-                  className="unilib-dropdown-menu"
-                  style={{ width: '17rem' }}
+                  className="unilib-dropdown-menu unilib-dropdown-menu--profile"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div style={{ paddingBottom: '0.75rem', borderBottom: '1px solid var(--color-border-subtle)', marginBottom: '0.75rem' }}>
-                    <p style={{ fontSize: '0.85rem', fontWeight: 700 }}>{user.name}</p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{user.email}</p>
-                    <span style={{ display: 'inline-block', marginTop: '0.25rem', fontSize: '0.65rem', fontWeight: 600, padding: '0.15rem 0.4rem', borderRadius: '4px', backgroundColor: 'var(--color-primary-50)', color: 'var(--color-primary-700)' }}>
+                  <div className="unilib-profile-user-summary">
+                    <p className="unilib-profile-user-name">{user.name}</p>
+                    <p className="unilib-profile-user-email">{user.email}</p>
+                    <span className="unilib-profile-user-badge">
                       ID: {user.studentOrEmployeeId}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <div className="unilib-profile-actions">
                     <Link
                       to="/profile"
                       onClick={() => setIsProfileOpen(false)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.5rem', fontSize: '0.8rem', borderRadius: '6px', color: 'var(--color-text-main)' }}
+                      className="unilib-profile-link"
                     >
                       <User size={16} />
                       <span>Account Profile</span>
@@ -221,7 +246,7 @@ export const Navbar: React.FC = () => {
                         setIsProfileOpen(false);
                         navigate('/login');
                       }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.5rem', fontSize: '0.8rem', borderRadius: '6px', color: 'var(--color-danger)', textAlign: 'left' }}
+                      className="unilib-profile-logout-btn"
                     >
                       <span>Sign Out</span>
                     </button>
@@ -230,18 +255,22 @@ export const Navbar: React.FC = () => {
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Button size="sm" variant="ghost" onClick={() => navigate('/login')}>
+            <div className="unilib-auth-buttons">
+              <Button size="sm" variant="ghost" onClick={() => navigate('/login')} className="unilib-auth-btn--login">
                 Sign In
               </Button>
-              <Button size="sm" variant="primary" onClick={() => navigate('/register')}>
+              <Button size="sm" variant="primary" onClick={() => navigate('/register')} className="unilib-auth-btn--register">
                 Register
               </Button>
             </div>
           )}
 
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() => {
+              setIsMobileMenuOpen((prev) => !prev);
+              setIsNotifOpen(false);
+              setIsProfileOpen(false);
+            }}
             aria-label="Toggle mobile menu"
             className="unilib-icon-btn unilib-mobile-toggle"
           >
@@ -258,11 +287,10 @@ export const Navbar: React.FC = () => {
               to={link.to}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) =>
-                `unilib-nav-link ${isActive ? 'unilib-nav-link--active' : ''}`
+                `unilib-nav-link unilib-mobile-drawer__item ${isActive ? 'unilib-nav-link--active' : ''}`
               }
-              style={{ justifyContent: 'space-between', padding: '0.65rem 0.75rem' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="unilib-mobile-drawer__link-content">
                 {link.icon}
                 <span>{link.label}</span>
               </div>
@@ -271,6 +299,40 @@ export const Navbar: React.FC = () => {
               )}
             </NavLink>
           ))}
+
+          <div className="unilib-mobile-drawer__footer">
+            {!isAuthenticated ? (
+              <div className="unilib-mobile-drawer__auth">
+                <Button size="sm" variant="outline" onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }}>
+                  Sign In
+                </Button>
+                <Button size="sm" variant="primary" onClick={() => { setIsMobileMenuOpen(false); navigate('/register'); }}>
+                  Register
+                </Button>
+              </div>
+            ) : (
+              <div className="unilib-mobile-drawer__profile">
+                <Link
+                  to="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="unilib-mobile-drawer__profile-link"
+                >
+                  <User size={16} />
+                  <span>Account ({user?.name})</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMobileMenuOpen(false);
+                    navigate('/login');
+                  }}
+                  className="unilib-profile-logout-btn unilib-mobile-drawer__logout"
+                >
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </header>

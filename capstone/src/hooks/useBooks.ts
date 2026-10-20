@@ -1,7 +1,4 @@
-/**
- * UniLib - useBooks Hook
- * Fetches and filters the academic book catalog with debouncing, sorting, and pagination.
- */
+
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Book, BookFiltersState } from '@/types';
@@ -26,13 +23,17 @@ export function useBooks() {
 
   const debouncedQuery = useDebounce(filters.searchQuery, APP_CONFIG.SEARCH_DEBOUNCE_MS);
 
-  // Sync inventory changes from storage
+
   const syncWithStorage = useCallback(() => {
     const localBooks = StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []);
     setBooks((prevBooks) => {
       return prevBooks.map((book) => {
-        const matchingLocal = localBooks.find((lb) => lb.id === book.id);
-        return matchingLocal || book;
+        const cleanBookId = book.id.replace(/^\/?works\//, '');
+        const matchingLocal = localBooks.find((lb) => {
+          const cleanLbId = lb.id.replace(/^\/?works\//, '');
+          return lb.id === book.id || cleanLbId === cleanBookId || (lb.title && lb.title === book.title);
+        });
+        return matchingLocal ? { ...book, ...matchingLocal } : book;
       });
     });
   }, []);
@@ -66,18 +67,18 @@ export function useBooks() {
     fetchCatalog();
   }, [fetchCatalog]);
 
-  // Client-side filtering & sorting on currently loaded results
+
   const filteredAndSortedBooks = useMemo(() => {
     let result = [...books];
 
-    // Filter by availability
+
     if (filters.availability === 'AVAILABLE') {
       result = result.filter((b) => b.availabilityStatus === 'AVAILABLE' && b.availableCopies > 0);
     } else if (filters.availability === 'ON_LOAN') {
       result = result.filter((b) => b.availabilityStatus === 'ON_LOAN' || b.availableCopies === 0);
     }
 
-    // Sort
+
     switch (filters.sortBy) {
       case 'title_asc':
         result.sort((a, b) => a.title.localeCompare(b.title));
@@ -96,7 +97,7 @@ export function useBooks() {
         break;
       case 'relevance':
       default:
-        // Keep standard relevance order
+
         break;
     }
 
@@ -105,7 +106,7 @@ export function useBooks() {
 
   const updateSearchQuery = (query: string) => {
     setFilters((prev) => ({ ...prev, searchQuery: query }));
-    setCurrentPage(1); // reset to page 1 on new search
+    setCurrentPage(1);
   };
 
   const updateCategory = (categoryId: string) => {

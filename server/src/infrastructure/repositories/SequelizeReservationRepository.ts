@@ -6,7 +6,7 @@ import {
 import { ReservationEntity } from '../../domain/entities/ReservationEntity';
 import { BookEntity } from '../../domain/entities/BookEntity';
 import { ReservationStatus, AvailabilityStatus } from '../../domain/types';
-import { ReservationModel, BookModel } from '../database/models';
+import { ReservationModel, BookModel, UserModel } from '../database/models';
 
 export class SequelizeReservationRepository implements IReservationRepository {
   private bookToEntity(record: BookModel): BookEntity {
@@ -52,11 +52,29 @@ export class SequelizeReservationRepository implements IReservationRepository {
       status: record.status as ReservationStatus,
       priorityOrder: record.priorityOrder,
       book: record.book ? this.bookToEntity(record.book as BookModel) : undefined,
+      user: record.user
+        ? {
+            id: record.user.id,
+            email: record.user.email,
+            name: record.user.name,
+            role: record.user.role as any,
+            studentOrEmployeeId: record.user.studentOrEmployeeId,
+            department: record.user.department,
+            avatarUrl: record.user.avatarUrl ?? undefined,
+            createdAt: record.user.createdAt,
+            updatedAt: record.user.updatedAt,
+          }
+        : undefined,
     };
   }
 
   async findById(id: string): Promise<ReservationEntity | null> {
-    const record = await ReservationModel.findByPk(id);
+    const record = await ReservationModel.findByPk(id, {
+      include: [
+        { model: BookModel, as: 'book' },
+        { model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'role', 'studentOrEmployeeId', 'department'] },
+      ],
+    });
     return record ? this.toEntity(record) : null;
   }
 
@@ -75,7 +93,31 @@ export class SequelizeReservationRepository implements IReservationRepository {
         bookId,
         status: { [Op.in]: ['WAITING', 'READY_FOR_PICKUP'] },
       },
+      include: [
+        { model: BookModel, as: 'book' },
+        { model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'role', 'studentOrEmployeeId', 'department'] },
+      ],
       order: [['priorityOrder', 'ASC']],
+    });
+    return records.map((r) => this.toEntity(r));
+  }
+
+  async findAllQueue(filters?: { bookId?: string; status?: string }): Promise<ReservationEntity[]> {
+    const whereClause: any = {};
+    if (filters?.bookId) {
+      whereClause.bookId = filters.bookId;
+    }
+    if (filters?.status) {
+      whereClause.status = filters.status;
+    }
+
+    const records = await ReservationModel.findAll({
+      where: whereClause,
+      include: [
+        { model: BookModel, as: 'book' },
+        { model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'role', 'studentOrEmployeeId', 'department'] },
+      ],
+      order: [['priorityOrder', 'ASC'], ['reservedAt', 'ASC']],
     });
     return records.map((r) => this.toEntity(r));
   }
@@ -120,6 +162,10 @@ export class SequelizeReservationRepository implements IReservationRepository {
     await reservation.save();
 
     return this.toEntity(reservation);
+  }
+
+  async updatePriority(id: string, priorityOrder: number): Promise<void> {
+    await ReservationModel.update({ priorityOrder }, { where: { id } });
   }
 
   async cancel(id: string): Promise<ReservationEntity> {

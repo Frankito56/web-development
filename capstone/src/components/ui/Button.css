@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Button Component Styles
-   ========================================================================== */
+
 
 .unilib-btn {
   display: inline-flex;
@@ -32,7 +30,6 @@
   transform: scale(0.98);
 }
 
-/* Sizes */
 .unilib-btn--sm {
   font-size: 0.78rem;
   padding: 0.35rem 0.75rem;
@@ -51,11 +48,10 @@
   gap: 0.6rem;
 }
 
-/* Variants */
 .unilib-btn--primary {
   background-color: var(--color-primary-600);
   color: #ffffff;
-  box-shadow: 0 1px 3px rgba(37, 68, 235, 0.25);
+  box-shadow: var(--shadow-primary-sm);
 }
 .unilib-btn--primary:hover:not(:disabled) {
   background-color: var(--color-primary-700);

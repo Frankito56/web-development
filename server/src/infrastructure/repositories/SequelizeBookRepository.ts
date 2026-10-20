@@ -116,7 +116,7 @@ export class SequelizeBookRepository implements IBookRepository {
   }
 
   async create(input: CreateBookInput): Promise<BookEntity> {
-    const totalCopies = input.totalCopies ?? 1;
+    const totalCopies = Math.min(8, Math.max(1, input.totalCopies ?? 8));
     const created = await BookModel.create({
       openLibraryKey: input.openLibraryKey,
       isbn: input.isbn,
@@ -140,10 +140,12 @@ export class SequelizeBookRepository implements IBookRepository {
       throw new Error(`Book with id ${id} not found`);
     }
 
-    if (input.totalCopies !== undefined) book.totalCopies = input.totalCopies;
+    if (input.totalCopies !== undefined) {
+      book.totalCopies = Math.min(8, Math.max(1, input.totalCopies));
+    }
     if (input.availableCopies !== undefined) {
-      book.availableCopies = input.availableCopies;
-      book.availabilityStatus = input.availableCopies > 0 ? 'AVAILABLE' : 'ON_LOAN';
+      book.availableCopies = Math.min(book.totalCopies, Math.max(0, input.availableCopies));
+      book.availabilityStatus = book.availableCopies > 0 ? 'AVAILABLE' : 'ON_LOAN';
     }
     if (input.shelfLocation !== undefined) book.shelfLocation = input.shelfLocation;
     if (input.availabilityStatus !== undefined) book.availabilityStatus = input.availabilityStatus;

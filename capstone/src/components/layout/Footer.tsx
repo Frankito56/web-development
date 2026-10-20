@@ -1,6 +1,4 @@
-/**
- * UniLib - University Library Footer
- */
+
 
 import React from 'react';
 import { BookOpen, ShieldCheck } from 'lucide-react';
@@ -12,7 +10,7 @@ export const Footer: React.FC = () => {
     <footer className="unilib-footer">
       <div className="unilib-footer__container">
         <div className="unilib-footer__grid">
-          {/* Brand info */}
+          { }
           <div className="unilib-footer__brand-block">
             <div className="unilib-footer__brand-header">
               <div className="unilib-footer__logo-box">
@@ -31,7 +29,7 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick links */}
+          { }
           <div>
             <h4 className="unilib-footer__section-title">Library Services</h4>
             <ul className="unilib-footer__links-list">
@@ -58,14 +56,14 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Academic Hours */}
+          { }
           <div>
             <h4 className="unilib-footer__section-title">Circulation Hours</h4>
             <div className="unilib-footer__hours-list">
               <p>Mon - Fri: 08:00 - 22:00</p>
               <p>Saturday: 09:00 - 18:00</p>
               <p>Sunday: 10:00 - 16:00 (Reading Room only)</p>
-              <p style={{ color: 'var(--color-primary-600)', fontWeight: 600, marginTop: '0.25rem' }}>
+              <p className="unilib-footer__highlight-text">
                 Standard Loan: 14 Days
               </p>
             </div>
@@ -73,8 +71,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="unilib-footer__bottom-row">
-          <p>© {new Date().getFullYear()} UniLib Academic Library. Built for Web Development Capstone.</p>
-          <p>Crafted with Clean Architecture & React 18/19</p>
+          <p>© {new Date().getFullYear()} UniLib Academic Library.</p>
         </div>
       </div>
     </footer>

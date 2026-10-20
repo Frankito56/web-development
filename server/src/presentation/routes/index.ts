@@ -27,12 +27,16 @@ import {
   BorrowBookUseCase,
   ReturnBookUseCase,
   RenewLoanUseCase,
+  GetCirculationLoansUseCase,
+  GetOverdueLoansUseCase,
+  DeliverLoanUseCase,
 } from '../../application/use-cases/LoanUseCases';
 import {
   GetUserReservationsUseCase,
   CreateReservationUseCase,
   CancelReservationUseCase,
   FulfillReservationUseCase,
+  GetReservationQueueUseCase,
 } from '../../application/use-cases/ReservationUseCases';
 import {
   GetUserReadingRecordsUseCase,
@@ -87,13 +91,17 @@ export function createApiRouter(): Router {
 
   const getUserLoansUseCase = new GetUserLoansUseCase(loanRepo);
   const borrowUseCase = new BorrowBookUseCase(loanRepo, bookRepo, openLibraryClient);
-  const returnUseCase = new ReturnBookUseCase(loanRepo, bookRepo);
+  const returnUseCase = new ReturnBookUseCase(loanRepo, bookRepo, reservationRepo);
   const renewUseCase = new RenewLoanUseCase(loanRepo);
+  const getCirculationLoansUseCase = new GetCirculationLoansUseCase(loanRepo);
+  const getOverdueLoansUseCase = new GetOverdueLoansUseCase(loanRepo);
+  const deliverLoanUseCase = new DeliverLoanUseCase(loanRepo);
 
   const getUserReservationsUseCase = new GetUserReservationsUseCase(reservationRepo);
   const createReservationUseCase = new CreateReservationUseCase(reservationRepo, loanRepo, bookRepo, openLibraryClient);
   const cancelReservationUseCase = new CancelReservationUseCase(reservationRepo);
   const fulfillReservationUseCase = new FulfillReservationUseCase(reservationRepo, loanRepo, bookRepo);
+  const getReservationQueueUseCase = new GetReservationQueueUseCase(reservationRepo);
 
   const getRecordsUseCase = new GetUserReadingRecordsUseCase(readingRecordRepo);
   const upsertRecordUseCase = new UpsertReadingRecordUseCase(readingRecordRepo, bookRepo, openLibraryClient);
@@ -101,7 +109,7 @@ export function createApiRouter(): Router {
 
   const getWishlistUseCase = new GetUserWishlistUseCase(wishlistRepo);
   const addWishlistUseCase = new AddToWishlistUseCase(wishlistRepo, bookRepo, openLibraryClient);
-  const removeWishlistUseCase = new RemoveFromWishlistUseCase(wishlistRepo);
+  const removeWishlistUseCase = new RemoveFromWishlistUseCase(wishlistRepo, bookRepo);
 
   const authController = new AuthController(registerUseCase, loginUseCase, getProfileUseCase, updateProfileUseCase);
   const bookController = new BookController(
@@ -110,12 +118,22 @@ export function createApiRouter(): Router {
     importBookUseCase,
     updateInventoryUseCase
   );
-  const loanController = new LoanController(getUserLoansUseCase, borrowUseCase, returnUseCase, renewUseCase);
+  const loanController = new LoanController(
+    getUserLoansUseCase,
+    borrowUseCase,
+    returnUseCase,
+    renewUseCase,
+    getCirculationLoansUseCase,
+    getOverdueLoansUseCase,
+    deliverLoanUseCase,
+    getReservationQueueUseCase
+  );
   const reservationController = new ReservationController(
     getUserReservationsUseCase,
     createReservationUseCase,
     cancelReservationUseCase,
-    fulfillReservationUseCase
+    fulfillReservationUseCase,
+    getReservationQueueUseCase
   );
   const readingRecordController = new ReadingRecordController(
     getRecordsUseCase,

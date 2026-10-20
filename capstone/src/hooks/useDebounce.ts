@@ -1,7 +1,4 @@
-/**
- * UniLib - useDebounce Hook
- * Debounces a fast-changing value (e.g. search input) by specified delay in milliseconds.
- */
+
 
 import { useState, useEffect } from 'react';
 

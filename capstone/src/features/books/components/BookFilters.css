@@ -1,6 +1,4 @@
-/* ==========================================================================
-   BookFilters Component Styles
-   ========================================================================== */
+
 
 .unilib-filters-wrap {
   display: flex;
@@ -42,7 +40,7 @@
   background-color: var(--color-primary-600);
   border-color: var(--color-primary-600);
   color: #ffffff;
-  box-shadow: 0 2px 4px rgba(37, 68, 235, 0.25);
+  box-shadow: var(--shadow-primary-md);
 }
 
 .unilib-filters-secondary {
@@ -96,4 +94,43 @@
 
 .unilib-sort-select:focus {
   border-color: var(--color-primary-500);
+}
+
+.unilib-avail-btn--available-active {
+  color: var(--color-success-text) !important;
+}
+
+.unilib-avail-btn--onloan-active {
+  color: var(--color-warning-text) !important;
+}
+
+.unilib-filters-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.unilib-sort-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.unilib-reset-filters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-primary-600);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.unilib-reset-filters-btn:hover {
+  opacity: 0.8;
 }

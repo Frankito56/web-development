@@ -1,7 +1,4 @@
-/**
- * UniLib - MyLoansPage Component
- * Comprehensive loan management dashboard showing active loans, due dates, countdowns, reservations, and past history.
- */
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -36,7 +33,7 @@ export const MyLoansPage: React.FC = () => {
     user ? LoanService.getUserReservations(user.id) : []
   );
 
-  // Fetch fresh data from backend API in parallel, batching state updates
+
   const loadData = useCallback(async () => {
     if (!user) return;
     try {
@@ -58,7 +55,7 @@ export const MyLoansPage: React.FC = () => {
 
   if (!user) {
     return (
-      <div style={{ padding: '3rem 0', textAlign: 'center' }}>
+      <div className="unilib-loans-empty-wrap">
         <EmptyState
           icon={<BookMarked size={32} />}
           title="Sign in to view your library loans"
@@ -70,66 +67,73 @@ export const MyLoansPage: React.FC = () => {
     );
   }
 
-  // Calculate metrics
+
   const limit = ROLE_LIMITS[user.role]?.maxLoans || 5;
-  const dueSoonCount = activeLoans.filter((l) => getDueStatus(l.dueDate).status === 'warning').length;
-  const overdueCount = activeLoans.filter((l) => getDueStatus(l.dueDate).status === 'overdue').length;
+  const pendingPickupCount = activeLoans.filter((l) => l.status === 'PENDING_PICKUP').length;
+  const dueSoonCount = activeLoans.filter(
+    (l) => l.status !== 'PENDING_PICKUP' && getDueStatus(l.dueDate).status === 'warning'
+  ).length;
+  const overdueCount = activeLoans.filter(
+    (l) => l.status === 'OVERDUE' || (l.status !== 'PENDING_PICKUP' && getDueStatus(l.dueDate).status === 'overdue')
+  ).length;
 
   return (
     <div className="unilib-loans-container animate-fade-in">
-      {/* Page Header */}
+      {/* Header */}
       <div className="unilib-loans-header-row">
         <div>
           <h1 className="unilib-loans-title">Circulation & Loan Center</h1>
           <p className="unilib-loans-subtitle">
-            Manage your borrowed university literature, review due dates, and monitor reservations.
+            Manage your borrowed university literature, track pickups, and monitor reservations.
           </p>
         </div>
 
-        {/* User status badge */}
+        {/* Allowance */}
         <div className="unilib-allowance-badge">
-          <span style={{ color: 'var(--color-text-muted)' }}>Borrow Allowance:</span>
-          <strong style={{ color: 'var(--color-primary-600)', fontFamily: 'monospace' }}>
+          <span className="unilib-allowance-label">Borrow Allowance:</span>
+          <strong className="unilib-allowance-value">
             {activeLoans.length} / {limit} books
           </strong>
         </div>
       </div>
 
-      {/* Metrics Row */}
+      {/* Metrics */}
       <div className="unilib-metrics-grid">
         <div className="unilib-metric-card">
           <div className="unilib-metric-card__header">
-            <span>Active Loans</span>
+            <span>Active & Pickups</span>
             <BookMarked size={16} color="var(--color-primary-500)" />
           </div>
           <span className="unilib-metric-card__value">{activeLoans.length}</span>
-          <p className="unilib-metric-card__subtext">In your possession</p>
+          <p className="unilib-metric-card__subtext">
+            {pendingPickupCount > 0 ? `${pendingPickupCount} pending pickup` : 'In your possession'}
+          </p>
         </div>
 
         <div className="unilib-metric-card">
-          <div className="unilib-metric-card__header" style={{ color: 'var(--color-warning)' }}>
+          <div className="unilib-metric-card__header unilib-metric-card__header--warning">
             <span>Due in ≤ 3 Days</span>
             <Clock size={16} />
           </div>
-          <span className="unilib-metric-card__value" style={{ color: 'var(--color-warning)' }}>
+          <span className="unilib-metric-card__value unilib-metric-card__value--warning">
             {dueSoonCount}
           </span>
-          <p className="unilib-metric-card__subtext">Renew or return soon</p>
+          <p className="unilib-metric-card__subtext">Return at desk soon</p>
         </div>
 
         <div className="unilib-metric-card">
-          <div className="unilib-metric-card__header" style={{ color: 'var(--color-danger)' }}>
+          <div className="unilib-metric-card__header unilib-metric-card__header--danger">
             <span>Overdue Loans</span>
             <AlertTriangle size={16} />
           </div>
-          <span className="unilib-metric-card__value" style={{ color: 'var(--color-danger)' }}>
+          <span className="unilib-metric-card__value unilib-metric-card__value--danger">
             {overdueCount}
           </span>
           <p className="unilib-metric-card__subtext">Needs immediate return</p>
         </div>
 
         <div className="unilib-metric-card">
-          <div className="unilib-metric-card__header" style={{ color: 'var(--color-success)' }}>
+          <div className="unilib-metric-card__header unilib-metric-card__header--success">
             <span>Past Returns</span>
             <CheckCircle2 size={16} />
           </div>
@@ -138,7 +142,7 @@ export const MyLoansPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Navigation Tabs */}
       <div className="unilib-loans-tabs-bar">
         <button
           onClick={() => setCurrentTab('active')}
@@ -165,7 +169,7 @@ export const MyLoansPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Tab Panels */}
+      {}
       <div>
         {currentTab === 'active' && (
           <div>

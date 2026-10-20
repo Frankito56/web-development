@@ -1,13 +1,13 @@
-/**
- * UniLib - Accessible BookCard Component
- */
 
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Book } from '@/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { WishlistService } from '@/services/wishlistService';
+import { LoanService } from '@/services/loanService';
+import { StorageService } from '@/services/storageService';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { Heart, Star, BookOpen, Calendar } from 'lucide-react';
@@ -23,8 +23,26 @@ export interface BookCardProps {
 export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReserveClick }) => {
   const { user } = useAuth();
   const { showToast } = useNotification();
+  const isLibrarian = user?.role === 'LIBRARIAN';
   const [imageError, setImageError] = useState(false);
-  const [inWishlist, setInWishlist] = useState(() => (user ? WishlistService.isInWishlist(user.id, book.id) : false));
+  const [inWishlist, setInWishlist] = useState(() => (!isLibrarian && user ? WishlistService.isInWishlist(user.id, book.id, book.title) : false));
+  const [, setStorageVersion] = useState(0);
+
+  useEffect(() => {
+    if (user && !isLibrarian) {
+      setInWishlist(WishlistService.isInWishlist(user.id, book.id, book.title));
+    }
+    const unsub = StorageService.subscribe(() => {
+      setStorageVersion((v) => v + 1);
+      if (user && !isLibrarian) {
+        setInWishlist(WishlistService.isInWishlist(user.id, book.id, book.title));
+      }
+    });
+    return unsub;
+  }, [user, book.id, book.title, isLibrarian]);
+
+  const alreadyBorrowed = (!isLibrarian && user) ? LoanService.isBookBorrowedByUser(user.id, book.id) : false;
+  const alreadyReserved = (!isLibrarian && user) ? LoanService.isBookReservedByUser(user.id, book.id, book.title) : false;
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,7 +52,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
     }
 
     if (inWishlist) {
-      WishlistService.removeFromWishlist(user.id, book.id);
+      WishlistService.removeFromWishlist(user.id, book.id, book.title);
       setInWishlist(false);
       showToast('Wishlist', `Removed "${book.title}" from wishlist.`, 'INFO');
     } else {
@@ -52,7 +70,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
       aria-labelledby={`book-title-${book.id}`}
       className="unilib-book-card"
     >
-      {/* Top Banner / Cover */}
+      {/* Cover Image & Fallback */}
       <div className="unilib-book-card__cover-wrap">
         {book.coverUrl && !imageError ? (
           <img
@@ -64,14 +82,15 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
           />
         ) : (
           <div className="unilib-book-card__cover-fallback">
-            <BookOpen size={48} strokeWidth={1.5} style={{ opacity: 0.6, marginBottom: '0.5rem' }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase' }}>
+            <BookOpen size={48} strokeWidth={1.5} className="unilib-book-card__cover-fallback-icon" />
+            <span className="unilib-book-card__cover-fallback-title">
               {book.title}
             </span>
           </div>
         )}
 
-        {/* Wishlist Floating Button */}
+        {/* Wishlist Button – hidden for librarians */}
+        {!isLibrarian && (
         <button
           onClick={handleToggleWishlist}
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -81,10 +100,17 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
         >
           <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
         </button>
+        )}
 
         {/* Availability Badge */}
         <div className="unilib-book-card__badge-wrap">
-          {isAvailable ? (
+          {alreadyReserved ? (
+            <Badge variant="reserved">Reserved by You</Badge>
+          ) : alreadyBorrowed ? (
+            <Badge variant="on_loan">Checked Out by You</Badge>
+          ) : book.availabilityStatus === 'RESERVED' ? (
+            <Badge variant="reserved">Reserved</Badge>
+          ) : isAvailable ? (
             <Badge variant="available">Available ({book.availableCopies})</Badge>
           ) : isOnLoan ? (
             <Badge variant="on_loan">On Loan</Badge>
@@ -94,10 +120,10 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
         </div>
       </div>
 
-      {/* Content */}
+      {}
       <div className="unilib-book-card__body">
         <div>
-          {/* Category & Rating */}
+          {}
           <div className="unilib-book-card__category-row">
             <span className="unilib-book-card__category">
               {book.subjects[0] || 'Academic'}
@@ -110,38 +136,46 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
             )}
           </div>
 
-          {/* Title */}
+          {}
           <Link to={`/books/${book.id}`} className="unilib-book-card__title" id={`book-title-${book.id}`}>
             {book.title}
           </Link>
 
-          {/* Authors */}
+          {}
           <p className="unilib-book-card__author">
             {book.authors.join(', ')}
           </p>
 
-          {/* Meta Year / Shelf */}
+          {}
           <div className="unilib-book-card__meta">
             {book.firstPublishYear && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <div className="unilib-book-card__meta-item">
                 <Calendar size={12} />
                 <span>{book.firstPublishYear}</span>
               </div>
             )}
             {book.locationShelf && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'monospace' }}>
+              <div className="unilib-book-card__meta-item unilib-book-card__meta-item--mono">
                 <span>📍 {book.locationShelf}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Bottom Actions */}
+        {/* Footer: tracker + actions. Librarian sees nothing interactive. */}
         <div className="unilib-book-card__footer">
-          <ReadingTrackerDropdown book={book} />
+          {!isLibrarian && <ReadingTrackerDropdown book={book} />}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            {isAvailable ? (
+          <div className="unilib-book-card__actions">
+            {isLibrarian ? null : alreadyBorrowed ? (
+              <Button size="sm" variant="outline" disabled title="You already have this book checked out">
+                Checked Out ✓
+              </Button>
+            ) : alreadyReserved ? (
+              <Button size="sm" variant="outline" disabled title="You already have a reservation for this book">
+                Reserved ✓
+              </Button>
+            ) : isAvailable ? (
               <Button
                 size="sm"
                 variant="primary"

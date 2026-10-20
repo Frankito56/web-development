@@ -1,11 +1,9 @@
-/**
- * UniLib - Input Sanitization & XSS Prevention
- */
+
 
 export function sanitizeInput(input: string): string {
   if (!input) return '';
   return input
-    .replace(/[<>]/g, '') // Strip potentially dangerous tag delimiters
+    .replace(/[<>]/g, '')
     .trim();
 }
 

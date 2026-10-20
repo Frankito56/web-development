@@ -1,7 +1,4 @@
-/**
- * UniLib - WishlistPage Component
- * Manages saved books and local notification alerts when wished titles become available.
- */
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -23,21 +20,20 @@ export const WishlistPage: React.FC = () => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>(() =>
     user ? WishlistService.getUserWishlist(user.id) : []
   );
-  const [books, setBooks] = useState<Book[]>(() =>
-    StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, [])
-  );
 
   const syncFromStorage = useCallback(() => {
     if (!user) return;
     setWishlist(WishlistService.getUserWishlist(user.id));
-    setBooks(StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []));
   }, [user]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
-    const items = await WishlistService.fetchUserWishlist(user.id);
-    setWishlist(items);
-    setBooks(StorageService.getItem<Book[]>(StorageService.KEYS.BOOKS, []));
+    await Promise.all([
+      WishlistService.fetchUserWishlist(user.id).catch(() => []),
+      LoanService.fetchUserLoans(user.id).catch(() => []),
+      LoanService.fetchUserReservations(user.id).catch(() => []),
+    ]);
+    setWishlist(WishlistService.getUserWishlist(user.id));
   }, [user]);
 
   useEffect(() => {
@@ -61,25 +57,62 @@ export const WishlistPage: React.FC = () => {
 
   const handleRemove = (item: WishlistItem) => {
     if (!user) return;
-    WishlistService.removeFromWishlist(user.id, item.bookId);
+    WishlistService.removeFromWishlist(user.id, item.bookId, item.bookTitle);
     showToast('Wishlist', `Removed "${item.bookTitle}" from your wishlist.`, 'INFO');
     loadData();
   };
 
-  const handleQuickBorrow = async (book: Book) => {
+  const handleQuickBorrow = async (item: WishlistItem) => {
     if (!user) return;
-    const result = await LoanService.borrowBook(book, user);
+    const bookObj: Book = {
+      id: item.bookId,
+      title: item.bookTitle,
+      authors: item.bookAuthors,
+      subjects: [],
+      coverUrl: item.bookCoverUrl,
+      availabilityStatus: item.availabilityStatus || 'AVAILABLE',
+      totalCopies: item.totalCopies || 3,
+      availableCopies: item.availableCopies || 1,
+    };
+    const result = await LoanService.borrowBook(bookObj, user);
     if (result.success) {
       showToast('Borrow Successful', result.message, 'SUCCESS');
-      WishlistService.removeFromWishlist(user.id, book.id);
+      await Promise.all([
+        LoanService.fetchUserLoans(user.id).catch(() => []),
+        loadData(),
+      ]);
     } else {
       showToast('Cannot Borrow', result.message, 'ERROR');
     }
   };
 
+  const handleQuickReserve = async (item: WishlistItem) => {
+    if (!user) return;
+    const bookObj: Book = {
+      id: item.bookId,
+      title: item.bookTitle,
+      authors: item.bookAuthors,
+      subjects: [],
+      coverUrl: item.bookCoverUrl,
+      availabilityStatus: item.availabilityStatus || 'ON_LOAN',
+      totalCopies: item.totalCopies || 3,
+      availableCopies: 0,
+    };
+    const result = await LoanService.reserveBook(bookObj, user);
+    if (result.success) {
+      showToast('Reservation Placed', `Successfully reserved "${item.bookTitle}". You are in the queue.`, 'SUCCESS');
+      await Promise.all([
+        LoanService.fetchUserReservations(user.id).catch(() => []),
+        loadData(),
+      ]);
+    } else {
+      showToast('Cannot Reserve', result.message, 'ERROR');
+    }
+  };
+
   if (!user) {
     return (
-      <div style={{ padding: '3rem 0', textAlign: 'center' }}>
+      <div className="unilib-wishlist-empty-wrap">
         <EmptyState
           icon={<Heart size={32} color="var(--color-text-muted)" />}
           title="Sign in to view your wishlist"
@@ -93,7 +126,7 @@ export const WishlistPage: React.FC = () => {
 
   return (
     <div className="unilib-wishlist-container">
-      {/* Header */}
+      {/* Page Header */}
       <div className="unilib-wishlist-header-row">
         <div>
           <h1 className="unilib-wishlist-title">
@@ -120,10 +153,12 @@ export const WishlistPage: React.FC = () => {
       ) : (
         <div className="unilib-wishlist-grid">
           {wishlist.map((item) => {
-            const matchedBook = books.find((b) => b.id === item.bookId);
-            const isAvailable = matchedBook
-              ? matchedBook.availabilityStatus === 'AVAILABLE' && matchedBook.availableCopies > 0
-              : false;
+            const availCopies = item.availableCopies ?? 0;
+            const avStatus = item.availabilityStatus;
+            const isAvailable =
+              (avStatus === 'AVAILABLE' || avStatus == null) && availCopies > 0;
+            const alreadyBorrowed = user ? LoanService.isBookBorrowedByUser(user.id, item.bookId, item.bookTitle) : false;
+            const alreadyReserved = user ? LoanService.isBookReservedByUser(user.id, item.bookId, item.bookTitle) : false;
 
             return (
               <article key={item.id} className="unilib-wishlist-card">
@@ -142,8 +177,12 @@ export const WishlistPage: React.FC = () => {
 
                   <div className="unilib-wishlist-card__info">
                     <div className="unilib-wishlist-card__header">
-                      {isAvailable ? (
-                        <Badge variant="available">In Stock ({matchedBook?.availableCopies})</Badge>
+                      {alreadyReserved ? (
+                        <Badge variant="reserved">Reserved by You</Badge>
+                      ) : alreadyBorrowed ? (
+                        <Badge variant="on_loan">Checked Out by You</Badge>
+                      ) : isAvailable ? (
+                        <Badge variant="available">In Stock ({availCopies})</Badge>
                       ) : (
                         <Badge variant="on_loan">All Copies On Loan</Badge>
                       )}
@@ -170,9 +209,8 @@ export const WishlistPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Bottom Controls */}
+                {/* Card Footer: Notifications & Borrow/Reserve Actions */}
                 <div className="unilib-wishlist-card__footer">
-                  {/* Notification Toggle */}
                   <button
                     onClick={() => handleToggleNotification(item)}
                     className={`unilib-alert-toggle-btn ${
@@ -192,14 +230,29 @@ export const WishlistPage: React.FC = () => {
                     )}
                   </button>
 
-                  {/* Borrow Action if available */}
-                  {isAvailable && matchedBook && (
+                  {alreadyBorrowed ? (
+                    <Button size="sm" variant="outline" disabled title="You currently have this book checked out">
+                      Checked Out ✓
+                    </Button>
+                  ) : alreadyReserved ? (
+                    <Button size="sm" variant="outline" disabled title="You already have an active reservation for this book">
+                      Reserved ✓
+                    </Button>
+                  ) : isAvailable ? (
                     <Button
                       size="sm"
                       variant="primary"
-                      onClick={() => handleQuickBorrow(matchedBook)}
+                      onClick={() => handleQuickBorrow(item)}
                     >
                       Borrow Now
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickReserve(item)}
+                    >
+                      Reserve Copy
                     </Button>
                   )}
                 </div>

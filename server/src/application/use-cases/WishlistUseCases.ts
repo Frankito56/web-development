@@ -37,7 +37,7 @@ export class AddToWishlistUseCase {
           coverUrl: remote.coverUrl,
           description: remote.description,
           subjects: remote.subjects,
-          totalCopies: 1,
+          totalCopies: 8,
           shelfLocation: 'Floor 1 - Main Desk',
         });
       }
@@ -47,14 +47,27 @@ export class AddToWishlistUseCase {
       throw new NotFoundError('Book');
     }
 
-    return this.wishlistRepo.add(userId, book.id, notify ?? true);
+    const entity = await this.wishlistRepo.add(userId, book.id, notify ?? true);
+    entity.book = book;
+    return entity;
   }
 }
 
 export class RemoveFromWishlistUseCase {
-  constructor(private readonly wishlistRepo: IWishlistRepository) {}
+  constructor(
+    private readonly wishlistRepo: IWishlistRepository,
+    private readonly bookRepo?: IBookRepository,
+  ) {}
 
   async execute(userId: string, bookId: string): Promise<void> {
-    await this.wishlistRepo.remove(userId, bookId);
+    let targetBookId = bookId;
+    if (this.bookRepo) {
+      const book = (await this.bookRepo.findById(bookId)) || (await this.bookRepo.findByOpenLibraryKey(bookId));
+      if (book) {
+        targetBookId = book.id;
+      }
+    }
+    await this.wishlistRepo.remove(userId, targetBookId);
   }
 }
+

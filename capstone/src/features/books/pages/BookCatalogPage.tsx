@@ -1,13 +1,11 @@
-/**
- * UniLib - BookCatalogPage Component
- * Main catalog page with real-time API search, category filtering, sorting, pagination, and loan modals.
- */
 
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useBooks } from '@/hooks/useBooks';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { LoanService } from '@/services/loanService';
+import { WishlistService } from '@/services/wishlistService';
 import { Book } from '@/types';
 import { SearchBar } from '../components/SearchBar';
 import { BookFilters } from '../components/BookFilters';
@@ -44,12 +42,20 @@ export const BookCatalogPage: React.FC = () => {
     resetFilters,
   } = useBooks();
 
-  // Modals state
+
   const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<Book | null>(null);
   const [selectedBookForReserve, setSelectedBookForReserve] = useState<Book | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Pagination calculation
+  useEffect(() => {
+    if (user?.id) {
+      LoanService.fetchUserLoans(user.id).catch(() => {});
+      LoanService.fetchUserReservations(user.id).catch(() => {});
+      WishlistService.fetchUserWishlist(user.id).catch(() => {});
+    }
+  }, [user?.id]);
+
+
   const pageSize = 12;
   const totalPages = Math.max(1, Math.ceil(allBooksCount / pageSize));
 
@@ -88,9 +94,9 @@ export const BookCatalogPage: React.FC = () => {
 
   return (
     <div className="unilib-catalog-container animate-fade-in">
-      {/* University Hero Section */}
+      {}
       <section className="unilib-hero-banner">
-        <div style={{ maxWidth: '48rem' }}>
+        <div className="unilib-hero-content">
           <div className="unilib-hero-badge">
             <Sparkles size={14} />
             <span>Academic Resource Discovery System</span>
@@ -116,7 +122,7 @@ export const BookCatalogPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating Quick Stats */}
+        {}
         <div className="unilib-hero-stats-row">
           <div>
             <div className="unilib-stat-number">14 Days</div>
@@ -137,7 +143,7 @@ export const BookCatalogPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Catalog Filters Bar */}
+      {}
       <section className="unilib-filters-card">
         <BookFilters
           filters={filters}
@@ -148,7 +154,7 @@ export const BookCatalogPage: React.FC = () => {
         />
       </section>
 
-      {/* Results Header */}
+      {}
       <div className="unilib-catalog-header">
         <div>
           <h2 className="unilib-catalog-title">Available Academic Works</h2>
@@ -158,7 +164,7 @@ export const BookCatalogPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Books Grid */}
+      {}
       {isLoading ? (
         <div className="unilib-books-grid">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -186,7 +192,7 @@ export const BookCatalogPage: React.FC = () => {
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {}
       {!isLoading && books.length > 0 && totalPages > 1 && (
         <nav aria-label="Catalog pagination" className="unilib-pagination">
           <Button
@@ -215,7 +221,7 @@ export const BookCatalogPage: React.FC = () => {
         </nav>
       )}
 
-      {/* Borrow Confirmation Modal */}
+      {}
       <Modal
         isOpen={!!selectedBookForBorrow}
         onClose={() => setSelectedBookForBorrow(null)}
@@ -223,48 +229,48 @@ export const BookCatalogPage: React.FC = () => {
         description="Review your borrowing details before confirming."
       >
         {selectedBookForBorrow && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', gap: '1rem', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-bg-card-subtle)', border: '1px solid var(--color-border)' }}>
+          <div className="unilib-modal-form">
+            <div className="unilib-modal-book-preview">
               {selectedBookForBorrow.coverUrl ? (
                 <img
                   src={selectedBookForBorrow.coverUrl}
                   alt={selectedBookForBorrow.title}
-                  style={{ width: '4rem', height: '5.5rem', objectFit: 'cover', borderRadius: '6px' }}
+                  className="unilib-modal-book-cover"
                 />
               ) : (
-                <div style={{ width: '4rem', height: '5.5rem', backgroundColor: 'var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="unilib-modal-book-fallback">
                   <BookOpen size={24} color="var(--color-text-subtle)" />
                 </div>
               )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>
+              <div className="unilib-modal-book-info">
+                <h4 className="unilib-modal-book-title">
                   {selectedBookForBorrow.title}
                 </h4>
-                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0.2rem 0' }}>
+                <p className="unilib-modal-book-authors">
                   {selectedBookForBorrow.authors.join(', ')}
                 </p>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--color-success-text)', fontWeight: 600 }}>
+                <div className="unilib-modal-book-copies">
                   Physical copies available: {selectedBookForBorrow.availableCopies}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '0.75rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Borrower:</span>
+            <div className="unilib-modal-details-list">
+              <div className="unilib-modal-details-row">
+                <span className="unilib-modal-details-label">Borrower:</span>
                 <strong>{user?.name} ({user?.role})</strong>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Loan Duration:</span>
+              <div className="unilib-modal-details-row">
+                <span className="unilib-modal-details-label">Loan Duration:</span>
                 <strong>{loanDays} Calendar Days</strong>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Due Date:</span>
-                <strong style={{ color: 'var(--color-primary-600)' }}>{formatDate(simulatedDueDate)}</strong>
+              <div className="unilib-modal-details-row">
+                <span className="unilib-modal-details-label">Due Date:</span>
+                <strong className="unilib-modal-due-date">{formatDate(simulatedDueDate)}</strong>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
+            <div className="unilib-modal-actions">
               <Button
                 variant="ghost"
                 size="sm"
@@ -286,7 +292,6 @@ export const BookCatalogPage: React.FC = () => {
         )}
       </Modal>
 
-      {/* Reserve Confirmation Modal */}
       <Modal
         isOpen={!!selectedBookForReserve}
         onClose={() => setSelectedBookForReserve(null)}
@@ -294,20 +299,20 @@ export const BookCatalogPage: React.FC = () => {
         description="All copies of this title are currently loaned out."
       >
         {selectedBookForReserve && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', gap: '0.75rem', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-warning-bg)', border: '1px solid var(--color-warning-border)' }}>
-              <Clock size={20} color="var(--color-warning)" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-warning-text)', lineHeight: 1.4 }}>
+          <div className="unilib-modal-form">
+            <div className="unilib-modal-alert-box">
+              <Clock size={20} color="var(--color-warning)" className="unilib-modal-alert-icon" />
+              <div className="unilib-modal-alert-text">
                 Placing a reservation puts you into the priority pickup queue. As soon as another student returns a copy, you will receive an in-app alert.
               </div>
             </div>
 
-            <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--color-bg-card-subtle)', border: '1px solid var(--color-border)', fontSize: '0.75rem' }}>
-              <p style={{ fontWeight: 700, margin: 0 }}>{selectedBookForReserve.title}</p>
-              <p style={{ color: 'var(--color-text-muted)', margin: '0.2rem 0 0 0' }}>{selectedBookForReserve.authors.join(', ')}</p>
+            <div className="unilib-modal-reserve-summary">
+              <p className="unilib-modal-reserve-summary-title">{selectedBookForReserve.title}</p>
+              <p className="unilib-modal-reserve-summary-authors">{selectedBookForReserve.authors.join(', ')}</p>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.5rem' }}>
+            <div className="unilib-modal-actions">
               <Button
                 variant="ghost"
                 size="sm"

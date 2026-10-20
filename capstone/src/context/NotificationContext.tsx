@@ -1,7 +1,4 @@
-/**
- * UniLib - Notification & Toast Context
- * Manages user notifications, loan alerts, wishlist triggers, and temporary toast popups.
- */
+
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { NotificationItem, NotificationType } from '@/types';
@@ -76,7 +73,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const newToast: ToastMessage = { id, title, message, type };
     setToasts((prev) => [...prev, newToast]);
 
-    // Auto-remove after 4 seconds
+
     setTimeout(() => {
       removeToast(id);
     }, 4000);

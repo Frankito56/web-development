@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Footer Component Styles
-   ========================================================================== */
+
 
 .unilib-footer {
   margin-top: auto;
@@ -107,6 +105,12 @@
   gap: 0.35rem;
   font-size: 0.8rem;
   color: var(--color-text-muted);
+}
+
+.unilib-footer__highlight-text {
+  color: var(--color-primary-600);
+  font-weight: 600;
+  margin-top: 0.25rem;
 }
 
 .unilib-footer__bottom-row {

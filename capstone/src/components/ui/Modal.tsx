@@ -1,8 +1,7 @@
-/**
- * UniLib - Accessible Modal Component (ARIA compliant, keyboard navigable)
- */
+
 
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import './Modal.css';
 
@@ -45,7 +44,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className="unilib-modal-backdrop"
       onClick={onClose}
@@ -84,6 +83,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         <div className="unilib-modal__content">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

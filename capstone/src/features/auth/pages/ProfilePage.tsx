@@ -59,7 +59,7 @@ export const ProfilePage: React.FC = () => {
         <img
           src={user.avatarUrl || '/placeholder-avatar.svg'}
           alt={user.name}
-          className="unilib-profile-avatar"
+          className="unilib-profile-hero-avatar"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src = '/placeholder-avatar.svg';
           }}
@@ -74,7 +74,7 @@ export const ProfilePage: React.FC = () => {
               <p className="unilib-profile-email">{user.email}</p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="unilib-profile-header-actions">
               <span className="unilib-profile-role-pill">
                 {limits.label}
               </span>
@@ -82,7 +82,7 @@ export const ProfilePage: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleOpenEdit}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                className="unilib-profile-edit-btn"
               >
                 <Edit3 size={14} />
                 Edit Profile
@@ -95,7 +95,7 @@ export const ProfilePage: React.FC = () => {
               <Building size={16} />
               <span>{user.department}</span>
             </div>
-            <div className="unilib-profile-meta-item" style={{ fontFamily: 'var(--font-mono)' }}>
+            <div className="unilib-profile-meta-item unilib-profile-id-mono">
               <span>ID: {user.studentOrEmployeeId}</span>
             </div>
           </div>
@@ -145,7 +145,7 @@ export const ProfilePage: React.FC = () => {
           <div className="unilib-profile-quota-list">
             <div className="unilib-profile-quota-row">
               <span className="unilib-profile-quota-label">Membership Status:</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--color-success)', fontWeight: 600 }}>
+              <span className="unilib-profile-status-verified">
                 <ShieldCheck size={16} />
                 Verified Active
               </span>
@@ -160,7 +160,7 @@ export const ProfilePage: React.FC = () => {
 
             <div className="unilib-profile-quota-row">
               <span className="unilib-profile-quota-label">Member Since:</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--color-text-main)' }}>
+              <span className="unilib-profile-status-date">
                 <Calendar size={14} />
                 {user.joinedDate || '2024-01-01'}
               </span>
@@ -168,7 +168,7 @@ export const ProfilePage: React.FC = () => {
 
             <div className="unilib-profile-quota-row">
               <span className="unilib-profile-quota-label">Library Access Tier:</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--color-primary-600)' }}>
+              <span className="unilib-profile-status-tier">
                 <BookMarked size={14} />
                 Full Circulation & Digital Reserves
               </span>
@@ -183,7 +183,7 @@ export const ProfilePage: React.FC = () => {
         title="Edit University Profile"
         maxWidth="md"
       >
-        <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSaveProfile} className="unilib-auth-form">
           <Input
             label="Full Name"
             type="text"
@@ -209,25 +209,25 @@ export const ProfilePage: React.FC = () => {
             helperText="Provide a direct image URL or leave empty to use the system placeholder (/placeholder-avatar.svg)."
           />
 
-          {/* Live Preview */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', background: 'var(--color-bg-card-subtle)', borderRadius: 'var(--radius-md)' }}>
+          {}
+          <div className="unilib-avatar-preview-box">
             <img
               src={editAvatarUrl.trim() || '/placeholder-avatar.svg'}
               alt="Avatar Preview"
-              style={{ width: '3rem', height: '3rem', borderRadius: 'var(--radius-full)', objectFit: 'cover', border: '2px solid var(--color-border)' }}
+              className="unilib-avatar-preview-img"
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = '/placeholder-avatar.svg';
               }}
             />
             <div>
-              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-main)', margin: 0 }}>Avatar Preview</p>
-              <p style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', margin: 0 }}>
+              <p className="unilib-avatar-preview-title">Avatar Preview</p>
+              <p className="unilib-avatar-preview-desc">
                 {editAvatarUrl.trim() ? 'Using custom image URL' : 'Using default placeholder'}
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+          <div className="unilib-modal-form-actions">
             <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>

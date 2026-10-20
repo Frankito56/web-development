@@ -1,7 +1,4 @@
-/**
- * UniLib - LoanHistoryList Component
- * Displays past returned loans with dates and return status.
- */
+
 
 import React from 'react';
 import { Loan } from '@/types';
@@ -26,46 +23,35 @@ export const LoanHistoryList: React.FC<{ loans: Loan[] }> = ({ loans }) => {
           {loans.map((loan) => (
             <tr key={loan.id}>
               <td>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="unilib-history-book-cell">
                   {loan.bookCoverUrl ? (
                     <img
                       src={loan.bookCoverUrl}
                       alt={loan.bookTitle}
-                      style={{ width: '2rem', height: '3rem', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
+                      className="unilib-history-cover"
                     />
                   ) : (
-                    <div style={{ width: '2rem', height: '3rem', backgroundColor: 'var(--color-bg-card-subtle)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div className="unilib-history-cover-placeholder">
                       <BookOpen size={16} color="var(--color-text-subtle)" />
                     </div>
                   )}
                   <div>
                     <Link
                       to={`/books/${loan.bookId}`}
-                      style={{ fontWeight: 700, color: 'var(--color-text-main)', display: 'block' }}
+                      className="unilib-history-title"
                     >
                       {loan.bookTitle}
                     </Link>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                    <span className="unilib-history-author">
                       {loan.bookAuthors.join(', ')}
                     </span>
                   </div>
                 </div>
               </td>
-              <td style={{ whiteSpace: 'nowrap' }}>{formatDate(loan.borrowDate)}</td>
-              <td style={{ whiteSpace: 'nowrap' }}>{formatDate(loan.returnDate || loan.dueDate)}</td>
-              <td style={{ whiteSpace: 'nowrap' }}>
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  backgroundColor: 'var(--color-success-bg)',
-                  color: 'var(--color-success-text)',
-                  border: '1px solid var(--color-success-border)'
-                }}>
+              <td className="unilib-history-nowrap">{formatDate(loan.borrowDate)}</td>
+              <td className="unilib-history-nowrap">{formatDate(loan.returnDate || loan.dueDate)}</td>
+              <td className="unilib-history-nowrap">
+                <span className="unilib-history-status-pill unilib-history-status-pill--returned">
                   <CheckCircle2 size={14} color="var(--color-success)" />
                   <span>Returned</span>
                 </span>
