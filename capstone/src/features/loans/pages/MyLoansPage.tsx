@@ -1,6 +1,4 @@
-
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { LoanService } from '@/services/loanService';
 import { Loan, Reservation } from '@/types';
@@ -69,13 +67,22 @@ export const MyLoansPage: React.FC = () => {
 
 
   const limit = ROLE_LIMITS[user.role]?.maxLoans || 5;
-  const pendingPickupCount = activeLoans.filter((l) => l.status === 'PENDING_PICKUP').length;
-  const dueSoonCount = activeLoans.filter(
-    (l) => l.status !== 'PENDING_PICKUP' && getDueStatus(l.dueDate).status === 'warning'
-  ).length;
-  const overdueCount = activeLoans.filter(
-    (l) => l.status === 'OVERDUE' || (l.status !== 'PENDING_PICKUP' && getDueStatus(l.dueDate).status === 'overdue')
-  ).length;
+  const pendingPickupCount = useMemo(
+    () => activeLoans.filter((l) => l.status === 'PENDING_PICKUP').length,
+    [activeLoans]
+  );
+  const dueSoonCount = useMemo(
+    () => activeLoans.filter(
+      (l) => l.status !== 'PENDING_PICKUP' && getDueStatus(l.dueDate).status === 'warning'
+    ).length,
+    [activeLoans]
+  );
+  const overdueCount = useMemo(
+    () => activeLoans.filter(
+      (l) => l.status === 'OVERDUE' || (l.status !== 'PENDING_PICKUP' && getDueStatus(l.dueDate).status === 'overdue')
+    ).length,
+    [activeLoans]
+  );
 
   return (
     <div className="unilib-loans-container animate-fade-in">

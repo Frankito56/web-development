@@ -1,5 +1,3 @@
-
-
 import { useState, useMemo } from 'react';
 
 interface UsePaginationOptions {

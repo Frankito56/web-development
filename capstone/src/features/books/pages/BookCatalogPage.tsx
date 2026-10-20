@@ -1,6 +1,4 @@
-
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useBooks } from '@/hooks/useBooks';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -57,9 +55,17 @@ export const BookCatalogPage: React.FC = () => {
 
 
   const pageSize = 12;
-  const totalPages = Math.max(1, Math.ceil(allBooksCount / pageSize));
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(allBooksCount / pageSize)), [allBooksCount, pageSize]);
 
-  const handleConfirmBorrow = async () => {
+  const handleBorrowClick = useCallback((book: Book) => {
+    setSelectedBookForBorrow(book);
+  }, []);
+
+  const handleReserveClick = useCallback((book: Book) => {
+    setSelectedBookForReserve(book);
+  }, []);
+
+  const handleConfirmBorrow = useCallback(async () => {
     if (!selectedBookForBorrow || !user) return;
     setActionLoading(true);
 
@@ -72,9 +78,9 @@ export const BookCatalogPage: React.FC = () => {
     } else {
       showToast('Cannot Borrow', result.message, 'ERROR');
     }
-  };
+  }, [selectedBookForBorrow, user, showToast]);
 
-  const handleConfirmReserve = async () => {
+  const handleConfirmReserve = useCallback(async () => {
     if (!selectedBookForReserve || !user) return;
     setActionLoading(true);
 
@@ -87,10 +93,10 @@ export const BookCatalogPage: React.FC = () => {
     } else {
       showToast('Cannot Reserve', result.message, 'ERROR');
     }
-  };
+  }, [selectedBookForReserve, user, showToast]);
 
-  const loanDays = user ? ROLE_LIMITS[user.role]?.maxLoanDays || 14 : 14;
-  const simulatedDueDate = calculateDueDate(new Date(), loanDays);
+  const loanDays = useMemo(() => (user ? ROLE_LIMITS[user.role]?.maxLoanDays || 14 : 14), [user]);
+  const simulatedDueDate = useMemo(() => calculateDueDate(new Date(), loanDays), [loanDays]);
 
   return (
     <div className="unilib-catalog-container animate-fade-in">
@@ -185,8 +191,8 @@ export const BookCatalogPage: React.FC = () => {
             <BookCard
               key={book.id}
               book={book}
-              onBorrowClick={(b) => setSelectedBookForBorrow(b)}
-              onReserveClick={(b) => setSelectedBookForReserve(b)}
+              onBorrowClick={handleBorrowClick}
+              onReserveClick={handleReserveClick}
             />
           ))}
         </div>

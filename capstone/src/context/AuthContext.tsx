@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { User, UserRole } from '@/types';
 import { apiClient } from '@/services/apiClient';
 
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       const res = await apiClient.auth.login(email, password);
       persistUser({
@@ -102,9 +102,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       return false;
     }
-  };
+  }, []);
 
-  const register = async (userData: RegisterData): Promise<{ success: boolean; error?: string }> => {
+  const register = useCallback(async (userData: RegisterData): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await apiClient.auth.register(userData);
       persistUser({
@@ -122,44 +122,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       return { success: false, error: err.message || 'Registration failed' };
     }
-  };
+  }, []);
 
-  const updateProfile = async (data: { name?: string; department?: string; avatarUrl?: string }): Promise<boolean> => {
+  const updateProfile = useCallback(async (data: { name?: string; department?: string; avatarUrl?: string }): Promise<boolean> => {
     try {
       const updated = await apiClient.auth.updateProfile(data);
-      const updatedUser: User | null = user
-        ? {
-            ...user,
-            name: updated.name,
-            department: updated.department,
-            avatarUrl: updated.avatarUrl || '/placeholder-avatar.svg',
-          }
-        : null;
-      persistUser(updatedUser);
+      setUser((currentUser) => {
+        const updatedUser: User | null = currentUser
+          ? {
+              ...currentUser,
+              name: updated.name,
+              department: updated.department,
+              avatarUrl: updated.avatarUrl || '/placeholder-avatar.svg',
+            }
+          : null;
+        if (updatedUser) {
+          localStorage.setItem('unilib_user', JSON.stringify(updatedUser));
+        }
+        return updatedUser;
+      });
       return true;
     } catch {
       return false;
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     apiClient.auth.logout();
     persistUser(null);
-  };
+  }, []);
+
+  const authValue = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      role: user?.role || null,
+      login,
+      register,
+      updateProfile,
+      logout,
+      isLoading,
+    }),
+    [user, login, register, updateProfile, logout, isLoading]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        role: user?.role || null,
-        login,
-        register,
-        updateProfile,
-        logout,
-        isLoading,
-      }}
-    >
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   );

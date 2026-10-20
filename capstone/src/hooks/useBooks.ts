@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Book, BookFiltersState } from '@/types';
 import { OpenLibraryService } from '@/services/openLibraryService';

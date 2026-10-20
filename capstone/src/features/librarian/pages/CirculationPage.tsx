@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   ClipboardList,
   BookOpen,
@@ -81,7 +81,7 @@ export const CirculationPage: React.FC = () => {
     load();
   }, [load]);
 
-  const handleDeliver = async (loanId: string) => {
+  const handleDeliver = useCallback(async (loanId: string) => {
     setDelivering(loanId);
     try {
       await apiClient.loans.deliverLoan(loanId);
@@ -92,9 +92,9 @@ export const CirculationPage: React.FC = () => {
     } finally {
       setDelivering(null);
     }
-  };
+  }, [showToast, load]);
 
-  const handleReturn = async (loanId: string) => {
+  const handleReturn = useCallback(async (loanId: string) => {
     setReturning(loanId);
     try {
       await apiClient.loans.returnLoan(loanId);
@@ -105,9 +105,9 @@ export const CirculationPage: React.FC = () => {
     } finally {
       setReturning(null);
     }
-  };
+  }, [showToast, load]);
 
-  const matchesSearch = (item: ApiLoan | ApiReservation): boolean => {
+  const matchesSearch = useCallback((item: ApiLoan | ApiReservation): boolean => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase().trim();
     const userName = (item.user?.name || '').toLowerCase();
@@ -123,15 +123,33 @@ export const CirculationPage: React.FC = () => {
       email.includes(q) ||
       title.includes(q)
     );
-  };
+  }, [searchQuery]);
 
-  const pendingLoans = data.loans.filter((l) => l.status === 'PENDING_PICKUP');
-  const activeLoans = data.loans.filter((l) => l.status === 'ACTIVE' || l.status === 'DELIVERED');
+  const pendingLoans = useMemo(
+    () => data.loans.filter((l) => l.status === 'PENDING_PICKUP'),
+    [data.loans]
+  );
+  const activeLoans = useMemo(
+    () => data.loans.filter((l) => l.status === 'ACTIVE' || l.status === 'DELIVERED'),
+    [data.loans]
+  );
 
-  const filteredPendingLoans = pendingLoans.filter(matchesSearch);
-  const filteredActiveLoans = activeLoans.filter(matchesSearch);
-  const filteredReservations = data.reservations.filter(matchesSearch);
-  const filteredOverdueLoans = data.overdueLoans.filter(matchesSearch);
+  const filteredPendingLoans = useMemo(
+    () => pendingLoans.filter(matchesSearch),
+    [pendingLoans, matchesSearch]
+  );
+  const filteredActiveLoans = useMemo(
+    () => activeLoans.filter(matchesSearch),
+    [activeLoans, matchesSearch]
+  );
+  const filteredReservations = useMemo(
+    () => data.reservations.filter(matchesSearch),
+    [data.reservations, matchesSearch]
+  );
+  const filteredOverdueLoans = useMemo(
+    () => data.overdueLoans.filter(matchesSearch),
+    [data.overdueLoans, matchesSearch]
+  );
 
   return (
     <main className="circ-page">

@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { Loan } from '@/types';
 import { formatDate } from '@/utils/dateUtils';

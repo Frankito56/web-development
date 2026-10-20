@@ -1,5 +1,3 @@
-
-
 import { APP_CONFIG } from '@/config';
 
 export function calculateDueDate(startDate: Date | string = new Date(), days: number = APP_CONFIG.MAX_LOAN_DAYS): string {

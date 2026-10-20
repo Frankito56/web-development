@@ -1,5 +1,3 @@
-
-
 import React, { useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import './SearchBar.css';

@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { CATEGORIES } from '@/config';
 import { BookFiltersState, SortOption } from '@/types';

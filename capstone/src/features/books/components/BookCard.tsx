@@ -1,6 +1,4 @@
-
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Book } from '@/types';
 import { Badge } from '@/components/ui/Badge';
@@ -20,7 +18,7 @@ export interface BookCardProps {
   onReserveClick?: (book: Book) => void;
 }
 
-export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReserveClick }) => {
+const BookCardComponent: React.FC<BookCardProps> = ({ book, onBorrowClick, onReserveClick }) => {
   const { user } = useAuth();
   const { showToast } = useNotification();
   const isLibrarian = user?.role === 'LIBRARIAN';
@@ -44,7 +42,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
   const alreadyBorrowed = (!isLibrarian && user) ? LoanService.isBookBorrowedByUser(user.id, book.id) : false;
   const alreadyReserved = (!isLibrarian && user) ? LoanService.isBookReservedByUser(user.id, book.id, book.title) : false;
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
       showToast('Authentication Required', 'Please sign in to save books to your wishlist.', 'WARNING');
@@ -60,7 +58,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
       setInWishlist(true);
       showToast('Wishlist', `Added "${book.title}" to wishlist with availability alert.`, 'SUCCESS');
     }
-  };
+  }, [user, inWishlist, book, showToast]);
 
   const isAvailable = book.availabilityStatus === 'AVAILABLE' && book.availableCopies > 0;
   const isOnLoan = book.availabilityStatus === 'ON_LOAN' || book.availableCopies === 0;
@@ -198,3 +196,5 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReser
     </article>
   );
 };
+
+export const BookCard = React.memo(BookCardComponent);

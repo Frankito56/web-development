@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -42,7 +40,7 @@ export const WishlistPage: React.FC = () => {
     return () => unsubscribe();
   }, [loadData, syncFromStorage]);
 
-  const handleToggleNotification = (item: WishlistItem) => {
+  const handleToggleNotification = useCallback((item: WishlistItem) => {
     if (!user) return;
     const newState = WishlistService.toggleNotification(user.id, item.bookId);
     showToast(
@@ -53,16 +51,16 @@ export const WishlistPage: React.FC = () => {
       'INFO'
     );
     loadData();
-  };
+  }, [user, showToast, loadData]);
 
-  const handleRemove = (item: WishlistItem) => {
+  const handleRemove = useCallback((item: WishlistItem) => {
     if (!user) return;
     WishlistService.removeFromWishlist(user.id, item.bookId, item.bookTitle);
     showToast('Wishlist', `Removed "${item.bookTitle}" from your wishlist.`, 'INFO');
     loadData();
-  };
+  }, [user, showToast, loadData]);
 
-  const handleQuickBorrow = async (item: WishlistItem) => {
+  const handleQuickBorrow = useCallback(async (item: WishlistItem) => {
     if (!user) return;
     const bookObj: Book = {
       id: item.bookId,
@@ -84,9 +82,9 @@ export const WishlistPage: React.FC = () => {
     } else {
       showToast('Cannot Borrow', result.message, 'ERROR');
     }
-  };
+  }, [user, showToast, loadData]);
 
-  const handleQuickReserve = async (item: WishlistItem) => {
+  const handleQuickReserve = useCallback(async (item: WishlistItem) => {
     if (!user) return;
     const bookObj: Book = {
       id: item.bookId,
@@ -108,7 +106,7 @@ export const WishlistPage: React.FC = () => {
     } else {
       showToast('Cannot Reserve', result.message, 'ERROR');
     }
-  };
+  }, [user, showToast, loadData]);
 
   if (!user) {
     return (

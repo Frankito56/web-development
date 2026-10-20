@@ -1,6 +1,4 @@
-
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Book, ReadingStatus } from '@/types';
 import { ReadingTrackerService } from '@/services/readingTrackerService';
 import { useAuth } from '@/context/AuthContext';
@@ -8,7 +6,7 @@ import { useNotification } from '@/context/NotificationContext';
 import { Bookmark, Check, ChevronDown, BookOpen, CheckCircle2 } from 'lucide-react';
 import './ReadingTrackerDropdown.css';
 
-export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
+const ReadingTrackerDropdownComponent: React.FC<{ book: Book }> = ({ book }) => {
   const { user } = useAuth();
   const { showToast } = useNotification();
   const [isOpen, setIsOpen] = useState(false);
@@ -29,12 +27,8 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
     };
   }, [isOpen]);
 
-  if (!user) return null;
-
-  const currentItem = ReadingTrackerService.getStatusForBook(user.id, book.id);
-  const currentStatus = currentItem?.status;
-
-  const handleSelect = (status: ReadingStatus | 'REMOVE') => {
+  const handleSelect = useCallback((status: ReadingStatus | 'REMOVE') => {
+    if (!user) return;
     if (status === 'REMOVE') {
       ReadingTrackerService.removeItem(user.id, book.id);
       showToast('Reading Tracker', `Removed "${book.title}" from reading list.`, 'INFO');
@@ -48,7 +42,12 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
       showToast('Reading Tracker', `${labels[status]}: "${book.title}"`, 'SUCCESS');
     }
     setIsOpen(false);
-  };
+  }, [user, book, showToast]);
+
+  if (!user) return null;
+
+  const currentItem = ReadingTrackerService.getStatusForBook(user.id, book.id);
+  const currentStatus = currentItem?.status;
 
   const statusLabels: Record<ReadingStatus, { text: string; icon: React.ReactNode }> = {
     WANT_TO_READ: {
@@ -131,3 +130,5 @@ export const ReadingTrackerDropdown: React.FC<{ book: Book }> = ({ book }) => {
     </div>
   );
 };
+
+export const ReadingTrackerDropdown = React.memo(ReadingTrackerDropdownComponent);

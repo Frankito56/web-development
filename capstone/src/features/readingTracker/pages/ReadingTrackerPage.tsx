@@ -1,6 +1,4 @@
-
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ReadingTrackerService } from '@/services/readingTrackerService';
 import { StorageService } from '@/services/storageService';
@@ -26,7 +24,7 @@ export const ReadingTrackerPage: React.FC = () => {
     return () => unsubscribe();
   }, [loadData]);
 
-  const handleUpdatePercentage = (item: ReadingProgressItem, newPercentage: number) => {
+  const handleUpdatePercentage = useCallback((item: ReadingProgressItem, newPercentage: number) => {
     if (!user) return;
     const finalPercentage = Math.min(100, Math.max(0, newPercentage));
     const newStatus: ReadingStatus =
@@ -51,12 +49,21 @@ export const ReadingTrackerPage: React.FC = () => {
       item.notes,
       item.rating
     );
-  };
+  }, [user]);
 
-  const handleRemove = (bookId: string) => {
+  const handleRemove = useCallback((bookId: string) => {
     if (!user) return;
     ReadingTrackerService.removeItem(user.id, bookId);
-  };
+  }, [user]);
+
+  const readingNow = useMemo(() => items.filter((i) => i.status === 'READING'), [items]);
+  const wantToRead = useMemo(() => items.filter((i) => i.status === 'WANT_TO_READ'), [items]);
+  const completed = useMemo(() => items.filter((i) => i.status === 'COMPLETED'), [items]);
+
+  const displayedItems = useMemo(
+    () => (activeFilter === 'ALL' ? items : items.filter((i) => i.status === activeFilter)),
+    [items, activeFilter]
+  );
 
   if (!user) {
     return (
@@ -71,15 +78,6 @@ export const ReadingTrackerPage: React.FC = () => {
       </div>
     );
   }
-
-  const readingNow = items.filter((i) => i.status === 'READING');
-  const wantToRead = items.filter((i) => i.status === 'WANT_TO_READ');
-  const completed = items.filter((i) => i.status === 'COMPLETED');
-
-  const displayedItems =
-    activeFilter === 'ALL'
-      ? items
-      : items.filter((i) => i.status === activeFilter);
 
   return (
     <div className="unilib-tracker-page-container animate-fade-in">

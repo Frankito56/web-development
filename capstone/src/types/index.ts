@@ -1,5 +1,3 @@
-
-
 export type UserRole = 'STUDENT' | 'PROFESSOR' | 'LIBRARIAN';
 
 export interface User {
