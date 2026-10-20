@@ -30,16 +30,17 @@ export class CreateReservationUseCase {
   ) {}
 
   async execute(userId: string, bookIdOrKey: string): Promise<ReservationEntity> {
+    const cleanKey = bookIdOrKey.replace(/^\/?works\//, '');
     let book = await this.bookRepo.findById(bookIdOrKey);
     if (!book) {
-      book = await this.bookRepo.findByOpenLibraryKey(bookIdOrKey);
+      book = await this.bookRepo.findByOpenLibraryKey(cleanKey);
     }
 
-    if (!book && this.openLibraryFetcher && (bookIdOrKey.startsWith('/works/') || bookIdOrKey.startsWith('OL'))) {
-      const remote = await this.openLibraryFetcher.fetchBookByWorkKey(bookIdOrKey);
+    if (!book && this.openLibraryFetcher && (cleanKey.startsWith('OL') || bookIdOrKey.startsWith('/works/'))) {
+      const remote = await this.openLibraryFetcher.fetchBookByWorkKey(cleanKey);
       if (remote) {
         book = await this.bookRepo.create({
-          openLibraryKey: bookIdOrKey,
+          openLibraryKey: cleanKey,
           isbn: remote.isbn,
           title: remote.title,
           authors: remote.authors,

@@ -23,18 +23,6 @@ RESTful backend API for the UniLib University Library Management System, built w
 
 The server follows a strict **Clean Architecture** layered approach with a unidirectional dependency rule: outer layers depend on inner layers, never the reverse.
 
-```
-┌─────────────────────────────────────────┐
-│  Presentation (Express routes, controllers, middlewares)  │
-├─────────────────────────────────────────┤
-│  Application (Use cases, DTOs, service abstractions)      │
-├─────────────────────────────────────────┤
-│  Infrastructure (Sequelize repos & models, JWT, Bcrypt, HTTP clients) │
-├─────────────────────────────────────────┤
-│  Domain (Entities, Repository ports, Domain errors)       │
-└─────────────────────────────────────────┘
-```
-
 **Key principles applied:**
 - **Domain layer** has zero framework dependencies — pure TypeScript interfaces and classes.
 - **Application layer** encodes all business rules. Use cases throw domain errors; they contain no try/catch blocks.
@@ -217,9 +205,10 @@ All endpoints are prefixed with `/api`.
 
 | Method | Endpoint         | Auth | Body / Params                                                   | Response                   |
 |:------ |:---------------- |:---- |:--------------------------------------------------------------- |:-------------------------- |
-| POST   | `/auth/register` | No   | `{ email, password, name, role?, studentOrEmployeeId, department }` | `{ token, user }`          |
+| POST   | `/auth/register` | No   | `{ email, password, name, studentOrEmployeeId, department, role? }` *(role: STUDENT or PROFESSOR only)* | `{ token, user }`          |
 | POST   | `/auth/login`    | No   | `{ email, password }`                                           | `{ token, user }`          |
 | GET    | `/auth/me`       | Yes  | —                                                               | `{ user }`                 |
+| PATCH  | `/auth/profile`  | Yes  | `{ name?, department?, avatarUrl? }`                            | `{ user }`                 |
 
 ### Books
 
@@ -227,17 +216,26 @@ All endpoints are prefixed with `/api`.
 |:------ |:--------------------------- |:--------- |:--------------------------------------------------------------------- |:----------------------------------- |
 | GET    | `/books`                    | No        | `?search=&subject=&page=1&limit=12`                                   | `{ books[], total, page, totalPages }` |
 | GET    | `/books/:id`                | No        | —                                                                     | `BookEntity`                        |
-| POST   | `/books/import`             | Librarian | `{ openLibraryKey, totalCopies?, shelfLocation? }`                    | `BookEntity`                        |
-| PATCH  | `/books/:id/inventory`      | Librarian | `{ totalCopies?, shelfLocation? }`                                    | `BookEntity`                        |
+| POST   | `/books/import`             | Librarian | `{ openLibraryKey, totalCopies?, shelfLocation? }` *(max 8 copies)*   | `BookEntity`                        |
+| PATCH  | `/books/:id/inventory`      | Librarian | `{ totalCopies?, shelfLocation? }` *(max 8 copies)*                   | `BookEntity`                        |
 
-### Loans
+### Loans & Circulation
 
-| Method | Endpoint                | Auth | Body / Params                       | Response          |
-|:------ |:----------------------- |:---- |:----------------------------------- |:----------------- |
-| POST   | `/loans`                | Yes  | `{ bookId }`                        | `LoanEntity`      |
-| GET    | `/loans/my`             | Yes  | —                                   | `LoanEntity[]`    |
-| PATCH  | `/loans/:id/return`     | Yes  | —                                   | `LoanEntity`      |
-| PATCH  | `/loans/:id/renew`      | Yes  | —                                   | `LoanEntity`      |
+The loan workflow follows an institutional two-step pickup and delivery lifecycle:
+1. Patron submits loan request (`POST /loans`) -> Status: `PENDING_PICKUP`.
+2. Librarian verifies student/professor credentials at the Circulation Desk and hands over book (`PATCH /loans/:id/deliver`) -> Status: `DELIVERED`.
+3. When the physical book is returned (`PATCH /loans/:id/return`), status becomes `RETURNED`. If there is a waiting reservation queue for that book, the oldest reservation automatically converts into a new `PENDING_PICKUP` loan for the waiting patron, and the reservation is marked `FULFILLED`.
+
+| Method | Endpoint                    | Auth      | Body / Params                       | Response          |
+|:------ |:--------------------------- |:--------- |:----------------------------------- |:----------------- |
+| POST   | `/loans`                    | Yes       | `{ bookId }`                        | `LoanEntity`      |
+| GET    | `/loans/my`                 | Yes       | —                                   | `LoanEntity[]`    |
+| GET    | `/loans/circulation/overview`| Librarian| —                                   | `{ activeLoans[], reservations[] }` |
+| GET    | `/loans/circulation`        | Librarian | —                                   | `LoanEntity[]`    |
+| GET    | `/loans/overdue`            | Librarian | —                                   | `LoanEntity[]`    |
+| PATCH  | `/loans/:id/deliver`        | Librarian | —                                   | `LoanEntity`      |
+| PATCH  | `/loans/:id/return`         | Yes/Librarian | —                               | `LoanEntity`      |
+| PATCH  | `/loans/:id/renew`          | Yes       | —                                   | `LoanEntity`      |
 
 ### Reservations
 
@@ -245,8 +243,9 @@ All endpoints are prefixed with `/api`.
 |:------ |:--------------------------------|:--------- |:-------------- |:--------------------- |
 | POST   | `/reservations`                 | Yes       | `{ bookId }`   | `ReservationEntity`   |
 | GET    | `/reservations/my`              | Yes       | —              | `ReservationEntity[]` |
+| GET    | `/reservations/queue`           | Librarian | —              | `ReservationEntity[]` |
 | DELETE | `/reservations/:id`             | Yes       | —              | `ReservationEntity`   |
-| PATCH  | `/reservations/:id/fulfill`     | Librarian | —              | `ReservationEntity`   |
+| POST   | `/reservations/:id/fulfill`     | Librarian | —              | `ReservationEntity`   |
 
 ### Reading Records
 
@@ -272,14 +271,17 @@ All endpoints are prefixed with `/api`.
 
 ---
 
-## 7. Demo Credentials
+## 7. Demo Credentials & Roles
 
-| Role       | Email                           | Password      | ID          | Department           |
-|:---------- |:------------------------------- |:------------- |:----------- |:-------------------- |
-| Librarian  | `biblioteca@unilib.edu`         | `Admin123!`   | `LIB-001`   | Central Library      |
-| Professor  | `profesor.garcia@unilib.edu`    | `Prof123!`    | `PROF-2024` | Software Engineering |
-| Student    | `estudiante.franco@unilib.edu`  | `Student123!` | `EST-9901`  | Computer Science     |
-| Student    | `estudiante.maria@unilib.edu`   | `Student123!` | `EST-9902`  | Systems Engineering  |
+The institutional seed script (`npm run seed`) provisions the central library administrator account. Patrons register directly through the application's registration page (`/register`).
+
+| Role       | Email                           | Password      | ID          | Loan Quota | Loan Period |
+|:---------- |:------------------------------- |:------------- |:----------- |:----------:|:-----------:|
+| Librarian  | `librarian@unilib.edu`          | `Admin123!`   | `LIB-002`   | 25 books   | 60 days     |
+| Professor  | *(Self-registered at `/register`)*| *(Custom)*   | *(Custom)*  | 15 books   | 30 days     |
+| Student    | *(Self-registered at `/register`)*| *(Custom)*   | *(Custom)*  | 5 books    | 14 days     |
+
+> **Security Note:** Public registration of the `LIBRARIAN` role is blocked at both frontend and backend validation layers to prevent unauthorized elevation of privileges.
 
 ---
 
@@ -298,11 +300,17 @@ The application uses **PostgreSQL** exclusively, managed through Sequelize ORM. 
 | `ReadingRecord` | Personal reading status and progress tracking             |
 | `WishlistItem`  | Saved books with optional availability alert flag         |
 
-To inspect the current database in a web UI:
-
-```bash
-npx prisma studio
-```
+To inspect or query the database tables:
+- Use standard PostgreSQL administration tools such as **pgAdmin 4**, **DBeaver**, or **DataGrip** connecting with the `DATABASE_URL`.
+- Or connect via the command-line CLI:
+  ```bash
+  psql "postgresql://USER:PASSWORD@HOST:5432/unilib"
+  ```
+- To re-synchronize or re-seed default records at any time:
+  ```bash
+  npm run db:sync
+  npm run seed
+  ```
 
 ---
 
@@ -314,7 +322,7 @@ The server uses Open Library's public API as a metadata source, not as the prima
 1. The frontend displays book information fetched directly from Open Library (`openlibrary.org`).
 2. When a user performs an action (borrow, reserve, wishlist, reading record) on a book identified by its Open Library key (e.g. `/works/OL45883W`), the server receives that key.
 3. If the book already exists in the local database, the existing record is used.
-4. If not, the server calls `OpenLibraryClient.fetchBookByWorkKey()` to retrieve the book's metadata, creates a new `Book` record with default inventory (`totalCopies: 1`, `availableCopies: 1`), and then processes the user's action.
+4. If not, the server calls `OpenLibraryClient.fetchBookByWorkKey()` to retrieve the book's metadata, creates a new `Book` record with default inventory (`totalCopies: 8`, `availableCopies: 8`, maximum 8 units per title), and then processes the user's action.
 
 This keeps the catalog dynamic without requiring any pre-seeded book data.
 

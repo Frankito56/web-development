@@ -1,0 +1,53 @@
+.unilib-loans-header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-loans-header-row {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.unilib-loans-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+}
+
+@media (min-width: 640px) {
+  .unilib-loans-title {
+    font-size: 2rem;
+  }
+}
+
+.unilib-loans-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.unilib-allowance-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  font-size: 0.8rem;
+}
+
+.unilib-allowance-label {
+  color: var(--color-text-muted);
+}
+
+.unilib-allowance-value {
+  color: var(--color-primary-600);
+  font-family: monospace;
+}

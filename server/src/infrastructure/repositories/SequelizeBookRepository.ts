@@ -50,9 +50,6 @@ export class SequelizeBookRepository implements IBookRepository {
   }
 
   async findById(id: string): Promise<BookEntity | null> {
-    // Non-UUID strings (e.g. OpenLibrary keys like "OL262758W") would cause
-    // Postgres to throw "invalid input syntax for type uuid". Skip PK lookup
-    // for those and let callers fall through to findByOpenLibraryKey.
     if (!this.isUUID(id)) {
       return null;
     }
@@ -61,7 +58,14 @@ export class SequelizeBookRepository implements IBookRepository {
   }
 
   async findByOpenLibraryKey(key: string): Promise<BookEntity | null> {
-    const record = await BookModel.findOne({ where: { openLibraryKey: key } });
+    const clean = key.replace(/^\/?works\//, '');
+    const record = await BookModel.findOne({
+      where: {
+        openLibraryKey: {
+          [Op.in]: [clean, `/works/${clean}`],
+        },
+      },
+    });
     return record ? this.toEntity(record) : null;
   }
 
@@ -117,8 +121,9 @@ export class SequelizeBookRepository implements IBookRepository {
 
   async create(input: CreateBookInput): Promise<BookEntity> {
     const totalCopies = Math.min(8, Math.max(1, input.totalCopies ?? 8));
+    const cleanKey = input.openLibraryKey ? input.openLibraryKey.replace(/^\/?works\//, '') : undefined;
     const created = await BookModel.create({
-      openLibraryKey: input.openLibraryKey,
+      openLibraryKey: cleanKey,
       isbn: input.isbn,
       title: input.title,
       authors: JSON.stringify(input.authors),

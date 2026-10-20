@@ -1,0 +1,29 @@
+.unilib-tracker-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.unilib-tracker-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+}
+
+@media (min-width: 640px) {
+  .unilib-tracker-title {
+    font-size: 2rem;
+  }
+}
+
+.unilib-tracker-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.unilib-tracker-empty-wrap {
+  padding: 3rem 0;
+  text-align: center;
+}

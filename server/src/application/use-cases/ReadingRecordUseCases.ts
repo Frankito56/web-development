@@ -21,16 +21,17 @@ export class UpsertReadingRecordUseCase {
   ) {}
 
   async execute(userId: string, dto: UpsertReadingRecordDTO): Promise<ReadingRecordEntity> {
+    const cleanKey = dto.bookId.replace(/^\/?works\//, '');
     let book = await this.bookRepo.findById(dto.bookId);
     if (!book) {
-      book = await this.bookRepo.findByOpenLibraryKey(dto.bookId);
+      book = await this.bookRepo.findByOpenLibraryKey(cleanKey);
     }
 
-    if (!book && this.openLibraryFetcher && (dto.bookId.startsWith('/works/') || dto.bookId.startsWith('OL'))) {
-      const remote = await this.openLibraryFetcher.fetchBookByWorkKey(dto.bookId);
+    if (!book && this.openLibraryFetcher && (cleanKey.startsWith('OL') || dto.bookId.startsWith('/works/'))) {
+      const remote = await this.openLibraryFetcher.fetchBookByWorkKey(cleanKey);
       if (remote) {
         book = await this.bookRepo.create({
-          openLibraryKey: dto.bookId,
+          openLibraryKey: cleanKey,
           isbn: remote.isbn,
           title: remote.title,
           authors: remote.authors,

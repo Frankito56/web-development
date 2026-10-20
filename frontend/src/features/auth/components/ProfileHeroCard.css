@@ -1,0 +1,117 @@
+.unilib-profile-hero-card {
+  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-profile-hero-card {
+    padding: 2rem;
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+.unilib-profile-hero-avatar {
+  width: 6rem;
+  height: 6rem;
+  min-width: 6rem;
+  min-height: 6rem;
+  max-width: 6rem;
+  max-height: 6rem;
+  border-radius: var(--radius-xl);
+  object-fit: cover;
+  border: 3px solid var(--color-bg-secondary);
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0;
+}
+
+.unilib-profile-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.unilib-profile-header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-profile-header-row {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.unilib-profile-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.unilib-profile-email {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+
+.unilib-profile-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.unilib-profile-role-pill {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--color-chip-bg);
+  color: var(--color-chip-text);
+  border: 1px solid var(--color-chip-border);
+}
+
+.unilib-profile-meta-row {
+  padding-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 640px) {
+  .unilib-profile-meta-row {
+    justify-content: flex-start;
+  }
+}
+
+.unilib-profile-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.unilib-profile-id-mono {
+  font-family: var(--font-mono);
+}

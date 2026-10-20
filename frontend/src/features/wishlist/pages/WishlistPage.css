@@ -1,0 +1,10 @@
+.unilib-wishlist-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.unilib-wishlist-empty-wrap {
+  padding: 3rem 0;
+  text-align: center;
+}

@@ -1,0 +1,137 @@
+.unilib-tracker-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.unilib-tracker-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.unilib-tracker-card__cover {
+  width: 3.5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.unilib-tracker-card__cover-placeholder {
+  background-color: var(--color-bg-card-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unilib-tracker-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.unilib-tracker-card__top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.unilib-tracker-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.unilib-tracker-badge--completed {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.unilib-tracker-badge--reading {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.unilib-tracker-badge--want {
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.unilib-tracker-card__trash-btn {
+  color: var(--color-text-subtle);
+  padding: 0.2rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.unilib-tracker-card__trash-btn:hover {
+  color: var(--color-danger);
+}
+
+.unilib-tracker-card__title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-main);
+  margin-top: 0.25rem;
+  display: block;
+  text-decoration: none;
+}
+
+.unilib-tracker-card__author {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.unilib-tracker-card__notes {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-card-subtle);
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-top: 0.25rem;
+}
+
+.unilib-tracker-card__slider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.unilib-tracker-card__progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.unilib-tracker-card__progress-label {
+  color: var(--color-text-muted);
+}
+
+.unilib-tracker-card__progress-value {
+  color: var(--color-text-main);
+}
+
+.unilib-tracker-card__slider {
+  width: 100%;
+  accent-color: var(--color-primary-600);
+  cursor: pointer;
+}

@@ -1,0 +1,79 @@
+.unilib-skeleton {
+  background-color: var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.unilib-book-skeleton {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.unilib-book-skeleton__cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+}
+
+.unilib-book-skeleton__chips {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.unilib-book-skeleton__footer {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.unilib-book-skeleton__chip-sm {
+  width: 4.5rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+}
+
+.unilib-book-skeleton__chip-md {
+  width: 5rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+}
+
+.unilib-book-skeleton__title {
+  width: 80%;
+  height: 1.25rem;
+  margin-top: 0.25rem;
+}
+
+.unilib-book-skeleton__subtitle {
+  width: 55%;
+  height: 0.9rem;
+}
+
+.unilib-book-skeleton__footer-stat {
+  width: 5rem;
+  height: 1rem;
+}
+
+.unilib-book-skeleton__footer-btn {
+  width: 4.5rem;
+  height: 2rem;
+  border-radius: 8px;
+}

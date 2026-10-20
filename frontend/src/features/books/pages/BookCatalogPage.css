@@ -1,0 +1,31 @@
+.unilib-catalog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.unilib-filters-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.unilib-catalog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.unilib-catalog-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+}
+
+.unilib-catalog-count {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 0.15rem;
+}

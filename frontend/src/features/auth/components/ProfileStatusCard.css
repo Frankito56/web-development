@@ -1,0 +1,21 @@
+.unilib-profile-status-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.unilib-profile-status-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-text-main);
+}
+
+.unilib-profile-status-tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-primary-600);
+}

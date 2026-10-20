@@ -1,0 +1,106 @@
+.unilib-subjects-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.unilib-subject-chip {
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background-color: var(--color-chip-bg);
+  color: var(--color-chip-text);
+  border: 1px solid var(--color-chip-border);
+}
+
+.unilib-detail-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--color-text-main);
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 640px) {
+  .unilib-detail-title {
+    font-size: 2.25rem;
+  }
+}
+
+.unilib-detail-authors {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+
+.unilib-detail-authors--spaced {
+  margin-top: 0.5rem;
+}
+
+.unilib-meta-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card-subtle);
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+}
+
+.unilib-meta-card-label {
+  color: var(--color-text-subtle);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.unilib-meta-card-value {
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.unilib-meta-card-value--mono {
+  font-family: monospace;
+}
+
+.unilib-meta-card-value--rating {
+  color: var(--color-warning);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.unilib-detail-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.unilib-overview-text {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.unilib-bibliographic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  font-size: 0.8rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+@media (min-width: 640px) {
+  .unilib-bibliographic-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.unilib-detail-isbn {
+  font-family: monospace;
+}

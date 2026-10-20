@@ -13,13 +13,11 @@ export function createLoanRoutes(
 
   router.use(authMiddleware);
 
-  // Librarian routes
   router.get('/circulation/overview', requireRole('LIBRARIAN') as any, asyncHandler(controller.getCirculationOverview as any));
   router.get('/circulation', requireRole('LIBRARIAN') as any, asyncHandler(controller.getCirculation as any));
   router.get('/overdue', requireRole('LIBRARIAN') as any, asyncHandler(controller.getOverdue as any));
   router.patch('/:id/deliver', requireRole('LIBRARIAN') as any, asyncHandler(controller.deliverLoan as any));
 
-  // Patron & General routes
   router.get('/my', asyncHandler(controller.getMyLoans as any));
 
   router.post(

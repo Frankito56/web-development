@@ -28,7 +28,7 @@ const LOAN_DAYS = 14;
 const MAX_RENEWALS = 2;
 
 export class GetUserLoansUseCase {
-  constructor(private readonly loanRepo: ILoanRepository) {}
+  constructor(private readonly loanRepo: ILoanRepository) { }
 
   async execute(userId: string): Promise<LoanEntity[]> {
     return this.loanRepo.findByUserId(userId);
@@ -41,19 +41,20 @@ export class BorrowBookUseCase {
     private readonly bookRepo: IBookRepository,
     private readonly userRepo: IUserRepository,
     private readonly openLibraryFetcher?: IOpenLibraryFetcher,
-  ) {}
+  ) { }
 
   async execute(userId: string, bookIdOrKey: string): Promise<LoanEntity> {
+    const cleanKey = bookIdOrKey.replace(/^\/?works\//, '');
     let book = await this.bookRepo.findById(bookIdOrKey);
     if (!book) {
-      book = await this.bookRepo.findByOpenLibraryKey(bookIdOrKey);
+      book = await this.bookRepo.findByOpenLibraryKey(cleanKey);
     }
 
-    if (!book && this.openLibraryFetcher && (bookIdOrKey.startsWith('/works/') || bookIdOrKey.startsWith('OL'))) {
-      const remote = await this.openLibraryFetcher.fetchBookByWorkKey(bookIdOrKey);
+    if (!book && this.openLibraryFetcher && (cleanKey.startsWith('OL') || bookIdOrKey.startsWith('/works/'))) {
+      const remote = await this.openLibraryFetcher.fetchBookByWorkKey(cleanKey);
       if (remote) {
         book = await this.bookRepo.create({
-          openLibraryKey: bookIdOrKey,
+          openLibraryKey: cleanKey,
           isbn: remote.isbn,
           title: remote.title,
           authors: remote.authors,
@@ -80,7 +81,6 @@ export class BorrowBookUseCase {
       throw new AlreadyBorrowedError();
     }
 
-    // Enforce per-role loan quota
     const user = await this.userRepo.findById(userId);
     const maxLoans = MAX_LOANS_BY_ROLE[user?.role ?? 'STUDENT'] ?? 5;
     const userLoans = await this.loanRepo.findByUserId(userId);
@@ -114,7 +114,7 @@ export class ReturnBookUseCase {
     private readonly loanRepo: ILoanRepository,
     private readonly bookRepo: IBookRepository,
     private readonly reservationRepo?: IReservationRepository,
-  ) {}
+  ) { }
 
   async execute(loanId: string, userId?: string, userRole?: string): Promise<LoanEntity> {
     const loan = await this.loanRepo.findById(loanId);
@@ -137,7 +137,6 @@ export class ReturnBookUseCase {
         const nextDueDate = new Date();
         nextDueDate.setDate(nextDueDate.getDate() + LOAN_DAYS);
 
-        // Turn the first reservation into a loan pending pickup for that patron
         await this.loanRepo.create({
           bookId: nextReservation.bookId,
           userId: nextReservation.userId,
@@ -145,17 +144,14 @@ export class ReturnBookUseCase {
           status: 'PENDING_PICKUP',
         });
 
-        // Mark the reservation as fulfilled
         await this.reservationRepo.updateStatus(nextReservation.id, 'FULFILLED');
 
-        // Shift priority order for remaining reservations in line
         for (let i = 1; i < activeReservations.length; i++) {
           if (this.reservationRepo.updatePriority) {
             await this.reservationRepo.updatePriority(activeReservations[i].id, i);
           }
         }
 
-        // Available copies does not increase because the copy is immediately issued to the waiting reservation
         const updatedBook = await this.bookRepo.findById(loan.bookId);
         if (updatedBook) {
           returned.book = updatedBook;
@@ -177,7 +173,7 @@ export class ReturnBookUseCase {
 }
 
 export class RenewLoanUseCase {
-  constructor(private readonly loanRepo: ILoanRepository) {}
+  constructor(private readonly loanRepo: ILoanRepository) { }
 
   async execute(loanId: string, userId: string, userRole?: string): Promise<LoanEntity> {
     const loan = await this.loanRepo.findById(loanId);
@@ -202,7 +198,7 @@ export class RenewLoanUseCase {
 }
 
 export class GetCirculationLoansUseCase {
-  constructor(private readonly loanRepo: ILoanRepository) {}
+  constructor(private readonly loanRepo: ILoanRepository) { }
 
   async execute(filters?: { status?: string; overdueOnly?: boolean; userId?: string }): Promise<LoanEntity[]> {
     return this.loanRepo.findCirculation(filters);
@@ -210,7 +206,7 @@ export class GetCirculationLoansUseCase {
 }
 
 export class GetOverdueLoansUseCase {
-  constructor(private readonly loanRepo: ILoanRepository) {}
+  constructor(private readonly loanRepo: ILoanRepository) { }
 
   async execute(): Promise<LoanEntity[]> {
     return this.loanRepo.findOverdue();
@@ -218,7 +214,7 @@ export class GetOverdueLoansUseCase {
 }
 
 export class DeliverLoanUseCase {
-  constructor(private readonly loanRepo: ILoanRepository) {}
+  constructor(private readonly loanRepo: ILoanRepository) { }
 
   async execute(loanId: string): Promise<LoanEntity> {
     const loan = await this.loanRepo.findById(loanId);

@@ -1,0 +1,63 @@
+.unilib-tracker-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-tracker-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.unilib-tracker-stat-btn {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.unilib-tracker-stat-btn:hover {
+  border-color: var(--color-primary-500);
+}
+
+.unilib-tracker-stat-btn--active {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-chip-bg);
+}
+
+.unilib-tracker-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.unilib-tracker-stat-header--reading {
+  color: var(--color-warning);
+}
+
+.unilib-tracker-stat-header--want {
+  color: var(--color-info);
+}
+
+.unilib-tracker-stat-header--completed {
+  color: var(--color-success);
+}
+
+.unilib-tracker-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.unilib-tracker-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--color-text-main);
+}

@@ -52,12 +52,13 @@ export class ImportBookUseCase {
   ) {}
 
   async execute(dto: ImportBookDTO): Promise<BookEntity> {
-    const existing = await this.bookRepo.findByOpenLibraryKey(dto.openLibraryKey);
+    const cleanKey = dto.openLibraryKey.replace(/^\/?works\//, '');
+    const existing = await this.bookRepo.findByOpenLibraryKey(cleanKey);
     if (existing) {
       return existing;
     }
 
-    const remoteData = await this.openLibraryFetcher.fetchBookByWorkKey(dto.openLibraryKey);
+    const remoteData = await this.openLibraryFetcher.fetchBookByWorkKey(cleanKey);
     if (!remoteData) {
       throw new NotFoundError('Open Library book');
     }
@@ -65,7 +66,7 @@ export class ImportBookUseCase {
     const totalCopies = Math.min(8, Math.max(1, dto.totalCopies ?? 8));
 
     return this.bookRepo.create({
-      openLibraryKey: dto.openLibraryKey,
+      openLibraryKey: cleanKey,
       isbn: remoteData.isbn,
       title: remoteData.title,
       authors: remoteData.authors,

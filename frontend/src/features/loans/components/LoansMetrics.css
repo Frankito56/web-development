@@ -1,0 +1,63 @@
+.unilib-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .unilib-metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.unilib-metric-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.unilib-metric-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.unilib-metric-card__value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--color-text-main);
+}
+
+.unilib-metric-card__subtext {
+  font-size: 0.7rem;
+  color: var(--color-text-subtle);
+}
+
+.unilib-metric-card__header--warning {
+  color: var(--color-warning);
+}
+
+.unilib-metric-card__value--warning {
+  color: var(--color-warning);
+}
+
+.unilib-metric-card__header--danger {
+  color: var(--color-danger);
+}
+
+.unilib-metric-card__value--danger {
+  color: var(--color-danger);
+}
+
+.unilib-metric-card__header--success {
+  color: var(--color-success);
+}

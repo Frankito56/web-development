@@ -1,0 +1,15 @@
+.unilib-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.unilib-page-counter {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  padding: 0.5rem 1rem;
+}

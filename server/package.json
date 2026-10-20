@@ -9,7 +9,6 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "seed": "ts-node src/infrastructure/database/seed.ts",
-    "db:sync": "ts-node -e \"require('./src/infrastructure/database/models').initDb().then(() => console.log('Database synced successfully')).catch(console.error)\"",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
