@@ -9,7 +9,7 @@ export interface CreateReservationInput {
 
 export interface IReservationRepository {
   findById(id: string): Promise<ReservationEntity | null>;
-  findByUserId(userId: string): Promise<ReservationEntity[]>;
+  findByUserId(userId: string, activeOnly?: boolean): Promise<ReservationEntity[]>;
   findActiveByBookId(bookId: string): Promise<ReservationEntity[]>;
   findActiveByUserAndBook(userId: string, bookId: string): Promise<ReservationEntity | null>;
   countActiveByBookId(bookId: string): Promise<number>;

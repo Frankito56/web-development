@@ -90,7 +90,7 @@ export function createApiRouter(): Router {
   const updateInventoryUseCase = new UpdateBookInventoryUseCase(bookRepo);
 
   const getUserLoansUseCase = new GetUserLoansUseCase(loanRepo);
-  const borrowUseCase = new BorrowBookUseCase(loanRepo, bookRepo, openLibraryClient);
+  const borrowUseCase = new BorrowBookUseCase(loanRepo, bookRepo, userRepo, openLibraryClient);
   const returnUseCase = new ReturnBookUseCase(loanRepo, bookRepo, reservationRepo);
   const renewUseCase = new RenewLoanUseCase(loanRepo);
   const getCirculationLoansUseCase = new GetCirculationLoansUseCase(loanRepo);

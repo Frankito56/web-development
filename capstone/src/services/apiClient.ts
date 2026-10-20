@@ -10,6 +10,7 @@ export interface ApiUser {
   studentOrEmployeeId: string;
   department: string;
   avatarUrl?: string;
+  createdAt?: string;
 }
 
 export interface AuthResponse {

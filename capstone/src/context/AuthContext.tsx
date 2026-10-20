@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           department: profile.department,
           avatarUrl: profile.avatarUrl || '/placeholder-avatar.svg',
           maxBorrowLimit: profile.role === 'LIBRARIAN' ? 25 : profile.role === 'PROFESSOR' ? 15 : 5,
-          joinedDate: '2024-01-01',
+          joinedDate: profile.createdAt ? String(profile.createdAt) : new Date().toISOString(),
         });
       } catch {
         apiClient.auth.logout();
@@ -96,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         department: res.user.department,
         avatarUrl: res.user.avatarUrl || '/placeholder-avatar.svg',
         maxBorrowLimit: res.user.role === 'LIBRARIAN' ? 25 : res.user.role === 'PROFESSOR' ? 15 : 5,
-        joinedDate: '2024-01-01',
+        joinedDate: res.user.createdAt ? String(res.user.createdAt) : new Date().toISOString(),
       });
       return true;
     } catch {
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         department: res.user.department,
         avatarUrl: res.user.avatarUrl || '/placeholder-avatar.svg',
         maxBorrowLimit: res.user.role === 'LIBRARIAN' ? 25 : res.user.role === 'PROFESSOR' ? 15 : 5,
-        joinedDate: '2024-01-01',
+        joinedDate: res.user.createdAt ? String(res.user.createdAt) : new Date().toISOString(),
       });
       return { success: true };
     } catch (err: any) {

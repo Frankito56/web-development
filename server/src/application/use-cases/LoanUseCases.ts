@@ -1,6 +1,7 @@
 import { ILoanRepository } from '../../domain/repositories/ILoanRepository';
 import { IBookRepository } from '../../domain/repositories/IBookRepository';
 import { IReservationRepository } from '../../domain/repositories/IReservationRepository';
+import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { IOpenLibraryFetcher } from './BookUseCases';
 import { LoanEntity } from '../../domain/entities/LoanEntity';
 import {
@@ -9,8 +10,19 @@ import {
   NotFoundError,
   LoanNotActiveError,
   MaxRenewalsReachedError,
+  MaxLoansReachedError,
   ForbiddenError,
 } from '../../domain/errors/DomainErrors';
+
+/** Maximum simultaneous active loans by role */
+const MAX_LOANS_BY_ROLE: Record<string, number> = {
+  STUDENT: 5,
+  PROFESSOR: 15,
+  LIBRARIAN: 25,
+};
+
+/** Statuses that count toward the active-loan quota */
+const ACTIVE_STATUSES = new Set(['PENDING_PICKUP', 'DELIVERED', 'OVERDUE']);
 
 const LOAN_DAYS = 14;
 const MAX_RENEWALS = 2;
@@ -27,6 +39,7 @@ export class BorrowBookUseCase {
   constructor(
     private readonly loanRepo: ILoanRepository,
     private readonly bookRepo: IBookRepository,
+    private readonly userRepo: IUserRepository,
     private readonly openLibraryFetcher?: IOpenLibraryFetcher,
   ) {}
 
@@ -65,6 +78,15 @@ export class BorrowBookUseCase {
     const existing = await this.loanRepo.findActiveByUserAndBook(userId, book.id);
     if (existing) {
       throw new AlreadyBorrowedError();
+    }
+
+    // Enforce per-role loan quota
+    const user = await this.userRepo.findById(userId);
+    const maxLoans = MAX_LOANS_BY_ROLE[user?.role ?? 'STUDENT'] ?? 5;
+    const userLoans = await this.loanRepo.findByUserId(userId);
+    const activeCount = userLoans.filter((l) => ACTIVE_STATUSES.has(l.status)).length;
+    if (activeCount >= maxLoans) {
+      throw new MaxLoansReachedError(maxLoans);
     }
 
     const dueDate = new Date();

@@ -25,6 +25,7 @@ export interface AuthResponseDTO {
     studentOrEmployeeId: string;
     department: string;
     avatarUrl?: string;
+    createdAt?: Date;
   };
 }
 

@@ -78,9 +78,13 @@ export class SequelizeReservationRepository implements IReservationRepository {
     return record ? this.toEntity(record) : null;
   }
 
-  async findByUserId(userId: string): Promise<ReservationEntity[]> {
+  async findByUserId(userId: string, activeOnly = true): Promise<ReservationEntity[]> {
+    const whereClause: any = { userId };
+    if (activeOnly) {
+      whereClause.status = { [Op.in]: ['WAITING', 'READY_FOR_PICKUP'] };
+    }
     const records = await ReservationModel.findAll({
-      where: { userId },
+      where: whereClause,
       order: [['reservedAt', 'DESC']],
       include: [{ model: BookModel, as: 'book' }],
     });
@@ -109,6 +113,8 @@ export class SequelizeReservationRepository implements IReservationRepository {
     }
     if (filters?.status) {
       whereClause.status = filters.status;
+    } else {
+      whereClause.status = { [Op.in]: ['WAITING', 'READY_FOR_PICKUP'] };
     }
 
     const records = await ReservationModel.findAll({

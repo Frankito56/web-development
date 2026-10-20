@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { LoanService } from '@/services/loanService';
 import { ROLE_LIMITS } from '@/config';
+import { formatDate } from '@/utils/dateUtils';
 import { Building, ShieldCheck, Calendar, BookMarked, Edit3 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -162,7 +163,7 @@ export const ProfilePage: React.FC = () => {
               <span className="unilib-profile-quota-label">Member Since:</span>
               <span className="unilib-profile-status-date">
                 <Calendar size={14} />
-                {user.joinedDate || '2024-01-01'}
+                {formatDate(user.joinedDate)}
               </span>
             </div>
 

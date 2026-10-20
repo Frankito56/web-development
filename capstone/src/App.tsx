@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LayoutWrapper } from '@/components/layout/LayoutWrapper';
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary';
 import { AuthGuard } from '@/features/auth/components/AuthGuard';
-import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/context/AuthContext';
 
 const BookCatalogPage = lazy(() =>
@@ -37,17 +36,8 @@ const CirculationPage = lazy(() =>
 );
 
 const PageLoadingFallback: React.FC = () => (
-  <div className="unilib-page-fallback">
-    <div className="unilib-page-fallback__header">
-      <Skeleton className="unilib-page-fallback__title" />
-      <Skeleton className="unilib-page-fallback__action" />
-    </div>
-    <Skeleton className="unilib-page-fallback__banner" />
-    <div className="unilib-page-fallback__grid">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="unilib-page-fallback__card" />
-      ))}
-    </div>
+  <div className="unilib-page-spinner">
+    <div className="unilib-page-spinner__circle" />
   </div>
 );
 

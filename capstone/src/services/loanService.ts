@@ -97,7 +97,10 @@ export const LoanService = {
   async fetchUserReservations(userId: string): Promise<Reservation[]> {
     try {
       const serverRes = await apiClient.reservations.getMyReservations();
-      const mapped: Reservation[] = serverRes.map((sr) => ({
+      const activeRes = serverRes.filter(
+        (sr) => sr.status === 'WAITING' || sr.status === 'READY_FOR_PICKUP'
+      );
+      const mapped: Reservation[] = activeRes.map((sr) => ({
         id: sr.id,
         bookId: sr.bookId,
         openLibraryKey: (sr as any).book?.openLibraryKey || undefined,
@@ -114,13 +117,17 @@ export const LoanService = {
       return mapped;
     } catch {
       const cached = StorageService.getItem<Reservation[]>(StorageService.KEYS.RESERVATIONS, []);
-      return cached.filter((r) => r.userId === userId && r.status !== 'CANCELLED');
+      return cached.filter(
+        (r) => r.userId === userId && r.status !== 'CANCELLED' && r.status !== 'FULFILLED'
+      );
     }
   },
 
   getUserReservations(userId: string): Reservation[] {
     const reservations = StorageService.getItem<Reservation[]>(StorageService.KEYS.RESERVATIONS, []);
-    return reservations.filter((r) => r.userId === userId && r.status !== 'CANCELLED');
+    return reservations.filter(
+      (r) => r.userId === userId && r.status !== 'CANCELLED' && r.status !== 'FULFILLED'
+    );
   },
 
   async borrowBook(book: Book, user: User): Promise<{ success: boolean; message: string; loan?: Loan }> {

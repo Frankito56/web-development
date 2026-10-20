@@ -74,3 +74,9 @@ export class ReservationNotReadyError extends DomainError {
     super('The reservation is not ready for pickup yet.', 409);
   }
 }
+
+export class MaxLoansReachedError extends DomainError {
+  constructor(limit: number) {
+    super(`You have reached the maximum simultaneous loan limit of ${limit} books.`, 409);
+  }
+}

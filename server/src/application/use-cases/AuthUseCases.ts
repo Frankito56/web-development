@@ -51,6 +51,7 @@ export class RegisterUserUseCase {
         studentOrEmployeeId: user.studentOrEmployeeId,
         department: user.department,
         avatarUrl: user.avatarUrl,
+        createdAt: user.createdAt,
       },
     };
   }
@@ -86,6 +87,7 @@ export class LoginUserUseCase {
         studentOrEmployeeId: user.studentOrEmployeeId,
         department: user.department,
         avatarUrl: user.avatarUrl,
+        createdAt: user.createdAt,
       },
     };
   }
