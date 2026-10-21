@@ -20,7 +20,7 @@
 
 .unilib-searchbar__input {
   width: 100%;
-  padding: 0.75rem 5rem 0.75rem 2.6rem;
+  padding: 0.75rem 2.5rem 0.75rem 2.6rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background-color: var(--color-bg-card);
@@ -68,22 +68,4 @@
 
 .unilib-searchbar__clear-btn:hover {
   color: var(--color-text-main);
-}
-
-.unilib-searchbar__shortcut {
-  display: none;
-  font-family: monospace;
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 0.15rem 0.35rem;
-  border-radius: 4px;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-subtle);
-  background-color: var(--color-bg-card-subtle);
-}
-
-@media (min-width: 640px) {
-  .unilib-searchbar__shortcut {
-    display: inline-block;
-  }
 }

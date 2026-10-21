@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { Search, X } from 'lucide-react';
 import './SearchBar.css';
 
@@ -17,21 +17,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   totalResults,
   isLoading,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && document.activeElement !== inputRef.current) {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   return (
     <div className="unilib-searchbar-wrapper">
       <div className="unilib-searchbar-container">
@@ -39,7 +24,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <Search size={16} />
         </span>
         <input
-          ref={inputRef}
           type="search"
           role="searchbox"
           aria-label="Search catalog"
@@ -59,7 +43,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <X size={14} />
             </button>
           )}
-          <span className="unilib-searchbar__shortcut">/</span>
         </div>
       </div>
 
