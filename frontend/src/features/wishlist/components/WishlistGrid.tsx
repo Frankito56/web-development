@@ -9,7 +9,6 @@ interface WishlistGridProps {
   wishlist: WishlistItem[];
   user: User | null;
   onRemove: (item: WishlistItem) => void;
-  onToggleNotification: (item: WishlistItem) => void;
   onQuickBorrow: (item: WishlistItem) => void;
   onQuickReserve: (item: WishlistItem) => void;
 }
@@ -18,7 +17,6 @@ export const WishlistGrid: React.FC<WishlistGridProps> = ({
   wishlist,
   user,
   onRemove,
-  onToggleNotification,
   onQuickBorrow,
   onQuickReserve,
 }) => {
@@ -42,7 +40,6 @@ export const WishlistGrid: React.FC<WishlistGridProps> = ({
           item={item}
           user={user}
           onRemove={onRemove}
-          onToggleNotification={onToggleNotification}
           onQuickBorrow={onQuickBorrow}
           onQuickReserve={onQuickReserve}
         />

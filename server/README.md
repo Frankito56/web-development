@@ -167,7 +167,8 @@ npm run dev
 The server starts on **http://localhost:3000** by default.
 
 ### Available Scripts
-
+| Command | Description                        | 
+|:------ |:--------------------------------|
 | `npm run dev`      | Start development server with hot-reload (auto-syncs DB) |
 | `npm run build`    | Compile TypeScript to `dist/`                  |
 | `npm start`        | Run compiled production build                  |
@@ -280,8 +281,6 @@ The institutional seed script (`npm run seed`) provisions the central library ad
 | Librarian  | `librarian@unilib.edu`          | `Admin123!`   | `LIB-002`   | 25 books   | 60 days     |
 | Professor  | *(Self-registered at `/register`)*| *(Custom)*   | *(Custom)*  | 15 books   | 30 days     |
 | Student    | *(Self-registered at `/register`)*| *(Custom)*   | *(Custom)*  | 5 books    | 14 days     |
-
-> **Security Note:** Public registration of the `LIBRARIAN` role is blocked at both frontend and backend validation layers to prevent unauthorized elevation of privileges.
 
 ---
 

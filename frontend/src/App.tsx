@@ -41,7 +41,6 @@ const PageLoadingFallback: React.FC = () => (
   </div>
 );
 
-/** Redirects librarians away from student-only routes */
 const LibrarianRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   if (user?.role === 'LIBRARIAN') {
@@ -61,7 +60,6 @@ export const App: React.FC = () => {
               <Route path="books" element={<BookCatalogPage />} />
               <Route path="books/:id" element={<BookDetailPage />} />
 
-              {/* Student / Professor routes — librarians are redirected away */}
               <Route
                 path="my-loans"
                 element={
@@ -101,7 +99,6 @@ export const App: React.FC = () => {
                 }
               />
 
-              {/* Librarian-only route */}
               <Route
                 path="circulation"
                 element={
@@ -111,11 +108,9 @@ export const App: React.FC = () => {
                 }
               />
 
-              {/* Auth */}
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
 
-              {/* Fallback */}
               <Route path="*" element={<Navigate to="/books" replace />} />
             </Route>
           </Routes>

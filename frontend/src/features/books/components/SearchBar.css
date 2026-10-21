@@ -36,6 +36,14 @@
   box-shadow: var(--shadow-focus-ring);
 }
 
+.unilib-searchbar__input::-webkit-search-decoration,
+.unilib-searchbar__input::-webkit-search-cancel-button,
+.unilib-searchbar__input::-webkit-search-results-button,
+.unilib-searchbar__input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+
 .unilib-searchbar__input::placeholder {
   color: var(--color-text-subtle);
 }

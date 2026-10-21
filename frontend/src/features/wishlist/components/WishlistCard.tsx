@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, BellOff, BookOpen, Trash2 } from 'lucide-react';
+import { BookOpen, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { WishlistItem, User } from '@/types';
@@ -11,7 +11,6 @@ interface WishlistCardProps {
   item: WishlistItem;
   user: User | null;
   onRemove: (item: WishlistItem) => void;
-  onToggleNotification: (item: WishlistItem) => void;
   onQuickBorrow: (item: WishlistItem) => void;
   onQuickReserve: (item: WishlistItem) => void;
 }
@@ -20,7 +19,6 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
   item,
   user,
   onRemove,
-  onToggleNotification,
   onQuickBorrow,
   onQuickReserve,
 }) => {
@@ -81,25 +79,6 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
       </div>
 
       <div className="unilib-wishlist-card__footer">
-        <button
-          onClick={() => onToggleNotification(item)}
-          className={`unilib-alert-toggle-btn ${
-            item.notifyWhenAvailable ? 'unilib-alert-toggle-btn--active' : ''
-          }`}
-        >
-          {item.notifyWhenAvailable ? (
-            <>
-              <Bell size={14} />
-              <span>Alert On</span>
-            </>
-          ) : (
-            <>
-              <BellOff size={14} />
-              <span>Alert Off</span>
-            </>
-          )}
-        </button>
-
         {alreadyBorrowed ? (
           <Button size="sm" variant="outline" disabled title="You currently have this book checked out">
             Checked Out ✓

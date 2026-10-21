@@ -39,19 +39,6 @@ export const WishlistPage: React.FC = () => {
     return () => unsubscribe();
   }, [loadData, syncFromStorage]);
 
-  const handleToggleNotification = useCallback((item: WishlistItem) => {
-    if (!user) return;
-    const newState = WishlistService.toggleNotification(user.id, item.bookId);
-    showToast(
-      'Availability Alert',
-      newState
-        ? `You will receive a notification when "${item.bookTitle}" is returned.`
-        : `Notifications disabled for "${item.bookTitle}".`,
-      'INFO'
-    );
-    loadData();
-  }, [user, showToast, loadData]);
-
   const handleRemove = useCallback((item: WishlistItem) => {
     if (!user) return;
     WishlistService.removeFromWishlist(user.id, item.bookId, item.bookTitle);
@@ -128,7 +115,6 @@ export const WishlistPage: React.FC = () => {
         wishlist={wishlist}
         user={user}
         onRemove={handleRemove}
-        onToggleNotification={handleToggleNotification}
         onQuickBorrow={handleQuickBorrow}
         onQuickReserve={handleQuickReserve}
       />

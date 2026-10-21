@@ -102,23 +102,3 @@
   gap: 0.5rem;
 }
 
-.unilib-alert-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.35rem 0.65rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-bg-card);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.unilib-alert-toggle-btn--active {
-  background-color: var(--color-info-bg);
-  color: var(--color-info-text);
-  border-color: var(--color-info-border);
-}

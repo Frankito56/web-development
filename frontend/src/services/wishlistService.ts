@@ -119,23 +119,4 @@ export const WishlistService = {
       apiClient.wishlist.remove(idToSend).catch(() => {});
     }
   },
-
-  toggleNotification(userId: string, bookIdentifier: string): boolean {
-    const cleanId = bookIdentifier.replace(/^\/?works\//, '');
-    const allWishlists = StorageService.getItem<WishlistItem[]>(StorageService.KEYS.WISHLIST, []);
-    const item = allWishlists.find((w) => {
-      if (w.userId !== userId) return false;
-      const wOpenLibKey = w.openLibraryKey ? w.openLibraryKey.replace(/^\/?works\//, '') : undefined;
-      return (
-        w.bookId === bookIdentifier ||
-        w.bookId === cleanId ||
-        (wOpenLibKey && (wOpenLibKey === cleanId || wOpenLibKey === bookIdentifier))
-      );
-    });
-    if (!item) return false;
-
-    item.notifyWhenAvailable = !item.notifyWhenAvailable;
-    StorageService.setItem(StorageService.KEYS.WISHLIST, allWishlists);
-    return item.notifyWhenAvailable;
-  },
 };
